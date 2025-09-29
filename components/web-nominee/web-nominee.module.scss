@@ -77,15 +77,15 @@
 	overflow: hidden;
 	cursor: pointer;
 
-	&:hover {
-		.badgeImg {
-			transform: translate(-50%, -150%) rotate(45deg);
-		}
+	// &:hover {
+	// 	.badgeImg {
+	// 		transform: translate(-50%, -150%) rotate(45deg);
+	// 	}
 
-		.badgeVote {
-			transform: translate3d(0, 0, 0) rotate(0);
-		}
-	}
+	// 	.badgeVote {
+	// 		transform: translate3d(0, 0, 0) rotate(0);
+	// 	}
+	// }
 }
 .badgeImg {
 	position: absolute;

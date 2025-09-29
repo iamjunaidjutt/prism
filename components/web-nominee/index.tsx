@@ -1,8 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef, useCallback } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import styles from "./web-nominee.module.scss";
+
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
 
 // Easing functions (replacing easing-utils)
 const easingFunctions = {
@@ -322,10 +327,66 @@ const WebNominee = () => {
 		setParticles();
 
 		window.addEventListener("resize", handleResize);
-		animationFrameRef.current = requestAnimationFrame(tick);
+
+		// ScrollTrigger for canvas animation
+		let animationActive = false;
+
+		ScrollTrigger.create({
+			trigger: containerRef.current,
+			start: "top 80%",
+			end: "bottom 20%",
+			onEnter: () => {
+				if (!animationActive) {
+					animationActive = true;
+					animationFrameRef.current = requestAnimationFrame(tick);
+				}
+			},
+			onLeave: () => {
+				animationActive = false;
+				if (animationFrameRef.current) {
+					cancelAnimationFrame(animationFrameRef.current);
+				}
+			},
+			onEnterBack: () => {
+				if (!animationActive) {
+					animationActive = true;
+					animationFrameRef.current = requestAnimationFrame(tick);
+				}
+			},
+			onLeaveBack: () => {
+				animationActive = false;
+				if (animationFrameRef.current) {
+					cancelAnimationFrame(animationFrameRef.current);
+				}
+			},
+		});
+
+		// Badge animation with ScrollTrigger
+		gsap.fromTo(
+			badgeRef.current,
+			{
+				scale: 0,
+				rotation: 180,
+				opacity: 0,
+			},
+			{
+				scale: 1,
+				rotation: 0,
+				opacity: 1,
+				duration: 1.5,
+				ease: "back.out(1.7)",
+				scrollTrigger: {
+					trigger: containerRef.current,
+					start: "top 70%",
+					end: "center center",
+					scrub: 1,
+				},
+			}
+		);
 
 		return () => {
 			window.removeEventListener("resize", handleResize);
+			ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 			if (animationFrameRef.current) {
 				cancelAnimationFrame(animationFrameRef.current);
 			}
