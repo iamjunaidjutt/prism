@@ -333,8 +333,10 @@ const WebNominee = () => {
 
 		ScrollTrigger.create({
 			trigger: containerRef.current,
-			start: "top 80%",
-			end: "bottom 20%",
+			// markers: true,
+			start: "top 70%",
+			end: "top 20%",
+			scrub: 1,
 			onEnter: () => {
 				if (!animationActive) {
 					animationActive = true;
@@ -368,6 +370,7 @@ const WebNominee = () => {
 				scale: 0,
 				rotation: 180,
 				opacity: 0,
+				delay: 0.5,
 			},
 			{
 				scale: 1,
@@ -377,8 +380,9 @@ const WebNominee = () => {
 				ease: "back.out(1.7)",
 				scrollTrigger: {
 					trigger: containerRef.current,
-					start: "top 70%",
-					end: "center center",
+					// markers: true,
+					start: "top 50%",
+					end: "bottom center",
 					scrub: 1,
 				},
 			}

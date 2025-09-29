@@ -72,8 +72,9 @@ const FutureCircle = () => {
 		const scrollTl = gsap.timeline({
 			scrollTrigger: {
 				trigger: container,
-				start: "top 80%",
-				end: "bottom 20%",
+				// markers: true,
+				start: "top 30%",
+				end: "bottom 80%",
 				scrub: 1,
 				onEnter: () => rotationTimeline.play(),
 				onLeave: () => rotationTimeline.pause(),

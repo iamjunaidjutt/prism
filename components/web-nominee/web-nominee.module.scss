@@ -34,7 +34,7 @@
 		background: radial-gradient(
 			ellipse at 50% 55%,
 			transparent 10%,
-			black 50%
+			#303030 50%
 		);
 		transform: translate3d(-50%, -50%, 0);
 
@@ -53,7 +53,7 @@
 
 		background: radial-gradient(
 			ellipse at 50% 75%,
-			#f40c3f 20%,
+			#f7e7ce 20%,
 			transparent 75%
 		);
 		mix-blend-mode: overlay;
@@ -141,13 +141,19 @@
 
 	background: linear-gradient(
 			20deg,
-			#00f8f1,
-			#ffbd1e20 16.5%,
-			#fe848f 33%,
-			#fe848f20 49.5%,
-			#00f8f1 66%,
-			#00f8f160 85.5%,
-			#ffbd1e 100%
+			#f7e7ce,
+			// light champagne
+			#b0b0b0 16.5%,
+			// chrome gray
+			#f7e7ce80 33%,
+			// light champagne (50% opacity)
+			#b0b0b020 49.5%,
+			// chrome gray (12% opacity)
+			#f7e7ce 66%,
+			// light champagne
+			#b0b0b060 85.5%,
+			// chrome gray (38% opacity)
+			#f7e7ce 100% // light champagne
 		)
 		0 100% / 100% 200%;
 	border-radius: 0 0 100% 100%;

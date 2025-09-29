@@ -27,17 +27,19 @@ const FutureCircleStatic = () => {
 				scale: 0,
 				rotation: 0,
 				opacity: 0,
+				delay: 1,
 			},
 			{
 				scale: 1,
-				rotation: 360,
+				// rotation: 360,
 				opacity: 1,
 				duration: 2,
 				ease: "back.out(1.7)",
 				scrollTrigger: {
 					trigger: container,
-					start: "top 80%",
-					end: "center center",
+					// markers: true,
+					start: "30% 60%",
+					end: "80% 40%",
 					scrub: 1,
 				},
 			}
