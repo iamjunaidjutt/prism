@@ -35,7 +35,7 @@ const FutureCircle = () => {
 
 		// Initialize animations with ScrollTrigger
 		gsap.set([elements, logo], {
-			scale: 0,
+			scale: 1,
 			transformOrigin: "50% 50%",
 		});
 
@@ -73,9 +73,10 @@ const FutureCircle = () => {
 			scrollTrigger: {
 				trigger: container,
 				// markers: true,
-				start: "top 30%",
-				end: "bottom 80%",
+				start: "top top",
+				end: "bottom top",
 				scrub: 1,
+				pin: true,
 				onEnter: () => rotationTimeline.play(),
 				onLeave: () => rotationTimeline.pause(),
 				onEnterBack: () => rotationTimeline.play(),

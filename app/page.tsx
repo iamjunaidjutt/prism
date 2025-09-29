@@ -9,7 +9,7 @@ export default function Home() {
 		<>
 			<Cursor />
 			{/* <ScrollPinContainer> */}
-			<FutureCircleStatic />
+			{/* <FutureCircleStatic /> */}
 			<FutureCircle />
 			<WebNominee />
 			{/* </ScrollPinContainer> */}
