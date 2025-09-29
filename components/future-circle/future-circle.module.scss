@@ -1,0 +1,32 @@
+.container {
+	@apply flex justify-center items-center h-screen relative;
+}
+
+.svg {
+	width: 400px;
+	position: absolute;
+	z-index: 1;
+}
+
+.logo {
+	position: absolute;
+	z-index: 2;
+}
+
+.outer {
+	stroke-dasharray: 377;
+}
+
+.dotted {
+	stroke-dasharray: 2 25;
+}
+
+.inner_slim {
+	stroke-dasharray: 283;
+}
+
+.inner_fat {
+	stroke-dasharray: 1131 0;
+	stroke-dashoffset: -47.25;
+	stroke-width: 3px;
+}
