@@ -8,11 +8,8 @@ export default function Home() {
 	return (
 		<>
 			<Cursor />
-			{/* <ScrollPinContainer> */}
-			{/* <FutureCircleStatic /> */}
 			<FutureCircle />
 			<WebNominee />
-			{/* </ScrollPinContainer> */}
 		</>
 	);
 }

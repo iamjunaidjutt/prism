@@ -59,7 +59,7 @@ const Cursor: React.FC = () => {
 				width: 32,
 				height: 32,
 				borderRadius: "50%",
-				background: "rgba(79,70,229,0.7)",
+				background: "#f7e7ce",
 				pointerEvents: "none",
 				zIndex: 9999,
 				mixBlendMode: "difference",

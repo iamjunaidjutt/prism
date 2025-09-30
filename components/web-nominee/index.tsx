@@ -378,6 +378,11 @@ const WebNominee = () => {
 				opacity: 1,
 				duration: 1.5,
 				ease: "back.out(1.7)",
+				snap: { rotation: 1 }, // Snap rotation to whole degrees
+				onComplete: () => {
+					// Ensure final rotation is exactly 0
+					gsap.set(badgeRef.current, { rotation: 0 });
+				},
 				scrollTrigger: {
 					trigger: containerRef.current,
 					// markers: true,
@@ -408,7 +413,6 @@ const WebNominee = () => {
 						height={300}
 						className={styles.badgeImg}
 					/>
-					<span className={styles.badgeVote}>Vote Now!</span>
 				</div>
 
 				<div className={styles.aura}></div>
