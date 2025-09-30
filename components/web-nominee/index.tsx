@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useRef, useCallback } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import Image from "next/image";
 import styles from "./web-nominee.module.scss";
 
@@ -320,87 +321,94 @@ const WebNominee = () => {
 	}, [setSize, setDiscs, setLines, setParticles]);
 
 	// Initialize component
-	useEffect(() => {
-		setSize();
-		setDiscs();
-		setLines();
-		setParticles();
+	useGSAP(
+		() => {
+			setSize();
+			setDiscs();
+			setLines();
+			setParticles();
 
-		window.addEventListener("resize", handleResize);
+			window.addEventListener("resize", handleResize);
 
-		// ScrollTrigger for canvas animation
-		let animationActive = false;
+			// ScrollTrigger for canvas animation
+			let animationActive = false;
 
-		ScrollTrigger.create({
-			trigger: containerRef.current,
-			// markers: true,
-			start: "top 70%",
-			end: "top 20%",
-			scrub: 1,
-			onEnter: () => {
-				if (!animationActive) {
-					animationActive = true;
-					animationFrameRef.current = requestAnimationFrame(tick);
-				}
-			},
-			onLeave: () => {
-				animationActive = false;
-				if (animationFrameRef.current) {
-					cancelAnimationFrame(animationFrameRef.current);
-				}
-			},
-			onEnterBack: () => {
-				if (!animationActive) {
-					animationActive = true;
-					animationFrameRef.current = requestAnimationFrame(tick);
-				}
-			},
-			onLeaveBack: () => {
-				animationActive = false;
-				if (animationFrameRef.current) {
-					cancelAnimationFrame(animationFrameRef.current);
-				}
-			},
-		});
-
-		// Badge animation with ScrollTrigger
-		gsap.fromTo(
-			badgeRef.current,
-			{
-				scale: 0,
-				rotation: 180,
-				opacity: 0,
-				delay: 0.5,
-			},
-			{
-				scale: 1,
-				rotation: 0,
-				opacity: 1,
-				duration: 1.5,
-				ease: "back.out(1.7)",
-				snap: { rotation: 1 }, // Snap rotation to whole degrees
-				onComplete: () => {
-					// Ensure final rotation is exactly 0
-					gsap.set(badgeRef.current, { rotation: 0 });
+			ScrollTrigger.create({
+				trigger: containerRef.current,
+				// markers: true,
+				start: "top 70%",
+				end: "top 20%",
+				scrub: 1,
+				onEnter: () => {
+					if (!animationActive) {
+						animationActive = true;
+						animationFrameRef.current = requestAnimationFrame(tick);
+					}
 				},
-				scrollTrigger: {
-					trigger: containerRef.current,
-					// markers: true,
-					start: "top 50%",
-					end: "bottom center",
-					scrub: 1,
+				onLeave: () => {
+					animationActive = false;
+					if (animationFrameRef.current) {
+						cancelAnimationFrame(animationFrameRef.current);
+					}
 				},
-			}
-		);
+				onEnterBack: () => {
+					if (!animationActive) {
+						animationActive = true;
+						animationFrameRef.current = requestAnimationFrame(tick);
+					}
+				},
+				onLeaveBack: () => {
+					animationActive = false;
+					if (animationFrameRef.current) {
+						cancelAnimationFrame(animationFrameRef.current);
+					}
+				},
+			});
 
-		return () => {
-			window.removeEventListener("resize", handleResize);
-			ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-			if (animationFrameRef.current) {
-				cancelAnimationFrame(animationFrameRef.current);
-			}
-		};
-	}, [handleResize, tick, setSize, setDiscs, setLines, setParticles]);
+			// Badge animation with ScrollTrigger
+			gsap.fromTo(
+				badgeRef.current,
+				{
+					scale: 0,
+					rotation: 180,
+					opacity: 0,
+					delay: 0.5,
+				},
+				{
+					scale: 1,
+					rotation: 0,
+					opacity: 1,
+					duration: 1.5,
+					ease: "back.out(1.7)",
+					snap: { rotation: 1 }, // Snap rotation to whole degrees
+					onComplete: () => {
+						// Ensure final rotation is exactly 0
+						gsap.set(badgeRef.current, { rotation: 0 });
+					},
+					scrollTrigger: {
+						trigger: containerRef.current,
+						// markers: true,
+						start: "top 50%",
+						end: "bottom center",
+						scrub: 1,
+					},
+				}
+			);
+
+			window.addEventListener("resize", handleResize);
+		},
+		{
+			scope: containerRef,
+			dependencies: [
+				handleResize,
+				tick,
+				setSize,
+				setDiscs,
+				setLines,
+				setParticles,
+			],
+		}
+	);
 
 	return (
 		<div ref={containerRef} className={styles.container}>

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import styles from "./future-circle.module.scss";
 import Image from "next/image";
 
@@ -12,55 +13,52 @@ gsap.registerPlugin(ScrollTrigger);
 const FutureCircleStatic = () => {
 	const containerRef = useRef<HTMLDivElement>(null);
 
-	useEffect(() => {
-		if (!containerRef.current) return;
+	useGSAP(
+		() => {
+			if (!containerRef.current) return;
 
-		const container = containerRef.current;
-		const logo = container.querySelector("#logo-image-static");
+			const container = containerRef.current;
+			const logo = container.querySelector("#logo-image-static");
 
-		if (!logo) return;
+			if (!logo) return;
 
-		// Only animate the logo with scroll effects
-		gsap.fromTo(
-			logo,
-			{
-				scale: 0,
-				rotation: 0,
-				opacity: 0,
-				delay: 1,
-			},
-			{
-				scale: 1,
-				// rotation: 360,
-				opacity: 1,
-				duration: 2,
-				ease: "back.out(1.7)",
-				scrollTrigger: {
-					trigger: container,
-					// markers: true,
-					start: "30% 60%",
-					end: "80% 40%",
-					scrub: 1,
+			// Only animate the logo with scroll effects
+			gsap.fromTo(
+				logo,
+				{
+					scale: 0,
+					rotation: 0,
+					opacity: 0,
+					delay: 1,
 				},
-			}
-		);
+				{
+					scale: 1,
+					// rotation: 360,
+					opacity: 1,
+					duration: 2,
+					ease: "back.out(1.7)",
+					scrollTrigger: {
+						trigger: container,
+						// markers: true,
+						start: "30% 60%",
+						end: "80% 40%",
+						scrub: 1,
+					},
+				}
+			);
 
-		// Add floating effect to logo
-		gsap.to(logo, {
-			y: -20,
-			duration: 2,
-			ease: "sine.inOut",
-			repeat: -1,
-			yoyo: true,
-			delay: 1,
-		});
-
-		// Cleanup function
-		return () => {
-			ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-			gsap.killTweensOf(logo);
-		};
-	}, []);
+			// Add floating effect to logo
+			gsap.to(logo, {
+				y: -20,
+				duration: 2,
+				ease: "sine.inOut",
+				repeat: -1,
+				yoyo: true,
+				delay: 1,
+			});
+		},
+		{ scope: containerRef }
+	);
 
 	return (
 		<div ref={containerRef} className={styles.container}>

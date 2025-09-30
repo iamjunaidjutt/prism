@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const Cursor: React.FC = () => {
 	const cursorRef = useRef<HTMLDivElement>(null);
 
-	useEffect(() => {
+	useGSAP(() => {
 		const cursor = cursorRef.current;
 		if (!cursor) return;
 
@@ -40,14 +41,7 @@ const Cursor: React.FC = () => {
 			});
 		};
 		window.addEventListener("mousedown", handleClick);
-
-		// Cleanup
-		return () => {
-			window.removeEventListener("mousemove", moveCursor);
-			window.removeEventListener("mousedown", handleClick);
-			gsap.ticker.remove(moveCursor);
-		};
-	}, []);
+	});
 
 	return (
 		<div
