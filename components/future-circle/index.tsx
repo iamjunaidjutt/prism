@@ -333,6 +333,12 @@ const FutureCircle = () => {
 			const prismaeonText = container.querySelector(
 				`.${styles.prismaeonText}`
 			);
+			const leftSideText = container.querySelector(
+				`.${styles.leftSideText}`
+			);
+			const rightSideText = container.querySelector(
+				`.${styles.rightSideText}`
+			);
 			const outer = container.querySelector("#outer-circle");
 			const dotted = container.querySelector("#dotted-circle");
 			const innerSlim = container.querySelector("#inner-slim-circle");
@@ -342,6 +348,8 @@ const FutureCircle = () => {
 				!elements.length ||
 				!logo ||
 				!prismaeonText ||
+				!leftSideText ||
+				!rightSideText ||
 				!outer ||
 				!dotted ||
 				!innerSlim ||
@@ -502,6 +510,37 @@ const FutureCircle = () => {
 				"-=0.5"
 			);
 
+			// Animate in side texts with WebNominee
+			scrollTl.fromTo(
+				leftSideText,
+				{
+					opacity: 0,
+					x: -50,
+				},
+				{
+					opacity: 1,
+					x: 0,
+					duration: 1,
+					ease: "power2.out",
+				},
+				"-=0.8"
+			);
+
+			scrollTl.fromTo(
+				rightSideText,
+				{
+					opacity: 0,
+					x: 50,
+				},
+				{
+					opacity: 1,
+					x: 0,
+					duration: 1,
+					ease: "power2.out",
+				},
+				"-=1"
+			);
+
 			// Phase 3: WebNominee badge animation
 			scrollTl.fromTo(
 				badgeRef.current,
@@ -609,6 +648,18 @@ const FutureCircle = () => {
 				<div className={styles.aura}></div>
 				<div className={styles.overlay}></div>
 				<canvas ref={canvasRef} className={styles.canvas}></canvas>
+			</div>
+
+			{/* Side Text Elements */}
+			<div className={styles.leftSideText}>
+				<div className={styles.leftTextLine1}>穿越化•PRISMAEON</div>
+				<div className={styles.leftTextLine2}>
+					priz.me,:.On ( priz-muh-ee-on)
+				</div>
+			</div>
+
+			<div className={styles.rightSideText}>
+				打造一个穿越文化：国界，时间周期 的品牌&大单品
 			</div>
 		</div>
 	);

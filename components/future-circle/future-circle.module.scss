@@ -219,3 +219,63 @@
 
 	pointer-events: none;
 }
+
+// Side text styles
+.leftSideText {
+	position: absolute;
+	left: 10%;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 15;
+	opacity: 0;
+	color: white;
+	text-align: left;
+
+	.leftTextLine1 {
+		font-size: 2rem;
+		font-weight: 300;
+		margin-bottom: 0.5rem;
+		letter-spacing: 0.05em;
+	}
+
+	.leftTextLine2 {
+		font-size: 1.4rem;
+		font-weight: 200;
+		opacity: 0.8;
+		font-style: italic;
+	}
+}
+
+.rightSideText {
+	position: absolute;
+	right: 10%;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 15;
+	opacity: 0;
+	color: white;
+	text-align: right;
+	font-size: 1.5rem;
+	font-weight: 300;
+	line-height: 1.4;
+	max-width: 300px;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+	.leftSideText {
+		left: 2%;
+		.leftTextLine1 {
+			font-size: 1.4rem;
+		}
+		.leftTextLine2 {
+			font-size: 1rem;
+		}
+	}
+
+	.rightSideText {
+		right: 2%;
+		font-size: 1.2rem;
+		max-width: 250px;
+	}
+}
