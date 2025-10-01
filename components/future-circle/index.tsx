@@ -426,6 +426,13 @@ const FutureCircle = () => {
 				opacity: 0,
 			});
 
+			// Set initial state for badge (no scaling or rotation)
+			gsap.set(badgeRef.current, {
+				opacity: 0,
+				scale: 1,
+				rotation: 0,
+			});
+
 			// Phase 1: FutureCircle animations (first 50% of scroll)
 			// Scale in animation for circles
 			scrollTl.to([elements], {
@@ -547,22 +554,15 @@ const FutureCircle = () => {
 				"-=1"
 			);
 
-			// Phase 3: WebNominee badge animation
-			scrollTl.fromTo(
+			// Phase 3: WebNominee badge simple appearance
+			scrollTl.to(
 				badgeRef.current,
 				{
-					scale: 0,
-					rotation: 180,
-					opacity: 0,
-				},
-				{
-					scale: 1,
-					rotation: 0,
 					opacity: 1,
-					duration: 1.5,
-					ease: "back.out(1.7)",
+					duration: 1,
+					ease: "power2.out",
 				},
-				"-=0.5"
+				"-=0.8"
 			);
 
 			// WebNominee animation setup
