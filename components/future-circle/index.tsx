@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -42,6 +42,7 @@ const easingFunctions = {
 };
 
 const FutureCircle = () => {
+	const [isMounted, setIsMounted] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	// WebNominee animation refs
@@ -323,9 +324,14 @@ const FutureCircle = () => {
 		setParticles();
 	}, [setSize, setDiscs, setLines, setParticles]);
 
+	// Ensure client-side mounting to prevent hydration mismatch
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
+
 	useGSAP(
 		() => {
-			if (!containerRef.current) return;
+			if (!containerRef.current || !isMounted) return;
 
 			const container = containerRef.current;
 			const elements = container.querySelectorAll("#future-svg circle");
@@ -573,6 +579,7 @@ const FutureCircle = () => {
 		{
 			scope: containerRef,
 			dependencies: [
+				isMounted,
 				handleResize,
 				tick,
 				setSize,
