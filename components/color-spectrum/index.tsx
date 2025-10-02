@@ -1,8 +1,15 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, {
+	useRef,
+	useEffect,
+	useState,
+	useCallback,
+	useMemo,
+} from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import styles from "./color-spectrum.module.scss";
 
 // Register GSAP plugins
@@ -108,17 +115,20 @@ const darkThemes = ["blue-black", "beige-black", "monochrome"];
 
 const ColorSpectrum = () => {
 	const [isMounted, setIsMounted] = useState(false);
-	const wavelengthTexts = [
-		"340nm - Violet",
-		"450nm - Blue",
-		"495nm - Cyan",
-		"570nm - Green",
-		"590nm - Yellow",
-		"620nm - Orange",
-		"750nm - Red",
-		"850nm - Infrared",
-		"950nm - Deep IR",
-	];
+	const wavelengthTexts = useMemo(
+		() => [
+			"Data\nAnalytics\n& Research",
+			"Strategy\nArchitecture\n& Planning",
+			"Creative\nDirecting\n& Design",
+			"Brand\nSensory\nSystem",
+			"Product\nPackaging\nDesign",
+			"New Media\nCustomization\n& Operation",
+			"IP Creation\n& Licensing",
+			"Visualization",
+			"Strategy\nPromotion",
+		],
+		[]
+	);
 	const [currentTheme, setCurrentTheme] = useState("original");
 	const [blurEnabled, setBlurEnabled] = useState(true);
 	const [soundEnabled, setSoundEnabled] = useState(false);
@@ -154,74 +164,6 @@ const ColorSpectrum = () => {
 		[soundEnabled]
 	);
 
-	const blendColors = useCallback(
-		(color1: string, color2: string, percentage: number) => {
-			percentage = Math.max(0, Math.min(1, percentage));
-			const hexToRgb = (hex: string) => {
-				const bigint = parseInt(hex.slice(1), 16);
-				return [
-					(bigint >> 16) & 255,
-					(bigint >> 8) & 255,
-					bigint & 255,
-				];
-			};
-			const rgbToHex = (rgb: number[]) =>
-				"#" +
-				((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
-					.toString(16)
-					.slice(1);
-
-			const rgb1 = hexToRgb(color1);
-			const rgb2 = hexToRgb(color2);
-			const r = Math.round(
-				rgb1[0] * (1 - percentage) + rgb2[0] * percentage
-			);
-			const g = Math.round(
-				rgb1[1] * (1 - percentage) + rgb2[1] * percentage
-			);
-			const b = Math.round(
-				rgb1[2] * (1 - percentage) + rgb2[2] * percentage
-			);
-			return rgbToHex([r, g, b]);
-		},
-		[]
-	);
-
-	const updateColors = useCallback((theme: string) => {
-		const colors = colorThemes[theme as keyof typeof colorThemes];
-		if (!colors) return;
-
-		const isDarkTheme = darkThemes.includes(theme);
-
-		// Update CSS custom properties
-		document.documentElement.style.setProperty(
-			"--color-bg",
-			isDarkTheme ? "#1a1a1a" : "#f5f5f5"
-		);
-		document.documentElement.style.setProperty(
-			"--color-text",
-			isDarkTheme ? "#ffffff" : "#333"
-		);
-		document.documentElement.style.setProperty(
-			"--color-text-light",
-			isDarkTheme ? "#cccccc" : "#666"
-		);
-		document.documentElement.style.setProperty(
-			"--color-text-lighter",
-			isDarkTheme ? "#999999" : "#999"
-		);
-
-		// Update gradient colors
-		colors.forEach((color, index) => {
-			document.documentElement.style.setProperty(
-				`--grad-color-${index + 1}`,
-				color
-			);
-		});
-
-		updateGradients(theme);
-	}, []);
-
 	const updateGradients = useCallback((theme: string) => {
 		const colors = colorThemes[theme as keyof typeof colorThemes];
 		if (!colors) return;
@@ -244,6 +186,44 @@ const ColorSpectrum = () => {
 			}
 		}
 	}, []);
+
+	const updateColors = useCallback(
+		(theme: string) => {
+			const colors = colorThemes[theme as keyof typeof colorThemes];
+			if (!colors) return;
+
+			const isDarkTheme = darkThemes.includes(theme);
+
+			// Update CSS custom properties
+			document.documentElement.style.setProperty(
+				"--color-bg",
+				isDarkTheme ? "#1a1a1a" : "#f5f5f5"
+			);
+			document.documentElement.style.setProperty(
+				"--color-text",
+				isDarkTheme ? "#ffffff" : "#333"
+			);
+			document.documentElement.style.setProperty(
+				"--color-text-light",
+				isDarkTheme ? "#cccccc" : "#666"
+			);
+			document.documentElement.style.setProperty(
+				"--color-text-lighter",
+				isDarkTheme ? "#999999" : "#999"
+			);
+
+			// Update gradient colors
+			colors.forEach((color, index) => {
+				document.documentElement.style.setProperty(
+					`--grad-color-${index + 1}`,
+					color
+				);
+			});
+
+			updateGradients(theme);
+		},
+		[updateGradients]
+	);
 
 	const generateRandomColor = useCallback(() => {
 		const hue = Math.floor(Math.random() * 360);
@@ -306,155 +286,285 @@ const ColorSpectrum = () => {
 	}, [soundEnabled]);
 
 	// Initialize animations
-	useEffect(() => {
-		if (!isMounted) return;
+	useGSAP(
+		() => {
+			if (!isMounted) return;
 
-		updateColors(currentTheme);
+			console.log("Simple GSAP Animation Starting...");
+			updateColors(currentTheme);
 
-		// Hero animations
-		const heroTl = gsap.timeline({ delay: 0.5 });
+			// Force wavelength labels to be visible immediately
+			const wavelengthElements = containerRef.current?.querySelectorAll(
+				`.${styles.wavelengthLabel}, .wavelength-label`
+			);
+			console.log(
+				`Found ${wavelengthElements?.length || 0} wavelength elements`
+			);
 
-		// Title animation
-		if (heroTitleRef.current) {
-			const chars = heroTitleRef.current.textContent?.split("") || [];
-			heroTitleRef.current.innerHTML = chars
-				.map((char) =>
-					char === " " ? " " : `<span class="char">${char}</span>`
-				)
-				.join("");
+			if (wavelengthElements) {
+				wavelengthElements.forEach((el) => {
+					if (el instanceof HTMLElement) {
+						el.style.opacity = "1";
+						el.style.transform = "translateY(0)";
+						el.style.filter = "blur(0)";
+					}
+				});
+			}
 
-			const charElements = heroTitleRef.current.querySelectorAll(".char");
+			// Clean up any existing timelines and animations
+			gsap.killTweensOf("*");
 
-			gsap.set(charElements, {
+			// Hero animations
+			const heroTl = gsap.timeline({ delay: 0.5 });
+
+			// Title animation
+			if (heroTitleRef.current) {
+				const chars = heroTitleRef.current.textContent?.split("") || [];
+				heroTitleRef.current.innerHTML = chars
+					.map((char) =>
+						char === " " ? " " : `<span class="char">${char}</span>`
+					)
+					.join("");
+
+				const charElements =
+					heroTitleRef.current.querySelectorAll(".char");
+
+				gsap.set(charElements, {
+					opacity: 0,
+					filter: "blur(8px)",
+					x: -20,
+				});
+
+				heroTl.to(
+					charElements,
+					{
+						opacity: 1,
+						filter: "blur(0px)",
+						x: 0,
+						duration: 0.8,
+						stagger: 0.03,
+						ease: "power2.out",
+					},
+					0
+				);
+			}
+
+			// Force initial states to ensure proper initialization
+			// SVG Container
+			gsap.set(svgContainerRef.current, {
+				visibility: "visible",
 				opacity: 0,
-				filter: "blur(8px)",
-				x: -20,
+				scaleY: 0.05,
+				y: -30,
 			});
 
-			heroTl.to(
-				charElements,
-				{
-					opacity: 1,
-					filter: "blur(0px)",
-					x: 0,
-					duration: 0.8,
-					stagger: 0.03,
-					ease: "power2.out",
+			// Text Grid and Main Title - Force visibility and reset properties
+			if (mainTitleRef.current) {
+				gsap.set(mainTitleRef.current, {
+					visibility: "visible",
+					opacity: 0,
+					y: 30,
+					filter: "blur(8px)",
+					force3D: true,
+				});
+			}
+
+			// Force text grid visibility
+			gsap.set(`.${styles.textGrid}`, {
+				visibility: "visible",
+				opacity: 0,
+				force3D: true,
+			});
+
+			// Initialize ALL wavelength labels - wait for DOM to be ready
+			const initializeWavelengthLabels = () => {
+				console.log(
+					`Initializing ${wavelengthTexts.length} wavelength labels`
+				);
+
+				// Use both class selector and data attributes for maximum coverage
+				const allWavelengthElements =
+					containerRef.current?.querySelectorAll(
+						`.${styles.wavelengthLabel}, .wavelength-label`
+					);
+				console.log(
+					`Found ${
+						allWavelengthElements?.length || 0
+					} wavelength elements via class`
+				);
+
+				// Initialize all found elements
+				if (allWavelengthElements && allWavelengthElements.length > 0) {
+					gsap.set(allWavelengthElements, {
+						visibility: "visible",
+						opacity: 0,
+						y: 30,
+						filter: "blur(0px)",
+						force3D: true,
+						clearProps: "filter,transform", // Clear any existing properties
+					});
+				}
+
+				// Double-check with data-index targeting
+				for (let i = 0; i < wavelengthTexts.length; i++) {
+					const wavelengthElement =
+						containerRef.current?.querySelector(
+							`[data-index="${i}"]`
+						);
+
+					if (wavelengthElement) {
+						console.log(
+							`Found and initializing wavelength element ${i}`
+						);
+						gsap.set(wavelengthElement, {
+							visibility: "visible",
+							opacity: 0,
+							y: 30,
+							filter: "blur(0px)",
+							force3D: true,
+							clearProps: "filter,transform",
+						});
+					} else {
+						console.warn(`Wavelength element ${i} not found!`);
+					}
+				}
+			};
+
+			// Call immediately and also with a small delay to ensure DOM is ready
+			setTimeout(initializeWavelengthLabels, 50);
+			setTimeout(initializeWavelengthLabels, 200);
+
+			// Sequential animation: spectrum first, then text grid titles in stagger
+			const scrollTl = gsap.timeline({
+				scrollTrigger: {
+					trigger: ".animation-section",
+					start: "top bottom",
+					end: "bottom top",
+					scrub: 1,
+					markers: false,
+					refreshPriority: 1,
+					onEnter: () =>
+						console.log("ScrollTrigger: Animation started"),
+					onUpdate: (self) => {
+						console.log(
+							`ScrollTrigger progress: ${self.progress.toFixed(
+								3
+							)}`
+						);
+					},
 				},
-				0
-			);
-		}
+			});
 
-		// Set initial states for elements - SVG container should be hidden
-		gsap.set(svgContainerRef.current, {
-			autoAlpha: 0, // Initially hidden
-			scaleY: 0.05,
-			translateY: "-30px",
-		});
+			// Step 1: Spectrum appears first (early in scroll)
+			scrollTl
+				.to(
+					svgContainerRef.current,
+					{
+						opacity: 1,
+						scaleY: 1,
+						y: 0,
+						duration: 0.3,
+						ease: "power2.out",
+					},
+					0
+				)
+				// Step 2: Text grid container becomes visible
+				.to(
+					`.${styles.textGrid}`,
+					{
+						opacity: 1,
+						duration: 0.1,
+						ease: "power2.out",
+					},
+					0.2
+				);
 
-		gsap.set(".wavelength-label", {
-			opacity: 0,
-			y: 30,
-			filter: "blur(8px)",
-		});
-
-		gsap.set(mainTitleRef.current, {
-			opacity: 0,
-			y: 30,
-			filter: "blur(8px)",
-		});
-
-		// Scroll-triggered animations
-		const tl = gsap.timeline({
-			scrollTrigger: {
-				trigger: ".animation-section",
-				start: "top center", // Start when animation section reaches center
-				end: "bottom center",
-				scrub: 1,
-				markers: false, // Disable for production
-				onEnter: () => console.log("ScrollTrigger entered"),
-				onUpdate: (self) =>
-					console.log("ScrollTrigger progress:", self.progress),
-			},
-		});
-
-		// Animation sequence - First make SVG visible, then animate
-		tl.to(
-			svgContainerRef.current,
-			{
-				autoAlpha: 1, // Make visible first
-				duration: 0.1,
-			},
-			0
-		).to(
-			svgContainerRef.current,
-			{
-				scaleY: 1,
-				translateY: "0px",
-				duration: 1.2,
-				ease: "power2.out",
-			},
-			0.1
-		);
-
-		// Animate each wavelength text sequentially
-		wavelengthTexts.forEach((_, index) => {
-			const delay = 0.9 + index * 0.2; // Stagger each text by 0.2 seconds
-			tl.to(
-				`[data-index="${index}"]`,
+			// Step 3: Animate wavelength titles in stagger (after spectrum appears)
+			scrollTl.to(
+				`.${styles.wavelengthLabel}, .wavelength-label`,
 				{
 					opacity: 1,
 					y: 0,
 					filter: "blur(0px)",
-					duration: 0.8,
+					duration: 0.4,
+					stagger: {
+						amount: 0.6, // Total time for all staggers
+						from: "center", // Stagger from center outward
+						ease: "power2.out",
+					},
 					ease: "power2.out",
 				},
-				delay
-			);
-		});
-
-		// Continue with other animations
-		tl.to(
-			mainTitleRef.current,
-			{
-				opacity: 1,
-				y: 0,
-				filter: "blur(0px)",
-				duration: 0.8,
-				ease: "power2.out",
-			},
-			1.1
-		)
-			.to(
-				".level5",
-				{ y: "-25vh", duration: 0.8, ease: "power2.out" },
-				0.9
-			)
-			.to(
-				".level4",
-				{ y: "-20vh", duration: 0.8, ease: "power2.out" },
-				0.9
-			)
-			.to(
-				".level3",
-				{ y: "-15vh", duration: 0.8, ease: "power2.out" },
-				0.9
-			)
-			.to(
-				".level2",
-				{ y: "-10vh", duration: 0.8, ease: "power2.out" },
-				0.9
-			)
-			.to(
-				".level1",
-				{ y: "-5vh", duration: 0.8, ease: "power2.out" },
-				0.9
+				0.3 // Start after spectrum appears
 			);
 
-		return () => {
-			ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-		};
-	}, [currentTheme, updateColors, wavelengthTexts]);
+			// Step 4: Animate main title after wavelength titles
+			scrollTl.to(
+				`.${styles.mainTitle}`,
+				{
+					opacity: 1,
+					y: 0,
+					filter: "blur(0px)",
+					duration: 0.4,
+					ease: "power2.out",
+				},
+				0.9 // Start after wavelength stagger completes
+			);
+
+			// Step 5: Animate spectrum levels (depth effect)
+			const levelAnimationStart = 0.7; // Start slightly before main title
+			scrollTl
+				.to(
+					".level-5",
+					{ y: "-25vh", duration: 0.8, ease: "power2.out" },
+					levelAnimationStart
+				)
+				.to(
+					".level-4",
+					{ y: "-20vh", duration: 0.8, ease: "power2.out" },
+					levelAnimationStart
+				)
+				.to(
+					".level-3",
+					{ y: "-15vh", duration: 0.8, ease: "power2.out" },
+					levelAnimationStart
+				)
+				.to(
+					".level-2",
+					{ y: "-10vh", duration: 0.8, ease: "power2.out" },
+					levelAnimationStart
+				)
+				.to(
+					".level-1",
+					{ y: "-5vh", duration: 0.8, ease: "power2.out" },
+					levelAnimationStart
+				);
+
+			console.log("Main title animation scheduled at 0.9s");
+			console.log("Animation setup complete");
+
+			// Ensure ScrollTrigger updates on resize
+			const handleResize = () => {
+				ScrollTrigger.refresh();
+			};
+
+			window.addEventListener("resize", handleResize);
+
+			// Cleanup function
+			return () => {
+				window.removeEventListener("resize", handleResize);
+			};
+		},
+		{
+			scope: containerRef,
+			dependencies: [
+				isMounted,
+				currentTheme,
+				updateColors,
+				wavelengthTexts,
+			],
+			revertOnUpdate: true, // This ensures proper cleanup when dependencies change
+		}
+	);
 
 	if (!isMounted) {
 		return null; // Avoid hydration mismatch
@@ -614,6 +724,7 @@ const ColorSpectrum = () => {
 							viewBox="0 0 1567 584"
 							preserveAspectRatio="none"
 							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
 						>
 							<g clipPath="url(#clip)" filter="url(#blur)">
 								<path
@@ -678,49 +789,357 @@ const ColorSpectrum = () => {
 										result="effect1_foregroundBlur"
 									/>
 								</filter>
-								{/* Gradients */}
-								{Array.from({ length: 9 }, (_, i) => (
-									<linearGradient
-										key={i}
-										id={`grad${i}`}
-										x1="50%"
-										y1="100%"
-										x2="50%"
-										y2="0%"
-										gradientUnits="userSpaceOnUse"
-									>
-										<stop stopColor="#340B05" />
-										<stop
-											offset="0.182709"
-											stopColor="#0358F7"
-										/>
-										<stop
-											offset="0.283673"
-											stopColor="#5092C7"
-										/>
-										<stop
-											offset="0.413484"
-											stopColor="#E1ECFE"
-										/>
-										<stop
-											offset="0.586565"
-											stopColor="#FFD400"
-										/>
-										<stop
-											offset="0.682722"
-											stopColor="#FA3D1D"
-										/>
-										<stop
-											offset="0.802892"
-											stopColor="#FD02F5"
-										/>
-										<stop
-											offset="1"
-											stopColor="#FFC0FD"
-											stopOpacity="0"
-										/>
-									</linearGradient>
-								))}
+								<linearGradient
+									id="grad0"
+									x1="1306"
+									y1="584"
+									x2="1306"
+									y2="184"
+									gradientUnits="userSpaceOnUse"
+								>
+									<stop stopColor="#340B05" />
+									<stop
+										offset="0.182709"
+										stopColor="#0358F7"
+									/>
+									<stop
+										offset="0.283673"
+										stopColor="#5092C7"
+									/>
+									<stop
+										offset="0.413484"
+										stopColor="#E1ECFE"
+									/>
+									<stop
+										offset="0.586565"
+										stopColor="#FFD400"
+									/>
+									<stop
+										offset="0.682722"
+										stopColor="#FA3D1D"
+									/>
+									<stop
+										offset="0.802892"
+										stopColor="#FD02F5"
+									/>
+									<stop
+										offset="1"
+										stopColor="#FFC0FD"
+										stopOpacity="0"
+									/>
+								</linearGradient>
+								<linearGradient
+									id="grad1"
+									x1="1132"
+									y1="584"
+									x2="1132"
+									y2="104"
+									gradientUnits="userSpaceOnUse"
+								>
+									<stop stopColor="#340B05" />
+									<stop
+										offset="0.182709"
+										stopColor="#0358F7"
+									/>
+									<stop
+										offset="0.283673"
+										stopColor="#5092C7"
+									/>
+									<stop
+										offset="0.413484"
+										stopColor="#E1ECFE"
+									/>
+									<stop
+										offset="0.586565"
+										stopColor="#FFD400"
+									/>
+									<stop
+										offset="0.682722"
+										stopColor="#FA3D1D"
+									/>
+									<stop
+										offset="0.802892"
+										stopColor="#FD02F5"
+									/>
+									<stop
+										offset="1"
+										stopColor="#FFC0FD"
+										stopOpacity="0"
+									/>
+								</linearGradient>
+								<linearGradient
+									id="grad2"
+									x1="261"
+									y1="584"
+									x2="261"
+									y2="184"
+									gradientUnits="userSpaceOnUse"
+								>
+									<stop stopColor="#340B05" />
+									<stop
+										offset="0.182709"
+										stopColor="#0358F7"
+									/>
+									<stop
+										offset="0.283673"
+										stopColor="#5092C7"
+									/>
+									<stop
+										offset="0.413484"
+										stopColor="#E1ECFE"
+									/>
+									<stop
+										offset="0.586565"
+										stopColor="#FFD400"
+									/>
+									<stop
+										offset="0.682722"
+										stopColor="#FA3D1D"
+									/>
+									<stop
+										offset="0.802892"
+										stopColor="#FD02F5"
+									/>
+									<stop
+										offset="1"
+										stopColor="#FFC0FD"
+										stopOpacity="0"
+									/>
+								</linearGradient>
+								<linearGradient
+									id="grad3"
+									x1="435"
+									y1="584"
+									x2="435"
+									y2="104"
+									gradientUnits="userSpaceOnUse"
+								>
+									<stop stopColor="#340B05" />
+									<stop
+										offset="0.182709"
+										stopColor="#0358F7"
+									/>
+									<stop
+										offset="0.283673"
+										stopColor="#5092C7"
+									/>
+									<stop
+										offset="0.413484"
+										stopColor="#E1ECFE"
+									/>
+									<stop
+										offset="0.586565"
+										stopColor="#FFD400"
+									/>
+									<stop
+										offset="0.682722"
+										stopColor="#FA3D1D"
+									/>
+									<stop
+										offset="0.802892"
+										stopColor="#FD02F5"
+									/>
+									<stop
+										offset="1"
+										stopColor="#FFC0FD"
+										stopOpacity="0"
+									/>
+								</linearGradient>
+								<linearGradient
+									id="grad4"
+									x1="609.501"
+									y1="584"
+									x2="609.501"
+									y2="54"
+									gradientUnits="userSpaceOnUse"
+								>
+									<stop stopColor="#340B05" />
+									<stop
+										offset="0.182709"
+										stopColor="#0358F7"
+									/>
+									<stop
+										offset="0.283673"
+										stopColor="#5092C7"
+									/>
+									<stop
+										offset="0.413484"
+										stopColor="#E1ECFE"
+									/>
+									<stop
+										offset="0.586565"
+										stopColor="#FFD400"
+									/>
+									<stop
+										offset="0.682722"
+										stopColor="#FA3D1D"
+									/>
+									<stop
+										offset="0.802892"
+										stopColor="#FD02F5"
+									/>
+									<stop
+										offset="1"
+										stopColor="#FFC0FD"
+										stopOpacity="0"
+									/>
+								</linearGradient>
+								<linearGradient
+									id="grad5"
+									x1="957.5"
+									y1="584"
+									x2="957.5"
+									y2="54"
+									gradientUnits="userSpaceOnUse"
+								>
+									<stop stopColor="#340B05" />
+									<stop
+										offset="0.182709"
+										stopColor="#0358F7"
+									/>
+									<stop
+										offset="0.283673"
+										stopColor="#5092C7"
+									/>
+									<stop
+										offset="0.413484"
+										stopColor="#E1ECFE"
+									/>
+									<stop
+										offset="0.586565"
+										stopColor="#FFD400"
+									/>
+									<stop
+										offset="0.682722"
+										stopColor="#FA3D1D"
+									/>
+									<stop
+										offset="0.802892"
+										stopColor="#FD02F5"
+									/>
+									<stop
+										offset="1"
+										stopColor="#FFC0FD"
+										stopOpacity="0"
+									/>
+								</linearGradient>
+								<linearGradient
+									id="grad6"
+									x1="783.501"
+									y1="584"
+									x2="783.501"
+									y2="0"
+									gradientUnits="userSpaceOnUse"
+								>
+									<stop stopColor="#340B05" />
+									<stop
+										offset="0.182709"
+										stopColor="#0358F7"
+									/>
+									<stop
+										offset="0.283673"
+										stopColor="#5092C7"
+									/>
+									<stop
+										offset="0.413484"
+										stopColor="#E1ECFE"
+									/>
+									<stop
+										offset="0.586565"
+										stopColor="#FFD400"
+									/>
+									<stop
+										offset="0.682722"
+										stopColor="#FA3D1D"
+									/>
+									<stop
+										offset="0.802892"
+										stopColor="#FD02F5"
+									/>
+									<stop
+										offset="1"
+										stopColor="#FFC0FD"
+										stopOpacity="0"
+									/>
+								</linearGradient>
+								<linearGradient
+									id="grad7"
+									x1="87.0003"
+									y1="585"
+									x2="87.0003"
+									y2="295"
+									gradientUnits="userSpaceOnUse"
+								>
+									<stop stopColor="#340B05" />
+									<stop
+										offset="0.182709"
+										stopColor="#0358F7"
+									/>
+									<stop
+										offset="0.283673"
+										stopColor="#5092C7"
+									/>
+									<stop
+										offset="0.413484"
+										stopColor="#E1ECFE"
+									/>
+									<stop
+										offset="0.586565"
+										stopColor="#FFD400"
+									/>
+									<stop
+										offset="0.682722"
+										stopColor="#FA3D1D"
+									/>
+									<stop
+										offset="0.802892"
+										stopColor="#FD02F5"
+									/>
+									<stop
+										offset="1"
+										stopColor="#FFC0FD"
+										stopOpacity="0"
+									/>
+								</linearGradient>
+								<linearGradient
+									id="grad8"
+									x1="1480"
+									y1="584"
+									x2="1480"
+									y2="294"
+									gradientUnits="userSpaceOnUse"
+								>
+									<stop stopColor="#340B05" />
+									<stop
+										offset="0.182709"
+										stopColor="#0358F7"
+									/>
+									<stop
+										offset="0.283673"
+										stopColor="#5092C7"
+									/>
+									<stop
+										offset="0.413484"
+										stopColor="#E1ECFE"
+									/>
+									<stop
+										offset="0.586565"
+										stopColor="#FFD400"
+									/>
+									<stop
+										offset="0.682722"
+										stopColor="#FA3D1D"
+									/>
+									<stop
+										offset="0.802892"
+										stopColor="#FD02F5"
+									/>
+									<stop
+										offset="1"
+										stopColor="#FFC0FD"
+										stopOpacity="0"
+									/>
+								</linearGradient>
 								<clipPath id="clip">
 									<rect
 										width="1567"
@@ -732,7 +1151,10 @@ const ColorSpectrum = () => {
 						</svg>
 					</div>
 
-					<div ref={mainTitleRef} className={styles.mainTitle}>
+					<div
+						ref={mainTitleRef}
+						className={`${styles.mainTitle} split-text`}
+					>
 						Where Light Becomes Color
 						<br />
 						Across the Infinite Spectrum
@@ -743,11 +1165,30 @@ const ColorSpectrum = () => {
 							<div key={index} className={styles.textColumn}>
 								<div
 									className={`${styles.wavelengthLabel} ${
-										styles[`level${(index % 5) + 1}`]
-									} wavelength-label level${(index % 5) + 1}`}
+										styles[
+											`level${Math.max(
+												1,
+												Math.min(
+													5,
+													5 - Math.abs(4 - index)
+												)
+											)}`
+										]
+									} wavelength-label level-${Math.max(
+										1,
+										Math.min(5, 5 - Math.abs(4 - index))
+									)} split-text`}
 									data-index={index}
 								>
-									{text}
+									{text.split("\n").map((line, lineIndex) => (
+										<React.Fragment key={lineIndex}>
+											{line}
+											{lineIndex <
+												text.split("\n").length - 1 && (
+												<br />
+											)}
+										</React.Fragment>
+									))}
 								</div>
 							</div>
 						))}
