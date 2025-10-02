@@ -404,13 +404,13 @@ const FutureCircle = () => {
 				repeat: -1,
 			});
 
-			// ScrollTrigger animation - Extended timeline for both animations
+			// ScrollTrigger animation - Extended timeline for sequential animations
 			const scrollTl = gsap.timeline({
 				scrollTrigger: {
 					trigger: container,
 					// markers: true,
 					start: "top top",
-					end: "+=200%", // Extended scroll distance for both animations
+					end: "+=400%", // Extended scroll distance for 4 phases
 					scrub: 1,
 					pin: true,
 					anticipatePin: 1,
@@ -492,7 +492,7 @@ const FutureCircle = () => {
 				"-=1"
 			);
 
-			// Phase 2: Transition (fade out FutureCircle completely, fade in WebNominee)
+			// Phase 2: Transition (fade out FutureCircle completely, fade in WebNominee badge only)
 			// Fade out circles and PRISMAEON text
 			scrollTl.to(
 				[elements, prismaeonText],
@@ -505,66 +505,60 @@ const FutureCircle = () => {
 				"+=0.5"
 			);
 
+			// Phase 3: WebNominee badge and effects appear (25% of total scroll)
 			scrollTl.to(
 				webbyNomineeRef.current,
 				{
 					opacity: 1,
-					duration: 1,
+					duration: 1.5,
 					ease: "power2.out",
 					onStart: () => {
-						// Start canvas animation
+						// Start canvas animation and make badge visible
 						if (!animationActive) {
 							animationActive = true;
 							animationFrameRef.current =
 								requestAnimationFrame(tick);
 						}
+						// Ensure badge is visible when container appears
+						gsap.set(badgeRef.current, { opacity: 1 });
 					},
 				},
-				"-=0.5"
+				"-=0.3"
 			);
 
-			// Animate in side texts with WebNominee
+			// Phase 4: Left side text appears (next 25% of scroll)
 			scrollTl.fromTo(
 				leftSideText,
 				{
 					opacity: 0,
-					x: -50,
+					x: -100,
 				},
 				{
 					opacity: 1,
 					x: 0,
-					duration: 1,
+					duration: 1.5,
 					ease: "power2.out",
 				},
-				"-=0.8"
+				"+=1"
 			);
 
+			// Phase 5: Right side text appears (final 25% of scroll)
 			scrollTl.fromTo(
 				rightSideText,
 				{
 					opacity: 0,
-					x: 50,
+					x: 100,
 				},
 				{
 					opacity: 1,
 					x: 0,
-					duration: 1,
+					duration: 1.5,
 					ease: "power2.out",
 				},
-				"-=1"
+				"+=1"
 			);
 
 			// Phase 3: WebNominee badge simple appearance
-			scrollTl.to(
-				badgeRef.current,
-				{
-					opacity: 1,
-					duration: 1,
-					ease: "power2.out",
-				},
-				"-=0.8"
-			);
-
 			// WebNominee animation setup
 			setSize();
 			setDiscs();
