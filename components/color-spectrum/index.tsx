@@ -221,6 +221,85 @@ const ColorSpectrum = () => {
 				);
 			}
 
+			// Hero Text Content Animation - animate from down to up
+			const heroTextElements = document.querySelectorAll(
+				`.${styles.heroTextContent} .${styles.heroText}`
+			);
+			if (heroTextElements.length > 0) {
+				gsap.set(heroTextElements, {
+					opacity: 0,
+					y: 50, // Start 50px below
+					filter: "blur(4px)",
+				});
+
+				heroTl.to(
+					heroTextElements,
+					{
+						opacity: 1,
+						y: 0, // Move to original position
+						filter: "blur(0px)",
+						duration: 1.0,
+						stagger: 0.2, // Stagger each text block
+						ease: "power2.out",
+					},
+					0.5 // Start after title animation begins
+				);
+			}
+
+			// Hero Nav Animation (left side) - animate from down to up
+			const heroNavElements = document.querySelectorAll(
+				`.${styles.heroNavItem}`
+			);
+			if (heroNavElements.length > 0) {
+				gsap.set(heroNavElements, {
+					opacity: 0,
+					y: 40, // Start 40px below
+					filter: "blur(3px)",
+				});
+
+				heroTl.to(
+					heroNavElements,
+					{
+						opacity: 1,
+						y: 0, // Move to original position
+						filter: "blur(0px)",
+						duration: 0.8,
+						stagger: 0.15, // Stagger each nav item
+						ease: "power2.out",
+					},
+					0.4 // Start slightly before heroTextContent
+				);
+			}
+
+			// Wavelength Text Animation - animate from down to up
+			const heroWavelengthElements = document.querySelectorAll(
+				`.${styles.wavelengthLabel}, .wavelength-label`
+			);
+			if (heroWavelengthElements && heroWavelengthElements.length > 0) {
+				gsap.set(heroWavelengthElements, {
+					opacity: 0,
+					y: 30, // Start 30px below
+					filter: "blur(3px)",
+				});
+
+				heroTl.to(
+					heroWavelengthElements,
+					{
+						opacity: 1,
+						y: 0, // Move to original position
+						filter: "blur(0px)",
+						duration: 0.8,
+						stagger: {
+							amount: 1.2, // Total time for all staggers
+							from: "start", // Stagger from left to right
+							ease: "power2.out",
+						},
+						ease: "power2.out",
+					},
+					1.0 // Start after hero text content
+				);
+			}
+
 			// Force initial states to ensure proper initialization
 			// SVG Container
 			gsap.set(svgContainerRef.current, {
