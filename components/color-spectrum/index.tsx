@@ -11,64 +11,15 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import styles from "./color-spectrum.module.scss";
+import Link from "next/link";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
 	gsap.registerPlugin(ScrollTrigger);
 }
 
-// Color themes configuration
+// Color themes configuration - simplified to monochrome only
 const colorThemes = {
-	original: [
-		"#340B05",
-		"#0358F7",
-		"#5092C7",
-		"#E1ECFE",
-		"#FFD400",
-		"#FA3D1D",
-		"#FD02F5",
-		"#FFC0FD",
-	],
-	"blue-pink": [
-		"#1E3A8A",
-		"#3B82F6",
-		"#A855F7",
-		"#EC4899",
-		"#F472B6",
-		"#F9A8D4",
-		"#FBCFE8",
-		"#FDF2F8",
-	],
-	"blue-orange": [
-		"#1E40AF",
-		"#3B82F6",
-		"#60A5FA",
-		"#FFFFFF",
-		"#FED7AA",
-		"#FB923C",
-		"#EA580C",
-		"#9A3412",
-	],
-	sunset: [
-		"#FEF3C7",
-		"#FCD34D",
-		"#F59E0B",
-		"#D97706",
-		"#B45309",
-		"#92400E",
-		"#78350F",
-		"#451A03",
-	],
-	purple: [
-		"#F3E8FF",
-		"#E9D5FF",
-		"#D8B4FE",
-		"#C084FC",
-		"#A855F7",
-		"#9333EA",
-		"#7C3AED",
-		"#6B21B6",
-	],
 	monochrome: [
 		"#1A1A1A",
 		"#404040",
@@ -79,39 +30,7 @@ const colorThemes = {
 		"#F5F5F5",
 		"#FFFFFF",
 	],
-	"pink-purple": [
-		"#FDF2F8",
-		"#FCE7F3",
-		"#F9A8D4",
-		"#F472B6",
-		"#EC4899",
-		"#BE185D",
-		"#831843",
-		"#500724",
-	],
-	"blue-black": [
-		"#000000",
-		"#0F172A",
-		"#1E293B",
-		"#334155",
-		"#475569",
-		"#64748B",
-		"#94A3B8",
-		"#CBD5E1",
-	],
-	"beige-black": [
-		"#FEF3C7",
-		"#F59E0B",
-		"#D97706",
-		"#92400E",
-		"#451A03",
-		"#1C1917",
-		"#0C0A09",
-		"#000000",
-	],
 };
-
-const darkThemes = ["blue-black", "beige-black", "monochrome"];
 
 const ColorSpectrum = () => {
 	const [isMounted, setIsMounted] = useState(false);
@@ -129,9 +48,8 @@ const ColorSpectrum = () => {
 		],
 		[]
 	);
-	const [currentTheme, setCurrentTheme] = useState("original");
+	const [currentTheme] = useState("monochrome");
 	const [blurEnabled, setBlurEnabled] = useState(true);
-	const [soundEnabled, setSoundEnabled] = useState(false);
 
 	// Refs
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -140,29 +58,9 @@ const ColorSpectrum = () => {
 	const mainTitleRef = useRef<HTMLDivElement>(null);
 	const gradientOverlayRef = useRef<HTMLDivElement>(null);
 
-	// Audio files (optional - implement if needed)
-	const audioFiles = useRef({
-		whoosh: null as HTMLAudioElement | null,
-		glitch: null as HTMLAudioElement | null,
-		reverb: null as HTMLAudioElement | null,
-	});
-
 	useEffect(() => {
 		setIsMounted(true);
 	}, []);
-
-	const playSound = useCallback(
-		(soundName: keyof typeof audioFiles.current) => {
-			if (soundEnabled && audioFiles.current[soundName]) {
-				const audio = audioFiles.current[soundName];
-				if (audio) {
-					audio.currentTime = 0;
-					audio.play().catch(() => {});
-				}
-			}
-		},
-		[soundEnabled]
-	);
 
 	const updateGradients = useCallback((theme: string) => {
 		const colors = colorThemes[theme as keyof typeof colorThemes];
@@ -192,28 +90,41 @@ const ColorSpectrum = () => {
 			const colors = colorThemes[theme as keyof typeof colorThemes];
 			if (!colors) return;
 
-			const isDarkTheme = darkThemes.includes(theme);
+			// Use only dark and light shades from monochrome palette
+			const darkShades = ["#1A1A1A", "#404040", "#666666"]; // Dark colors for backgrounds
+			const lightShades = ["#CCCCCC", "#E5E5E5", "#F5F5F5", "#FFFFFF"]; // Light colors for text
 
-			// Update CSS custom properties
+			// Update CSS custom properties with dark background and light text
 			document.documentElement.style.setProperty(
 				"--color-bg",
-				isDarkTheme ? "#1a1a1a" : "#f5f5f5"
+				darkShades[0] // Darkest shade for main background
 			);
 			document.documentElement.style.setProperty(
 				"--color-text",
-				isDarkTheme ? "#ffffff" : "#333"
+				lightShades[3] // Lightest shade for main text
 			);
 			document.documentElement.style.setProperty(
 				"--color-text-light",
-				isDarkTheme ? "#cccccc" : "#666"
+				lightShades[1] // Light shade for secondary text
 			);
 			document.documentElement.style.setProperty(
 				"--color-text-lighter",
-				isDarkTheme ? "#999999" : "#999"
+				lightShades[0] // Medium light shade for subtle text
 			);
 
-			// Update gradient colors
-			colors.forEach((color, index) => {
+			// Update gradient colors to use simplified dark to light progression
+			const simplifiedColors = [
+				darkShades[0], // #1A1A1A
+				darkShades[1], // #404040
+				darkShades[2], // #666666
+				lightShades[0], // #CCCCCC
+				lightShades[1], // #E5E5E5
+				lightShades[2], // #F5F5F5
+				lightShades[3], // #FFFFFF
+				lightShades[3], // #FFFFFF (repeat for consistency)
+			];
+
+			simplifiedColors.forEach((color, index) => {
 				document.documentElement.style.setProperty(
 					`--grad-color-${index + 1}`,
 					color
@@ -225,52 +136,8 @@ const ColorSpectrum = () => {
 		[updateGradients]
 	);
 
-	const generateRandomColor = useCallback(() => {
-		const hue = Math.floor(Math.random() * 360);
-		const saturation = Math.floor(Math.random() * 40) + 60;
-		const lightness = Math.floor(Math.random() * 50) + 30;
-		return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-	}, []);
-
-	const randomizeColors = useCallback(() => {
-		playSound("glitch");
-		const randomColors = Array.from({ length: 8 }, () =>
-			generateRandomColor()
-		);
-
-		// Update gradients with random colors
-		for (let i = 0; i < 9; i++) {
-			const gradient = document.getElementById(`grad${i}`);
-			if (gradient) {
-				const stops = gradient.querySelectorAll("stop");
-				stops.forEach((stop, idx) => {
-					if (randomColors[idx]) {
-						stop.setAttribute("stop-color", randomColors[idx]);
-					} else if (randomColors[randomColors.length - 1]) {
-						stop.setAttribute(
-							"stop-color",
-							randomColors[randomColors.length - 1]
-						);
-					}
-				});
-			}
-		}
-
-		// Animate SVG container
-		if (svgContainerRef.current) {
-			gsap.to(svgContainerRef.current, {
-				scale: 1.02,
-				duration: 0.2,
-				yoyo: true,
-				repeat: 1,
-				ease: "power2.inOut",
-			});
-		}
-	}, [playSound, generateRandomColor]);
-
 	const toggleBlur = useCallback(() => {
 		const svgGroup = document.querySelector('g[clip-path="url(#clip)"]');
-		playSound("whoosh");
 
 		if (blurEnabled) {
 			svgGroup?.removeAttribute("filter");
@@ -279,11 +146,7 @@ const ColorSpectrum = () => {
 			svgGroup?.setAttribute("filter", "url(#blur)");
 			setBlurEnabled(true);
 		}
-	}, [blurEnabled, playSound]);
-
-	const toggleSound = useCallback(() => {
-		setSoundEnabled(!soundEnabled);
-	}, [soundEnabled]);
+	}, [blurEnabled]);
 
 	// Initialize animations
 	useGSAP(
@@ -440,7 +303,7 @@ const ColorSpectrum = () => {
 					trigger: ".animation-section",
 					start: "top bottom",
 					end: "bottom top",
-					scrub: 1,
+					scrub: 0.5, // Reduced scrub for smoother animation
 					markers: false,
 					refreshPriority: 1,
 					onEnter: () =>
@@ -453,9 +316,7 @@ const ColorSpectrum = () => {
 						);
 					},
 				},
-			});
-
-			// Step 1: Spectrum appears first (early in scroll)
+			}); // Step 1: Spectrum appears first (early in scroll)
 			scrollTl
 				.to(
 					svgContainerRef.current,
@@ -463,8 +324,8 @@ const ColorSpectrum = () => {
 						opacity: 1,
 						scaleY: 1,
 						y: 0,
-						duration: 0.3,
-						ease: "power2.out",
+						duration: 0.4, // Increased duration for smoother animation
+						ease: "power2.inOut", // Changed to inOut for smoother transition
 					},
 					0
 				)
@@ -473,10 +334,10 @@ const ColorSpectrum = () => {
 					`.${styles.textGrid}`,
 					{
 						opacity: 1,
-						duration: 0.1,
-						ease: "power2.out",
+						duration: 0.15, // Slightly increased
+						ease: "power2.inOut",
 					},
-					0.2
+					0.15 // Adjusted timing
 				);
 
 			// Step 3: Animate wavelength titles in stagger (after spectrum appears)
@@ -486,15 +347,15 @@ const ColorSpectrum = () => {
 					opacity: 1,
 					y: 0,
 					filter: "blur(0px)",
-					duration: 0.4,
+					duration: 0.5, // Increased duration
 					stagger: {
-						amount: 0.6, // Total time for all staggers
+						amount: 0.8, // Increased stagger time for smoother effect
 						from: "center", // Stagger from center outward
-						ease: "power2.out",
+						ease: "power2.inOut",
 					},
-					ease: "power2.out",
+					ease: "power2.inOut", // Changed to inOut for smoother transition
 				},
-				0.3 // Start after spectrum appears
+				0.25 // Slightly adjusted timing
 			);
 
 			// Step 4: Animate main title after wavelength titles
@@ -504,38 +365,38 @@ const ColorSpectrum = () => {
 					opacity: 1,
 					y: 0,
 					filter: "blur(0px)",
-					duration: 0.4,
-					ease: "power2.out",
+					duration: 0.5, // Increased duration
+					ease: "power2.inOut", // Changed to inOut for smoother transition
 				},
-				0.9 // Start after wavelength stagger completes
+				0.8 // Adjusted timing to work with new wavelength timing
 			);
 
 			// Step 5: Animate spectrum levels (depth effect)
-			const levelAnimationStart = 0.7; // Start slightly before main title
+			const levelAnimationStart = 0.6; // Adjusted timing
 			scrollTl
 				.to(
 					".level-5",
-					{ y: "-25vh", duration: 0.8, ease: "power2.out" },
+					{ y: "-25vh", duration: 1.0, ease: "power2.inOut" }, // Increased duration and smoother easing
 					levelAnimationStart
 				)
 				.to(
 					".level-4",
-					{ y: "-20vh", duration: 0.8, ease: "power2.out" },
+					{ y: "-20vh", duration: 1.0, ease: "power2.inOut" },
 					levelAnimationStart
 				)
 				.to(
 					".level-3",
-					{ y: "-15vh", duration: 0.8, ease: "power2.out" },
+					{ y: "-15vh", duration: 1.0, ease: "power2.inOut" },
 					levelAnimationStart
 				)
 				.to(
 					".level-2",
-					{ y: "-10vh", duration: 0.8, ease: "power2.out" },
+					{ y: "-10vh", duration: 1.0, ease: "power2.inOut" },
 					levelAnimationStart
 				)
 				.to(
 					".level-1",
-					{ y: "-5vh", duration: 0.8, ease: "power2.out" },
+					{ y: "-5vh", duration: 1.0, ease: "power2.inOut" },
 					levelAnimationStart
 				);
 
@@ -582,131 +443,96 @@ const ColorSpectrum = () => {
 			{/* Gradient Overlay */}
 			<div ref={gradientOverlayRef} className={styles.gradientOverlay} />
 
-			{/* Color Switcher */}
+			{/* Header Navigation */}
 			<header className={styles.header}>
-				<div className={styles.colorSwitcher}>
-					{Object.keys(colorThemes).map((theme) => (
-						<div
-							key={theme}
-							className={`${styles.colorBtn} ${
-								styles[
-									`theme${
-										theme.charAt(0).toUpperCase() +
-										theme
-											.slice(1)
-											.replace(/-([a-z])/g, (g) =>
-												g[1].toUpperCase()
-											)
-									}`
-								]
-							} ${currentTheme === theme ? styles.active : ""}`}
-							onClick={() => {
-								setCurrentTheme(theme);
-								updateColors(theme);
-								playSound("reverb");
-								if (svgContainerRef.current) {
-									gsap.to(svgContainerRef.current, {
-										scale: 1.02,
-										duration: 0.2,
-										yoyo: true,
-										repeat: 1,
-										ease: "power2.inOut",
-									});
-								}
-							}}
-						/>
-					))}
+				<div className={`${styles.navItem} ${styles.navTopLeft}`}>
+					PRISMAEON
 				</div>
+				<div className={`${styles.navItem} ${styles.navTopRight}`}>
+					<Link
+						href="mailto:hi@prismaeon.com"
+						className={styles.emailLink}
+					>
+						hi@PRISM.COM
+					</Link>{" "}
+					— 2025
+				</div>
+			</header>
 
+			{/* Hero Section */}
+			<section className={styles.heroSection}>
+				{/* Blur Toggle */}
 				<div className={styles.blurToggle}>
 					<span className={styles.blurBtn} onClick={toggleBlur}>
 						{blurEnabled ? "Blur Off" : "Blur On"}
 					</span>
 				</div>
 
-				<div className={styles.randomizeToggle}>
-					<span
-						className={styles.randomizeBtn}
-						onClick={randomizeColors}
-					>
-						Randomize
-					</span>
-				</div>
-
-				<div className={`${styles.navItem} ${styles.navTopLeft}`}>
-					Cosmic Spectrum
-				</div>
-				<div className={`${styles.navItem} ${styles.navTopRight}`}>
-					<span>
-						<a
-							href="mailto:hi@prismaeon.com"
-							className={styles.emailLink}
-						>
-							hi@prismaeon.com
-						</a>{" "}
-						— 2024
-					</span>
-					<div className={styles.soundToggle} onClick={toggleSound}>
-						<svg className={styles.soundWave} viewBox="0 0 20 12">
-							<path
-								className={`${styles.waveLine} ${
-									soundEnabled ? styles.waveAnimated : ""
-								}`}
-								d="M2 6 Q4 2 6 6 Q8 10 10 6 Q12 2 14 6 Q16 10 18 6"
-							/>
-						</svg>
-					</div>
-				</div>
-				<div className={`${styles.navItem} ${styles.navBottomLeft}`}>
-					Stellar Radiation
-				</div>
-				<div className={`${styles.navItem} ${styles.navBottomCenter}`}>
-					Scroll to explore
-				</div>
-				<div className={`${styles.navItem} ${styles.navBottomRight}`}>
-					Color Wavelengths
-				</div>
-			</header>
-
-			{/* Hero Section */}
-			<section className={styles.heroSection}>
 				<h1 ref={heroTitleRef} className={styles.heroTitle}>
-					Light Frequencies
+					9D PRISMAEON
 				</h1>
 
 				<div className={styles.heroContent}>
 					<div className={styles.heroNav}>
 						{[
-							"Wave",
-							"Photons",
-							"Spectrum",
-							"Frequencies",
-							"Electromagnetic",
-							"Wavelength",
-							"Radiation",
-							"Energy",
-							"Light",
+							{
+								chinese: "大数据分析 与 调研",
+								english: "Data Analytics & Research",
+							},
+							{
+								chinese: "顶层战略架构与策划",
+								english: "Strategy Architecture & Planning",
+							},
+							{
+								chinese: "品牌产品穿越化创意与设计",
+								english: "Creative Directing & Design",
+							},
+							{
+								chinese: "品牌穿越化感官系统",
+								english: "Brand Sensory System",
+							},
+							{
+								chinese: "穿越化产品包装设计",
+								english: "Product Packaging Design",
+							},
+							{
+								chinese: "新媒体定制运维服务",
+								english: "New Media Customization & Operation",
+							},
+							{
+								chinese: "穿越化IP创造及授权",
+								english: "IP Creation & Licensing",
+							},
+							{
+								chinese: "穿越化视觉",
+								english: "Visualization",
+							},
+							{
+								chinese: "策略推广",
+								english: "Strategy Promotion",
+							},
 						].map((item, index) => (
 							<div key={index} className={styles.heroNavItem}>
-								{item}
+								<p className={styles.chinese}>{item.chinese}</p>
+								<p className={styles.english}>{item.english}</p>
 							</div>
 						))}
 					</div>
 
 					<div className={styles.heroTextContent}>
 						<div className={styles.heroText}>
-							In a universe where light becomes the language of
-							existence, our cosmic spectrum emerges as a bridge
-							between the seen and unseen. We capture wavelengths
-							that define reality, blending electromagnetic
-							frequencies with visual poetry.
+							The &quot;Transcendence &amp; Buyability&quot;
+							Framework, pioneered by PRISM, Empowered by an
+							A-Team of data scientists, statisticians, and global
+							creatives一and guided by proven channel strategy一we
+							systematically dismantle barriers to growth by
+							deeply analyzing, strategically deconstructing, and
+							powerfully reinventing your global brand and product
+							portfolio.
 						</div>
 						<div className={styles.heroText}>
-							Our collection is inspired by the raw energy of
-							distant galaxies, where physics meets pure beauty.
-							From violet waves to infrared radiation, we
-							reimagine the electromagnetic spectrum for the
-							curious minds.
+							PRISM 领域独创的「穿越化·买点论」
+							是系统化解决品牌及产品在全球化增长中的认知、审美与商业隔阂的方法论。依托A级数据分析团队与统计学博士团队，结合海内外一线的创意设计力量，并由深耕多年的渠道认知反推，全方位洞察·解构·重塑您的品牌与产品
 						</div>
 					</div>
 				</div>
