@@ -141,7 +141,7 @@
 	background: #000c;
 	border-radius: 999rem;
 	overflow: hidden;
-	opacity: 0;
+	opacity: 1; /* Changed from 0 to 1 since webbyNominee controls visibility */
 }
 
 .badgeImg {
