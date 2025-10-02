@@ -36,15 +36,24 @@ const ColorSpectrum = () => {
 	const [isMounted, setIsMounted] = useState(false);
 	const wavelengthTexts = useMemo(
 		() => [
-			"Data\nAnalytics\n& Research",
-			"Strategy\nArchitecture\n& Planning",
-			"Creative\nDirecting\n& Design",
-			"Brand\nSensory\nSystem",
-			"Product\nPackaging\nDesign",
-			"New Media\nCustomization\n& Operation",
-			"IP Creation\n& Licensing",
-			"Visualization",
-			"Strategy\nPromotion",
+			"精准洞察",
+			"全局掌控",
+			"文化适配",
+			"情感共鸣",
+			"美学表达",
+			"持续互动",
+			"资产沉淀",
+			"感官冲击",
+			"全域共振",
+			// "Data\nAnalytics\n& Research",
+			// "Strategy\nArchitecture\n& Planning",
+			// "Creative\nDirecting\n& Design",
+			// "Brand\nSensory\nSystem",
+			// "Product\nPackaging\nDesign",
+			// "New Media\nCustomization\n& Operation",
+			// "IP Creation\n& Licensing",
+			// "Visualization",
+			// "Strategy\nPromotion",
 		],
 		[]
 	);
@@ -469,7 +478,10 @@ const ColorSpectrum = () => {
 				</div>
 
 				<h1 ref={heroTitleRef} className={styles.heroTitle}>
-					9D PRISMAEON
+					9D PRISMAEON{" "}
+					<span className={styles.heroTitleChinese}>
+						久违之光 穿界越限
+					</span>
 				</h1>
 
 				<div className={styles.heroContent}>
