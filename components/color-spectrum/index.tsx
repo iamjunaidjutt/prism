@@ -621,7 +621,7 @@ const ColorSpectrum = () => {
 							powerfully reinventing your global brand and product
 							portfolio.
 						</div>
-						<div className={styles.heroText}>
+						<div className={styles.heroTextChinese}>
 							PRISM 领域独创的「穿越化·买点论」
 							是系统化解决品牌及产品在全球化增长中的认知、审美与商业隔阂的方法论。依托A级数据分析团队与统计学博士团队，结合海内外一线的创意设计力量，并由深耕多年的渠道认知反推，全方位洞察·解构·重塑您的品牌与产品
 						</div>

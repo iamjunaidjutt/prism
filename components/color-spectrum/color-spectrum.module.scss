@@ -500,7 +500,7 @@
 }
 .heroTextContent {
 	display: flex;
-	gap: 2rem;
+	gap: 4rem;
 	flex: 1;
 	justify-content: flex-end;
 }
@@ -508,6 +508,17 @@
 	width: 25%;
 	font-family: var(--font-mono);
 	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: var(--color-text);
+	line-height: 1.6;
+	overflow: hidden;
+	transition: color 0.3s ease;
+}
+.heroTextChinese {
+	width: 25%;
+	font-family: var(--font-mono);
+	font-size: 16px;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 	color: var(--color-text);
