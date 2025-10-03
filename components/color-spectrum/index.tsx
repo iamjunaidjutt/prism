@@ -18,17 +18,17 @@ if (typeof window !== "undefined") {
 	gsap.registerPlugin(ScrollTrigger);
 }
 
-// Color themes configuration - simplified to monochrome only
+// Color themes configuration - custom chrome gray to light champagne theme
 const colorThemes = {
 	monochrome: [
 		"#1A1A1A",
 		"#404040",
 		"#666666",
-		"#999999",
-		"#CCCCCC",
-		"#E5E5E5",
-		"#F5F5F5",
-		"#FFFFFF",
+		"#b0b0b0",
+		"#f7e7ce",
+		"#f7e7ce",
+		"#f7e7ce",
+		"#f7e7ce",
 	],
 };
 
@@ -36,24 +36,15 @@ const ColorSpectrum = () => {
 	const [isMounted, setIsMounted] = useState(false);
 	const wavelengthTexts = useMemo(
 		() => [
-			"精准洞察",
-			"全局掌控",
-			"文化适配",
-			"情感共鸣",
-			"美学表达",
-			"持续互动",
-			"资产沉淀",
-			"感官冲击",
-			"全域共振",
-			// "Data\nAnalytics\n& Research",
-			// "Strategy\nArchitecture\n& Planning",
-			// "Creative\nDirecting\n& Design",
-			// "Brand\nSensory\nSystem",
-			// "Product\nPackaging\nDesign",
-			// "New Media\nCustomization\n& Operation",
-			// "IP Creation\n& Licensing",
-			// "Visualization",
-			// "Strategy\nPromotion",
+			"精准\n洞察",
+			"全局\n掌控",
+			"文化\n适配",
+			"情感\n共鸣",
+			"美学\n表达",
+			"持续\n互动",
+			"资产\n沉淀",
+			"感官\n冲击",
+			"全域\n共振",
 		],
 		[]
 	);
@@ -75,33 +66,45 @@ const ColorSpectrum = () => {
 		const colors = colorThemes[theme as keyof typeof colorThemes];
 		if (!colors) return;
 
-		// Update SVG gradients
-		for (let i = 0; i < 9; i++) {
-			const gradient = document.getElementById(`grad${i}`);
-			if (gradient) {
-				const stops = gradient.querySelectorAll("stop");
-				stops.forEach((stop, idx) => {
-					if (colors[idx]) {
-						stop.setAttribute("stop-color", colors[idx]);
-					} else if (colors[colors.length - 1]) {
-						stop.setAttribute(
-							"stop-color",
-							colors[colors.length - 1]
-						);
-					}
-				});
+		// Add a small delay to ensure SVG is rendered
+		setTimeout(() => {
+			// Update SVG gradients
+			for (let i = 0; i < 9; i++) {
+				const gradient = document.getElementById(`grad${i}`);
+				if (gradient) {
+					const stops = gradient.querySelectorAll("stop");
+					stops.forEach((stop, idx) => {
+						if (colors[idx]) {
+							stop.setAttribute("stop-color", colors[idx]);
+						} else if (colors[colors.length - 1]) {
+							stop.setAttribute(
+								"stop-color",
+								colors[colors.length - 1]
+							);
+						}
+					});
+				}
 			}
-		}
+		}, 100);
 	}, []);
+
+	// Additional useEffect to ensure gradients are updated after component mounts
+	useEffect(() => {
+		if (isMounted) {
+			setTimeout(() => {
+				updateGradients(currentTheme);
+			}, 300);
+		}
+	}, [isMounted, updateGradients, currentTheme]);
 
 	const updateColors = useCallback(
 		(theme: string) => {
 			const colors = colorThemes[theme as keyof typeof colorThemes];
 			if (!colors) return;
 
-			// Use only dark and light shades from monochrome palette
+			// Use chrome gray to light champagne theme
 			const darkShades = ["#1A1A1A", "#404040", "#666666"]; // Dark colors for backgrounds
-			const lightShades = ["#CCCCCC", "#E5E5E5", "#F5F5F5", "#FFFFFF"]; // Light colors for text
+			const lightShades = ["#b0b0b0", "#f7e7ce", "#f7e7ce", "#f7e7ce"]; // Chrome gray to light champagne for text
 
 			// Update CSS custom properties with dark background and light text
 			document.documentElement.style.setProperty(
@@ -121,16 +124,16 @@ const ColorSpectrum = () => {
 				lightShades[0] // Medium light shade for subtle text
 			);
 
-			// Update gradient colors to use simplified dark to light progression
+			// Update gradient colors to use chrome gray to light champagne progression
 			const simplifiedColors = [
 				darkShades[0], // #1A1A1A
 				darkShades[1], // #404040
 				darkShades[2], // #666666
-				lightShades[0], // #CCCCCC
-				lightShades[1], // #E5E5E5
-				lightShades[2], // #F5F5F5
-				lightShades[3], // #FFFFFF
-				lightShades[3], // #FFFFFF (repeat for consistency)
+				lightShades[0], // #b0b0b0 (chrome gray)
+				lightShades[1], // #f7e7ce (light champagne)
+				lightShades[2], // #f7e7ce (light champagne)
+				lightShades[3], // #f7e7ce (light champagne)
+				lightShades[3], // #f7e7ce (light champagne, repeat for consistency)
 			];
 
 			simplifiedColors.forEach((color, index) => {
@@ -556,12 +559,12 @@ const ColorSpectrum = () => {
 					</span>
 				</div>
 
-				<h1 ref={heroTitleRef} className={styles.heroTitle}>
-					9D PRISMAEON{" "}
-					<span className={styles.heroTitleChinese}>
-						久违之光 • 穿界越限
-					</span>
-				</h1>
+				<div ref={heroTitleRef} className={styles.heroTitle}>
+					<div className={styles.heroTitleMain}>9D PRISMAEON</div>{" "}
+					<div className={styles.heroTitleChinese}>
+						久违之光 · 穿界越限
+					</div>
+				</div>
 
 				<div className={styles.heroContent}>
 					<div className={styles.heroNav}>
