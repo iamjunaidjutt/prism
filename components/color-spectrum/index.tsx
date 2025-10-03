@@ -55,7 +55,6 @@ const ColorSpectrum = () => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const heroTitleRef = useRef<HTMLHeadingElement>(null);
 	const svgContainerRef = useRef<HTMLDivElement>(null);
-	const mainTitleRef = useRef<HTMLDivElement>(null);
 	const gradientOverlayRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -312,17 +311,6 @@ const ColorSpectrum = () => {
 				y: -30,
 			});
 
-			// Text Grid and Main Title - Force visibility and reset properties
-			if (mainTitleRef.current) {
-				gsap.set(mainTitleRef.current, {
-					visibility: "visible",
-					opacity: 0,
-					y: 30,
-					filter: "blur(8px)",
-					force3D: true,
-				});
-			}
-
 			// Force text grid visibility
 			gsap.set(`.${styles.textGrid}`, {
 				visibility: "visible",
@@ -392,8 +380,8 @@ const ColorSpectrum = () => {
 			const scrollTl = gsap.timeline({
 				scrollTrigger: {
 					trigger: ".animation-section",
-					start: "top bottom",
-					end: "bottom top",
+					start: "top 70%",
+					end: "bottom 30%", // Further reduced to eliminate all redundant scrolling
 					scrub: 0.5, // Reduced scrub for smoother animation
 					markers: false,
 					refreshPriority: 1,
@@ -431,38 +419,36 @@ const ColorSpectrum = () => {
 					0.15 // Adjusted timing
 				);
 
-			// Step 3: Animate wavelength titles in stagger (after spectrum appears)
-			scrollTl.to(
-				`.${styles.wavelengthLabel}, .wavelength-label`,
-				{
-					opacity: 1,
-					y: 0,
-					filter: "blur(0px)",
-					duration: 0.5, // Increased duration
-					stagger: {
-						amount: 0.8, // Increased stagger time for smoother effect
-						from: "center", // Stagger from center outward
-						ease: "power2.inOut",
-					},
-					ease: "power2.inOut", // Changed to inOut for smoother transition
-				},
-				0.25 // Slightly adjusted timing
+			// Step 3: Sequential left-to-right reveal of titles - integrated into main timeline
+			const wavelengthLabels = containerRef.current?.querySelectorAll(
+				`.${styles.wavelengthLabel}, .wavelength-label`
 			);
 
-			// Step 4: Animate main title after wavelength titles
-			scrollTl.to(
-				`.${styles.mainTitle}`,
-				{
-					opacity: 1,
-					y: 0,
-					filter: "blur(0px)",
-					duration: 0.5, // Increased duration
-					ease: "power2.inOut", // Changed to inOut for smoother transition
-				},
-				0.8 // Adjusted timing to work with new wavelength timing
-			);
+			if (wavelengthLabels && wavelengthLabels.length > 0) {
+				// First, set all titles to hidden state immediately
+				gsap.set(wavelengthLabels, {
+					opacity: 0,
+					y: 20,
+					filter: "blur(3px)",
+				});
 
-			// Step 5: Animate spectrum levels (depth effect)
+				// Add each title animation to the main timeline with proper stagger
+				wavelengthLabels.forEach((element, index) => {
+					scrollTl.to(
+						element,
+						{
+							opacity: 1,
+							y: 0,
+							filter: "blur(0px)",
+							duration: 0.4,
+							ease: "power2.out",
+						},
+						0.3 + index * 0.08 // Start at 0.3s and stagger by 0.08s each
+					); // Stagger each title by 0.08 seconds in main timeline
+				});
+			}
+
+			// Step 4: Animate spectrum levels (depth effect)
 			const levelAnimationStart = 0.6; // Adjusted timing
 			scrollTl
 				.to(
@@ -491,7 +477,6 @@ const ColorSpectrum = () => {
 					levelAnimationStart
 				);
 
-			console.log("Main title animation scheduled at 0.9s");
 			console.log("Animation setup complete");
 
 			// Ensure ScrollTrigger updates on resize
@@ -1069,15 +1054,6 @@ const ColorSpectrum = () => {
 								</clipPath>
 							</defs>
 						</svg>
-					</div>
-
-					<div
-						ref={mainTitleRef}
-						className={`${styles.mainTitle} split-text`}
-					>
-						Where Light Becomes Color
-						<br />
-						Across the Infinite Spectrum
 					</div>
 
 					<div className={styles.textGrid}>
