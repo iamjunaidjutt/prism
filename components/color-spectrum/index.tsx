@@ -18,17 +18,17 @@ if (typeof window !== "undefined") {
 	gsap.registerPlugin(ScrollTrigger);
 }
 
-// Color themes configuration - simplified to monochrome only
+// Color themes configuration - custom chrome gray to light champagne theme
 const colorThemes = {
 	monochrome: [
 		"#1A1A1A",
 		"#404040",
 		"#666666",
-		"#999999",
-		"#CCCCCC",
-		"#E5E5E5",
-		"#F5F5F5",
-		"#FFFFFF",
+		"#b0b0b0",
+		"#f7e7ce",
+		"#f7e7ce",
+		"#f7e7ce",
+		"#f7e7ce",
 	],
 };
 
@@ -36,24 +36,15 @@ const ColorSpectrum = () => {
 	const [isMounted, setIsMounted] = useState(false);
 	const wavelengthTexts = useMemo(
 		() => [
-			"精准洞察",
-			"全局掌控",
-			"文化适配",
-			"情感共鸣",
-			"美学表达",
-			"持续互动",
-			"资产沉淀",
-			"感官冲击",
-			"全域共振",
-			// "Data\nAnalytics\n& Research",
-			// "Strategy\nArchitecture\n& Planning",
-			// "Creative\nDirecting\n& Design",
-			// "Brand\nSensory\nSystem",
-			// "Product\nPackaging\nDesign",
-			// "New Media\nCustomization\n& Operation",
-			// "IP Creation\n& Licensing",
-			// "Visualization",
-			// "Strategy\nPromotion",
+			"精准\n洞察",
+			"全局\n掌控",
+			"文化\n适配",
+			"情感\n共鸣",
+			"美学\n表达",
+			"持续\n互动",
+			"资产\n沉淀",
+			"感官\n冲击",
+			"全域\n共振",
 		],
 		[]
 	);
@@ -64,7 +55,6 @@ const ColorSpectrum = () => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const heroTitleRef = useRef<HTMLHeadingElement>(null);
 	const svgContainerRef = useRef<HTMLDivElement>(null);
-	const mainTitleRef = useRef<HTMLDivElement>(null);
 	const gradientOverlayRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -75,33 +65,45 @@ const ColorSpectrum = () => {
 		const colors = colorThemes[theme as keyof typeof colorThemes];
 		if (!colors) return;
 
-		// Update SVG gradients
-		for (let i = 0; i < 9; i++) {
-			const gradient = document.getElementById(`grad${i}`);
-			if (gradient) {
-				const stops = gradient.querySelectorAll("stop");
-				stops.forEach((stop, idx) => {
-					if (colors[idx]) {
-						stop.setAttribute("stop-color", colors[idx]);
-					} else if (colors[colors.length - 1]) {
-						stop.setAttribute(
-							"stop-color",
-							colors[colors.length - 1]
-						);
-					}
-				});
+		// Add a small delay to ensure SVG is rendered
+		setTimeout(() => {
+			// Update SVG gradients
+			for (let i = 0; i < 9; i++) {
+				const gradient = document.getElementById(`grad${i}`);
+				if (gradient) {
+					const stops = gradient.querySelectorAll("stop");
+					stops.forEach((stop, idx) => {
+						if (colors[idx]) {
+							stop.setAttribute("stop-color", colors[idx]);
+						} else if (colors[colors.length - 1]) {
+							stop.setAttribute(
+								"stop-color",
+								colors[colors.length - 1]
+							);
+						}
+					});
+				}
 			}
-		}
+		}, 100);
 	}, []);
+
+	// Additional useEffect to ensure gradients are updated after component mounts
+	useEffect(() => {
+		if (isMounted) {
+			setTimeout(() => {
+				updateGradients(currentTheme);
+			}, 300);
+		}
+	}, [isMounted, updateGradients, currentTheme]);
 
 	const updateColors = useCallback(
 		(theme: string) => {
 			const colors = colorThemes[theme as keyof typeof colorThemes];
 			if (!colors) return;
 
-			// Use only dark and light shades from monochrome palette
+			// Use chrome gray to light champagne theme
 			const darkShades = ["#1A1A1A", "#404040", "#666666"]; // Dark colors for backgrounds
-			const lightShades = ["#CCCCCC", "#E5E5E5", "#F5F5F5", "#FFFFFF"]; // Light colors for text
+			const lightShades = ["#b0b0b0", "#f7e7ce", "#f7e7ce", "#f7e7ce"]; // Chrome gray to light champagne for text
 
 			// Update CSS custom properties with dark background and light text
 			document.documentElement.style.setProperty(
@@ -121,16 +123,16 @@ const ColorSpectrum = () => {
 				lightShades[0] // Medium light shade for subtle text
 			);
 
-			// Update gradient colors to use simplified dark to light progression
+			// Update gradient colors to use chrome gray to light champagne progression
 			const simplifiedColors = [
 				darkShades[0], // #1A1A1A
 				darkShades[1], // #404040
 				darkShades[2], // #666666
-				lightShades[0], // #CCCCCC
-				lightShades[1], // #E5E5E5
-				lightShades[2], // #F5F5F5
-				lightShades[3], // #FFFFFF
-				lightShades[3], // #FFFFFF (repeat for consistency)
+				lightShades[0], // #b0b0b0 (chrome gray)
+				lightShades[1], // #f7e7ce (light champagne)
+				lightShades[2], // #f7e7ce (light champagne)
+				lightShades[3], // #f7e7ce (light champagne)
+				lightShades[3], // #f7e7ce (light champagne, repeat for consistency)
 			];
 
 			simplifiedColors.forEach((color, index) => {
@@ -223,7 +225,7 @@ const ColorSpectrum = () => {
 
 			// Hero Text Content Animation - animate from down to up
 			const heroTextElements = document.querySelectorAll(
-				`.${styles.heroTextContent} .${styles.heroText}`
+				`.${styles.heroTextContent} .${styles.heroText}, .${styles.heroTextContent} .${styles.heroTextChinese}`
 			);
 			if (heroTextElements.length > 0) {
 				gsap.set(heroTextElements, {
@@ -309,17 +311,6 @@ const ColorSpectrum = () => {
 				y: -30,
 			});
 
-			// Text Grid and Main Title - Force visibility and reset properties
-			if (mainTitleRef.current) {
-				gsap.set(mainTitleRef.current, {
-					visibility: "visible",
-					opacity: 0,
-					y: 30,
-					filter: "blur(8px)",
-					force3D: true,
-				});
-			}
-
 			// Force text grid visibility
 			gsap.set(`.${styles.textGrid}`, {
 				visibility: "visible",
@@ -389,8 +380,8 @@ const ColorSpectrum = () => {
 			const scrollTl = gsap.timeline({
 				scrollTrigger: {
 					trigger: ".animation-section",
-					start: "top bottom",
-					end: "bottom top",
+					start: "top 70%",
+					end: "bottom 30%", // Further reduced to eliminate all redundant scrolling
 					scrub: 0.5, // Reduced scrub for smoother animation
 					markers: false,
 					refreshPriority: 1,
@@ -428,38 +419,36 @@ const ColorSpectrum = () => {
 					0.15 // Adjusted timing
 				);
 
-			// Step 3: Animate wavelength titles in stagger (after spectrum appears)
-			scrollTl.to(
-				`.${styles.wavelengthLabel}, .wavelength-label`,
-				{
-					opacity: 1,
-					y: 0,
-					filter: "blur(0px)",
-					duration: 0.5, // Increased duration
-					stagger: {
-						amount: 0.8, // Increased stagger time for smoother effect
-						from: "center", // Stagger from center outward
-						ease: "power2.inOut",
-					},
-					ease: "power2.inOut", // Changed to inOut for smoother transition
-				},
-				0.25 // Slightly adjusted timing
+			// Step 3: Sequential left-to-right reveal of titles - integrated into main timeline
+			const wavelengthLabels = containerRef.current?.querySelectorAll(
+				`.${styles.wavelengthLabel}, .wavelength-label`
 			);
 
-			// Step 4: Animate main title after wavelength titles
-			scrollTl.to(
-				`.${styles.mainTitle}`,
-				{
-					opacity: 1,
-					y: 0,
-					filter: "blur(0px)",
-					duration: 0.5, // Increased duration
-					ease: "power2.inOut", // Changed to inOut for smoother transition
-				},
-				0.8 // Adjusted timing to work with new wavelength timing
-			);
+			if (wavelengthLabels && wavelengthLabels.length > 0) {
+				// First, set all titles to hidden state immediately
+				gsap.set(wavelengthLabels, {
+					opacity: 0,
+					y: 20,
+					filter: "blur(3px)",
+				});
 
-			// Step 5: Animate spectrum levels (depth effect)
+				// Add each title animation to the main timeline with proper stagger
+				wavelengthLabels.forEach((element, index) => {
+					scrollTl.to(
+						element,
+						{
+							opacity: 1,
+							y: 0,
+							filter: "blur(0px)",
+							duration: 0.4,
+							ease: "power2.out",
+						},
+						0.3 + index * 0.08 // Start at 0.3s and stagger by 0.08s each
+					); // Stagger each title by 0.08 seconds in main timeline
+				});
+			}
+
+			// Step 4: Animate spectrum levels (depth effect)
 			const levelAnimationStart = 0.6; // Adjusted timing
 			scrollTl
 				.to(
@@ -488,7 +477,6 @@ const ColorSpectrum = () => {
 					levelAnimationStart
 				);
 
-			console.log("Main title animation scheduled at 0.9s");
 			console.log("Animation setup complete");
 
 			// Ensure ScrollTrigger updates on resize
@@ -556,12 +544,12 @@ const ColorSpectrum = () => {
 					</span>
 				</div>
 
-				<h1 ref={heroTitleRef} className={styles.heroTitle}>
-					9D PRISMAEON{" "}
-					<span className={styles.heroTitleChinese}>
-						久违之光 穿界越限
-					</span>
-				</h1>
+				<div ref={heroTitleRef} className={styles.heroTitle}>
+					<div className={styles.heroTitleMain}>9D PRISMAEON</div>{" "}
+					<div className={styles.heroTitleChinese}>
+						久违之光 · 穿界越限
+					</div>
+				</div>
 
 				<div className={styles.heroContent}>
 					<div className={styles.heroNav}>
@@ -621,7 +609,7 @@ const ColorSpectrum = () => {
 							powerfully reinventing your global brand and product
 							portfolio.
 						</div>
-						<div className={styles.heroText}>
+						<div className={styles.heroTextChinese}>
 							PRISM 领域独创的「穿越化·买点论」
 							是系统化解决品牌及产品在全球化增长中的认知、审美与商业隔阂的方法论。依托A级数据分析团队与统计学博士团队，结合海内外一线的创意设计力量，并由深耕多年的渠道认知反推，全方位洞察·解构·重塑您的品牌与产品
 						</div>
@@ -1066,15 +1054,6 @@ const ColorSpectrum = () => {
 								</clipPath>
 							</defs>
 						</svg>
-					</div>
-
-					<div
-						ref={mainTitleRef}
-						className={`${styles.mainTitle} split-text`}
-					>
-						Where Light Becomes Color
-						<br />
-						Across the Infinite Spectrum
 					</div>
 
 					<div className={styles.textGrid}>
