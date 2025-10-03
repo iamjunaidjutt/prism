@@ -445,12 +445,12 @@
 .heroNav {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
+	gap: 1.2rem; /* Increased spacing between navigation items */
 	flex-shrink: 0;
 }
 .heroNavItem {
 	font-family: var(--font-sans);
-	font-size: 22px;
+	font-size: 4px; /* Made smaller */
 	font-weight: 500;
 	text-transform: uppercase;
 	color: var(--color-text);
@@ -471,14 +471,16 @@
 
 // Chinese and English text styling
 .chinese {
-	font-size: 1rem;
+	font-size: 0.8rem; /* Made smaller */
 	font-weight: 400;
 	margin: 0;
 	line-height: 1.3;
+	display: inline-block; // Make border fit text width
+	border-bottom: 1px solid var(--color-text);
 }
 
 .english {
-	font-size: 1rem;
+	font-size: 0.8rem; /* Made smaller */
 	font-weight: 500;
 	margin: 0;
 	line-height: 1.2;
@@ -518,7 +520,7 @@
 .heroTextChinese {
 	width: 25%;
 	font-family: var(--font-mono);
-	font-size: 16px;
+	font-size: 16.5px;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 	color: var(--color-text);
@@ -556,6 +558,18 @@
 	.heroText {
 		width: 100%;
 		font-size: 10px;
+	}
+	.heroNav {
+		gap: 1rem; /* Adjust mobile spacing */
+	}
+	.heroNavItem {
+		font-size: 3px; /* Smaller on mobile */
+	}
+	.chinese {
+		font-size: 0.7rem; /* Smaller on mobile */
+	}
+	.english {
+		font-size: 0.7rem; /* Smaller on mobile */
 	}
 	.colorSwitcher {
 		gap: 0.3rem;

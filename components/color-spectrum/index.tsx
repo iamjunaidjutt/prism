@@ -223,7 +223,7 @@ const ColorSpectrum = () => {
 
 			// Hero Text Content Animation - animate from down to up
 			const heroTextElements = document.querySelectorAll(
-				`.${styles.heroTextContent} .${styles.heroText}`
+				`.${styles.heroTextContent} .${styles.heroText}, .${styles.heroTextContent} .${styles.heroTextChinese}`
 			);
 			if (heroTextElements.length > 0) {
 				gsap.set(heroTextElements, {
@@ -559,7 +559,7 @@ const ColorSpectrum = () => {
 				<h1 ref={heroTitleRef} className={styles.heroTitle}>
 					9D PRISMAEON{" "}
 					<span className={styles.heroTitleChinese}>
-						久违之光 穿界越限
+						久违之光 • 穿界越限
 					</span>
 				</h1>
 
