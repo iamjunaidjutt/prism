@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "./glitch.module.scss";
 import type * as THREE from "three";
 
-const GlitchSliderClient = () => {
+const GlitchSlider = () => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [isLoaded, setIsLoaded] = useState(false);
 
@@ -1937,4 +1937,4 @@ function createLoadingManager(onComplete: () => void) {
 	requestAnimationFrame(animate);
 }
 
-export default GlitchSliderClient;
+export default GlitchSlider;
