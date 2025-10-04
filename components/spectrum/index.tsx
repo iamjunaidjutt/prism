@@ -117,35 +117,30 @@ const Spectrum: React.FC = () => {
 				});
 			}
 
-			// Animate hero text paragraphs
+			// Animate hero text paragraphs - animate as whole blocks to preserve justify alignment
 			const textElements = heroTextRef.current?.querySelectorAll(
 				"#hero-text-0, #hero-text-1"
 			);
 
 			if (textElements) {
-				textElements.forEach((textEl, index) => {
-					const textSplit = new SplitText(textEl as HTMLElement, {
-						type: "lines",
-					});
-					gsap.set(textSplit.lines, {
-						opacity: 0,
-						y: 50,
-						clipPath: "inset(0 0 100% 0)",
-					});
-
-					heroTl.to(
-						textSplit.lines,
-						{
-							opacity: 1,
-							y: 0,
-							clipPath: "inset(0 0 0% 0)",
-							duration: 0.8,
-							stagger: 0.1,
-							ease: "power2.out",
-						},
-						0.8 + index * 0.2
-					);
+				gsap.set(textElements, {
+					opacity: 0,
+					y: 50,
+					filter: "blur(4px)",
 				});
+
+				heroTl.to(
+					textElements,
+					{
+						opacity: 1,
+						y: 0,
+						filter: "blur(0px)",
+						duration: 1.0,
+						stagger: 0.2,
+						ease: "power2.out",
+					},
+					0.5
+				);
 			}
 
 			// Animate scroll hint with continuous blur
@@ -402,7 +397,7 @@ const Spectrum: React.FC = () => {
 						id="nav-top-left"
 						className={`${styles.navItem} ${styles.navTopLeft}`}
 					>
-						PRISMAEON
+						PRÏSMAEON
 					</div>
 					<div
 						id="nav-top-right"
@@ -412,7 +407,7 @@ const Spectrum: React.FC = () => {
 							href="mailto:hi@prismaeon.com"
 							className={styles.emailLink}
 						>
-							hi@PRISM.COM
+							hi@PRÏSM.COM
 						</a>{" "}
 						— 2025
 					</div>
@@ -448,7 +443,7 @@ const Spectrum: React.FC = () => {
 			{/* Hero Section */}
 			<section className={styles.heroSection}>
 				<div ref={heroTitleRef} className={styles.heroTitle}>
-					<div className={styles.heroTitleMain}>9D PRISMAEON</div>{" "}
+					<div className={styles.heroTitleMain}>9D PRÏSMAEON</div>{" "}
 					<div className={styles.heroTitleChinese}>
 						久违之光 · 穿界越限
 					</div>
@@ -542,7 +537,7 @@ const Spectrum: React.FC = () => {
 							className={`${styles.heroText} ${styles.splitText}`}
 						>
 							The &quot;Transcendence &amp; Buyability&quot;
-							Framework, pioneered by PRISM, Empowered by an
+							Framework, pioneered by PRÏSM, Empowered by an
 							A-Team of data scientists, statisticians, and global
 							creatives一and guided by proven channel strategy一we
 							systematically dismantle barriers to growth by
@@ -554,7 +549,7 @@ const Spectrum: React.FC = () => {
 							id="hero-text-1"
 							className={`${styles.heroTextChinese} ${styles.splitText}`}
 						>
-							PRISM 领域独创的「穿越化·买点论」
+							PRÏSM 领域独创的「穿越化·买点论」
 							是系统化解决品牌及产品在全球化增长中的认知、审美与商业隔阂的方法论。依托A级数据分析团队与统计学博士团队，结合海内外一线的创意设计力量，并由深耕多年的渠道认知反推，全方位洞察·解构·重塑您的品牌与产品
 						</div>
 					</div>
