@@ -83,6 +83,35 @@
 	z-index: 1;
 }
 
+.topCenterText {
+	position: fixed;
+	top: 1rem;
+	left: 50%;
+	transform: translateX(-50%);
+	color: var(--color-text);
+	font-family: var(--font-mono);
+	font-size: 14px;
+	font-weight: 500;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	z-index: var(--content-z);
+	pointer-events: none;
+}
+
+.bottomCenterText {
+	position: fixed;
+	bottom: 1rem;
+	left: 50%;
+	transform: translateX(-50%);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: 14px;
+	font-weight: 500;
+	letter-spacing: 0.1em;
+	z-index: var(--content-z);
+	pointer-events: none;
+}
+
 /* Corner Text Styles */
 .cornerText {
 	position: fixed;
@@ -409,5 +438,15 @@
 
 	.cornerTextCenter {
 		height: 70vh;
+	}
+
+	.topCenterText {
+		font-size: 12px;
+		top: 1.5rem;
+	}
+
+	.bottomCenterText {
+		font-size: 32px;
+		bottom: 1.5rem;
 	}
 }

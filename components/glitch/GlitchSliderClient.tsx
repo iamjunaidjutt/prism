@@ -1757,6 +1757,9 @@ const GlitchSliderClient = () => {
 					aria-hidden="true"
 				></canvas>
 
+				<div className={styles.topCenterText}>PRÏSMAEON</div>
+				<div className={styles.bottomCenterText}>穿越化</div>
+
 				<section className={styles.featuredImage} data-featured-image>
 					<div
 						className={styles.featuredImageWrapper}
