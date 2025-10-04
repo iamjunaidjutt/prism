@@ -56,6 +56,11 @@ const GlitchSliderClient = () => {
 					title: "大数据分析 与 调研",
 					description: "DATA ANALYTICS & RESEARCH",
 					number: "∅1",
+					properties: [
+						"- 品牌全方位调研与诊断",
+						"- 宏观市场洞察及本地化规划",
+						"- 可行性评估",
+					],
 					paragraphLines: [
 						"核心价值：理性与确定性的基石",
 						"代表从“主观臆断”到“客观洞察”的转变，确保品牌的每一个决策都建立在数据",
@@ -66,6 +71,12 @@ const GlitchSliderClient = () => {
 					title: "顶层战略架构与策划",
 					description: "STRATEGY ARCHITECTURE & PLANMING",
 					number: "∅2",
+					properties: [
+						"- 品牌产品解构与重塑",
+						"- 商业模型设计",
+						"- 市场进入策略",
+						"- 合规化",
+					],
 					paragraphLines: [
 						"核心价值：远见与蓝图",
 						"代表从“零散战术”到“系统战略”的升华。它为品牌绘制清晰的航海图，确保所",
@@ -76,6 +87,11 @@ const GlitchSliderClient = () => {
 					title: "品牌产品穿越化创意与设计",
 					description: "CREATIVE DIRECTING & DESIGN",
 					number: "∅3",
+					properties: [
+						"- 多维头脑风暴",
+						"- 大单品爆款策划与设计",
+						"- 文化与市场适配性重构",
+					],
 					paragraphLines: [
 						"核心价值：共鸣与颠覆力",
 						"代表从“生硬移植”到“无感融入”的质变。其价值在于破解文化密码，让品牌产",
@@ -86,6 +102,13 @@ const GlitchSliderClient = () => {
 					title: "品牌穿越化感官系统",
 					description: "BRAND SENSORY SYSTEM",
 					number: "∅4",
+					properties: [
+						"- 感宫商业用户心理学调研",
+						"- 五感呈现梳理",
+						"- 标志诊断·重构·优化",
+						"- 吉祥物设计",
+						"- 品牌口号",
+					],
 					paragraphLines: [
 						"核心价值：直觉与记忆点",
 						"代表从“视觉识别”到“全感官体验”的升级。通过占领用户的眼、耳、鼻、舌、",
@@ -96,6 +119,13 @@ const GlitchSliderClient = () => {
 					title: "穿越化产品包装设计",
 					description: "PRODUCT PACKAGING DESIGN",
 					number: "∅5",
+					properties: [
+						"- 包装策略",
+						"- 包装设计",
+						"- 材料预算",
+						"- 工业设计",
+						"- 爆款研究",
+					],
 					paragraphLines: [
 						"核心价值：静默的销售员",
 						"代表从“保护容器”到“沟通媒介”的转变。在零售的第一触点，通过On-Point",
@@ -106,6 +136,11 @@ const GlitchSliderClient = () => {
 					title: "新媒体定制运维服务",
 					description: "NEW MEDIA CUSTOMIZATION & OPERATION",
 					number: "∅6",
+					properties: [
+						"- 品牌数字化整合营销传播",
+						"- WEB3D品牌国际官网定制",
+						"- 海外自媒体孵化与运维",
+					],
 					paragraphLines: [
 						"核心价值：生态与对话",
 						"代表从“单向广播”到“双向对话”的构建。它为品牌在目标市场创建并运营一个",
@@ -116,6 +151,12 @@ const GlitchSliderClient = () => {
 					title: "穿越化IP创造及授权",
 					description: "IP CREATION & LICENSING",
 					number: "∅7",
+					properties: [
+						"- IP孵化与开发",
+						"- IP授权与管理",
+						"- IP传播与营销",
+						"- IP供应链与渠道",
+					],
 					paragraphLines: [
 						"核心价值：超越产品的生命力",
 						"代表从“销售产品”到“经营资产”的飞跃。创造品牌独有的商业“护城河”和情",
@@ -126,6 +167,12 @@ const GlitchSliderClient = () => {
 					title: "穿越化视觉",
 					description: "VISUALIZATION",
 					number: "∅8",
+					properties: [
+						"- 企业宣传片",
+						"- 全域整合传播",
+						"- TVC广告制作",
+						"- 3A级CG",
+					],
 					paragraphLines: [
 						"核心价值：信任与渴望的放大器",
 						"代表从“信息传递”到“感官征服”的冲击。通过顶级的视觉制作，建立品牌“高",
@@ -136,6 +183,13 @@ const GlitchSliderClient = () => {
 					title: "策略推广",
 					description: "STRATEGY PROMOTION",
 					number: "∅9",
+					properties: [
+						"- 主题事件营销",
+						"- 市场策略规划",
+						"- 社交媒体营销",
+						"- 海外UGC/ KOL矩阵",
+						"- 投流及方案",
+					],
 					paragraphLines: [
 						"核心价值：临门一脚的穿透力",
 						"代表从“空中楼阁”到“市场大地”的连接。整合所有全球化线上线下资源触点，通过精准的、立体化的攻势，将前面所有环节积累的品牌价值，最终转化为实实在",
@@ -1034,6 +1088,18 @@ const GlitchSliderClient = () => {
 					opacity: 0,
 				});
 
+				const newPropertyLines = slideData[slideIndex].properties.map(
+					(lineText) => {
+						const lineSpan = document.createElement("span");
+						lineSpan.textContent = lineText;
+						gsap.set(lineSpan, {
+							y: transitionDirection === "down" ? 28 : -28,
+							opacity: 0,
+						});
+						return lineSpan;
+					}
+				);
+
 				const newParagraphLines = slideData[
 					slideIndex
 				].paragraphLines.map((lineText) => {
@@ -1050,6 +1116,7 @@ const GlitchSliderClient = () => {
 					newNumber,
 					newTitle,
 					newDescription,
+					newPropertyLines,
 					newParagraphLines,
 				};
 			}
@@ -1102,6 +1169,13 @@ const GlitchSliderClient = () => {
 				const descriptionContainer = slider.querySelector(
 					"[data-slide-description]"
 				);
+				// Get all property line containers (up to 5)
+				const propertyLineContainers: (Element | null)[] = [];
+				for (let i = 1; i <= 5; i++) {
+					propertyLineContainers.push(
+						slider.querySelector(`[data-property-line-${i}]`)
+					);
+				}
 				const paragraphLine1Container = slider.querySelector(
 					"[data-paragraph-line-1]"
 				);
@@ -1116,6 +1190,10 @@ const GlitchSliderClient = () => {
 				const currentTitle = titleContainer?.querySelector("h1");
 				const currentDescription =
 					descriptionContainer?.querySelector("p");
+				// Get all current property line spans
+				const currentPropertyLines = propertyLineContainers.map(
+					(container) => container?.querySelector("span")
+				);
 				const currentParagraphLine1 =
 					paragraphLine1Container?.querySelector("span");
 				const currentParagraphLine2 =
@@ -1132,6 +1210,7 @@ const GlitchSliderClient = () => {
 					newNumber,
 					newTitle,
 					newDescription,
+					newPropertyLines,
 					newParagraphLines,
 				} = createTextElements(nextIndex, transitionDirection);
 
@@ -1140,6 +1219,10 @@ const GlitchSliderClient = () => {
 				numberContainer?.appendChild(newNumber);
 				titleContainer?.appendChild(newTitle);
 				descriptionContainer?.appendChild(newDescription);
+				// Append property lines dynamically based on how many exist
+				newPropertyLines.forEach((line, index) => {
+					propertyLineContainers[index]?.appendChild(line);
+				});
 				paragraphLine1Container?.appendChild(newParagraphLines[0]);
 				paragraphLine2Container?.appendChild(newParagraphLines[1]);
 				paragraphLine3Container?.appendChild(newParagraphLines[2]);
@@ -1163,14 +1246,16 @@ const GlitchSliderClient = () => {
 					onComplete: () => {
 						// Cleanup ALL old elements except the newest ones
 						// Remove all children from containers except the last one
-						[
+						const allContainers = [
 							numberContainer,
 							titleContainer,
 							descriptionContainer,
+							...propertyLineContainers,
 							paragraphLine1Container,
 							paragraphLine2Container,
 							paragraphLine3Container,
-						].forEach((container) => {
+						];
+						allContainers.forEach((container) => {
 							if (container) {
 								// Keep only the last child (newest element)
 								while (container.children.length > 1) {
@@ -1381,6 +1466,51 @@ const GlitchSliderClient = () => {
 					},
 					0.4
 				);
+
+				// Property lines with scramble (handle variable count)
+				currentPropertyLines.forEach((line, index) => {
+					if (line) {
+						transitionTimeline.to(
+							line,
+							{
+								y: transitionDirection === "down" ? -28 : 28,
+								opacity: 0,
+								duration: config.transitionDuration,
+								ease: "cubic-bezier(0.77,0,0.18,1)",
+							},
+							0.05 + index * 0.02
+						);
+					}
+				});
+				newPropertyLines.forEach((line, index) => {
+					transitionTimeline.fromTo(
+						line,
+						{
+							y: transitionDirection === "down" ? 28 : -28,
+							opacity: 0,
+						},
+						{
+							y: 0,
+							opacity: 1,
+							duration: config.transitionDuration,
+							ease: "cubic-bezier(0.77,0,0.18,1)",
+						},
+						0.05 + index * 0.02
+					);
+					transitionTimeline.to(
+						line,
+						{
+							duration: 1.2,
+							scrambleText: {
+								text: slideData[nextIndex].properties[index],
+								chars: "!<>-_\\/[]{}—=+*^?#________",
+								revealDelay: 0.5 + index * 0.1,
+								speed: 0.3,
+							},
+						},
+						0.45 + index * 0.1
+					);
+				});
 
 				// Paragraph lines
 				[
@@ -1654,6 +1784,39 @@ const GlitchSliderClient = () => {
 						<p>DATA ANALYTICS & RESEARCH</p>
 					</div>
 				</header>
+
+				<div className={styles.slideProperties} data-slide-properties>
+					<div
+						className={styles.slidePropertyLine}
+						data-property-line-1
+					>
+						<span>品牌全方位调研与诊断</span>
+					</div>
+					<div
+						className={styles.slidePropertyLine}
+						data-property-line-2
+					>
+						<span>宏观市场洞察及本地化规划</span>
+					</div>
+					<div
+						className={styles.slidePropertyLine}
+						data-property-line-3
+					>
+						<span>可行性评估</span>
+					</div>
+					<div
+						className={styles.slidePropertyLine}
+						data-property-line-4
+					>
+						<span></span>
+					</div>
+					<div
+						className={styles.slidePropertyLine}
+						data-property-line-5
+					>
+						<span></span>
+					</div>
+				</div>
 
 				<div className={styles.slideParagraph} data-slide-paragraph>
 					<div
