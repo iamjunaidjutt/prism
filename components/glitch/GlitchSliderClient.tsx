@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./glitch.module.scss";
+import type * as THREE from "three";
 
 const GlitchSliderClient = () => {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -13,7 +14,6 @@ const GlitchSliderClient = () => {
 		const initSlider = async () => {
 			// Dynamic imports to avoid SSR issues
 			const THREE = await import("three");
-			const { Pane } = await import("tweakpane");
 			const gsap = (await import("gsap")).default;
 			const { ScrambleTextPlugin } = await import(
 				"gsap/ScrambleTextPlugin"
@@ -44,53 +44,102 @@ const GlitchSliderClient = () => {
 				"https://assets.codepen.io/7558/horror-03.jpg",
 				"https://assets.codepen.io/7558/horror-04.jpg",
 				"https://assets.codepen.io/7558/horror-05.jpg",
+				"https://assets.codepen.io/7558/horror-01.jpg",
+				"https://assets.codepen.io/7558/horror-02.jpg",
+				"https://assets.codepen.io/7558/horror-03.jpg",
+				"https://assets.codepen.io/7558/horror-04.jpg",
 			];
 
 			// Slide data
 			const slideData = [
 				{
-					title: "Awakening Abyss",
-					description: "Eldritch Emergence",
+					title: "大数据分析 与 调研",
+					description: "DATA ANALYTICS & RESEARCH",
 					number: "∅1",
 					paragraphLines: [
-						"Archived VHS documentary footage captures the moment",
-						"an ancient cosmic entity ruptures frozen silence.",
+						"核心价值：理性与确定性的基石",
+						"代表从“主观臆断”到“客观洞察”的转变，确保品牌的每一个决策都建立在数据",
+						"和事实之上，从而规避风险，找准赛道。",
 					],
 				},
 				{
-					title: "Fractured Signal",
-					description: "Glitch Documentary",
+					title: "顶层战略架构与策划",
+					description: "STRATEGY ARCHITECTURE & PLANMING",
 					number: "∅2",
 					paragraphLines: [
-						"The broadcast distorts as forbidden knowledge leaks",
-						"through corrupted frames and spectral interference.",
+						"核心价值：远见与蓝图",
+						"代表从“零散战术”到“系统战略”的升华。它为品牌绘制清晰的航海图，确保所",
+						"有的后续动作都朝着一个统一的、可实现的终极目标前进。",
 					],
 				},
 				{
-					title: "Echoes of the Deep",
-					description: "Haunted Vision",
+					title: "品牌产品穿越化创意与设计",
+					description: "CREATIVE DIRECTING & DESIGN",
 					number: "∅3",
 					paragraphLines: [
-						"Submerged memories resurface in spectral echoes,",
-						"reminding viewers that the abyss remembers.",
+						"核心价值：共鸣与颠覆力",
+						"代表从“生硬移植”到“无感融入”的质变。其价值在于破解文化密码，让品牌产",
+						"品不仅能被接受，更能成为当地市场渴望的“新鲜血液”。",
 					],
 				},
 				{
-					title: "Glitching Sanctum",
-					description: "Digital Cultifacts",
+					title: "品牌穿越化感官系统",
+					description: "BRAND SENSORY SYSTEM",
 					number: "∅4",
 					paragraphLines: [
-						"A sacred data temple collapses into noise,",
-						"its ritual code leaking forbidden patterns.",
+						"核心价值：直觉与记忆点",
+						"代表从“视觉识别”到“全感官体验”的升级。通过占领用户的眼、耳、鼻、舌、",
+						"身，在用户心智中建立立体、深刻且美好的品牌直觉记忆。",
 					],
 				},
 				{
-					title: "Frozen Leviathan",
-					description: "Apocalyptic Witness",
+					title: "穿越化产品包装设计",
+					description: "PRODUCT PACKAGING DESIGN",
 					number: "∅5",
 					paragraphLines: [
-						"The last frame holds the frozen titan—half-buried,",
-						"its silence a prophecy of an unraveling world.",
+						"核心价值：静默的销售员",
+						"代表从“保护容器”到“沟通媒介”的转变。在零售的第一触点，通过On-Point",
+						"且卓越的美学设计和用户体验，聚焦性地激发购买欲望，提升产品价值感于品牌调性。",
+					],
+				},
+				{
+					title: "新媒体定制运维服务",
+					description: "NEW MEDIA CUSTOMIZATION & OPERATION",
+					number: "∅6",
+					paragraphLines: [
+						"核心价值：生态与对话",
+						"代表从“单向广播”到“双向对话”的构建。它为品牌在目标市场创建并运营一个",
+						"“本土化数字家园”，实现与用户的持续沟通和关系深化。",
+					],
+				},
+				{
+					title: "穿越化IP创造及授权",
+					description: "IP CREATION & LICENSING",
+					number: "∅7",
+					paragraphLines: [
+						"核心价值：超越产品的生命力",
+						"代表从“销售产品”到“经营资产”的飞跃。创造品牌独有的商业“护城河”和情",
+						"感载体，让用户因为热爱IP而忠于品牌，实现价值的自我增殖。",
+					],
+				},
+				{
+					title: "穿越化视觉",
+					description: "VISUALIZATION",
+					number: "∅8",
+					paragraphLines: [
+						"核心价值：信任与渴望的放大器",
+						"代表从“信息传递”到“感官征服”的冲击。通过顶级的视觉制作，建立品牌“高",
+						"级感”和“信任状”，在瞬间抓住用户注意力并激发深层渴望。",
+					],
+				},
+				{
+					title: "策略推广",
+					description: "STRATEGY PROMOTION",
+					number: "∅9",
+					paragraphLines: [
+						"核心价值：临门一脚的穿透力",
+						"代表从“空中楼阁”到“市场大地”的连接。整合所有全球化线上线下资源触点，通过精准的、立体化的攻势，将前面所有环节积累的品牌价值，最终转化为实实在",
+						"在的市场声量和销售业绩。",
 					],
 				},
 			];
@@ -158,80 +207,6 @@ const GlitchSliderClient = () => {
 				slideTextures: [] as THREE.Texture[],
 				texturesLoaded: false,
 				startTime: Date.now(),
-			};
-
-			let pane: Pane | null = null;
-			let isApplyingPreset = false;
-
-			// Effect presets
-			const effectPresets: Record<
-				string,
-				Record<string, Record<string, number>>
-			> = {
-				datamosh: {
-					Default: {
-						datamoshBlockSize: 1.0,
-						datamoshCorruptionFreq: 1.0,
-						datamoshQuantization: 1.0,
-						datamoshDisplacement: 1.0,
-						datamoshTemporal: 1.0,
-					},
-					Intense: {
-						datamoshBlockSize: 0.5,
-						datamoshCorruptionFreq: 1.8,
-						datamoshQuantization: 1.6,
-						datamoshDisplacement: 2.0,
-						datamoshTemporal: 1.4,
-					},
-				},
-				pixelSort: {
-					Default: {
-						pixelSortDirection: 0.5,
-						pixelSortThreshold: 1.0,
-						pixelSortBandWidth: 1.0,
-						pixelSortSeparation: 1.0,
-						pixelSortSensitivity: 1.0,
-					},
-				},
-				digitalStatic: {
-					Default: {
-						staticDensity: 1.0,
-						staticWaveSpeed: 1.0,
-						staticAnalogNoise: 1.0,
-						staticChannelShift: 1.0,
-						staticFlicker: 1.0,
-					},
-				},
-				staticSweep: {
-					Default: {
-						sweepWidth: 1.0,
-						sweepLayers: 1.0,
-						sweepChromaticAberration: 1.0,
-						sweepEdgeGlow: 1.0,
-						sweepFadeTiming: 1.0,
-					},
-				},
-				glitchWipe: {
-					Default: {
-						wipeAngle: 0.0,
-						wipeAberrationStrength: 1.0,
-						wipeEdgeWidth: 1.0,
-						wipeColorBleeding: 1.0,
-						wipeTransitionCurve: 1.0,
-					},
-				},
-				analogDecay: {
-					Default: {
-						analogGrain: 1.0,
-						analogBleeding: 1.0,
-						analogVSync: 1.0,
-						analogDropout: 1.0,
-						analogScanlines: 1.0,
-						analogVignette: 1.0,
-						analogJitter: 1.0,
-						analogChroma: 1.0,
-					},
-				},
 			};
 
 			// Shaders (complete implementation with all 6 glitch effects)
@@ -1133,6 +1108,9 @@ const GlitchSliderClient = () => {
 				const paragraphLine2Container = slider.querySelector(
 					"[data-paragraph-line-2]"
 				);
+				const paragraphLine3Container = slider.querySelector(
+					"[data-paragraph-line-3]"
+				);
 
 				const currentNumber = numberContainer?.querySelector("span");
 				const currentTitle = titleContainer?.querySelector("h1");
@@ -1142,6 +1120,8 @@ const GlitchSliderClient = () => {
 					paragraphLine1Container?.querySelector("span");
 				const currentParagraphLine2 =
 					paragraphLine2Container?.querySelector("span");
+				const currentParagraphLine3 =
+					paragraphLine3Container?.querySelector("span");
 
 				// Create new elements
 				const newFeaturedWrapper = createFeaturedImageWrapper(
@@ -1162,12 +1142,12 @@ const GlitchSliderClient = () => {
 				descriptionContainer?.appendChild(newDescription);
 				paragraphLine1Container?.appendChild(newParagraphLines[0]);
 				paragraphLine2Container?.appendChild(newParagraphLines[1]);
+				paragraphLine3Container?.appendChild(newParagraphLines[2]);
 
 				// Set initial position for featured image
 				gsap.set(newFeaturedWrapper.querySelector("img"), {
 					y: transitionDirection === "down" ? "-50%" : "50%",
 				});
-
 				// Update shader uniforms
 				state.shaderMaterial.uniforms.uTexture1.value = currentTexture;
 				state.shaderMaterial.uniforms.uTexture2.value = nextTexture;
@@ -1189,6 +1169,7 @@ const GlitchSliderClient = () => {
 							descriptionContainer,
 							paragraphLine1Container,
 							paragraphLine2Container,
+							paragraphLine3Container,
 						].forEach((container) => {
 							if (container) {
 								// Keep only the last child (newest element)
@@ -1198,9 +1179,7 @@ const GlitchSliderClient = () => {
 									);
 								}
 							}
-						});
-
-						// Remove all featured wrappers except the newest one
+						}); // Remove all featured wrappers except the newest one
 						if (featuredImageContainer) {
 							const wrappers =
 								featuredImageContainer.querySelectorAll(
@@ -1258,15 +1237,17 @@ const GlitchSliderClient = () => {
 					0
 				);
 
-				transitionTimeline.to(
-					currentFeaturedWrapper?.querySelector("img"),
-					{
-						y: transitionDirection === "down" ? "50%" : "-50%",
-						duration: config.transitionDuration,
-						ease: "cubic-bezier(0.77,0,0.18,1)",
-					},
-					0
-				);
+				if (currentFeaturedWrapper?.querySelector("img")) {
+					transitionTimeline.to(
+						currentFeaturedWrapper.querySelector("img")!,
+						{
+							y: transitionDirection === "down" ? "50%" : "-50%",
+							duration: config.transitionDuration,
+							ease: "cubic-bezier(0.77,0,0.18,1)",
+						},
+						0
+					);
+				}
 
 				transitionTimeline.to(
 					newFeaturedWrapper.querySelector("img"),
@@ -1279,16 +1260,18 @@ const GlitchSliderClient = () => {
 				);
 
 				// Text transitions with scramble
-				transitionTimeline.to(
-					currentNumber,
-					{
-						y: transitionDirection === "down" ? -20 : 20,
-						opacity: 0,
-						duration: config.transitionDuration,
-						ease: "cubic-bezier(0.77,0,0.18,1)",
-					},
-					0
-				);
+				if (currentNumber) {
+					transitionTimeline.to(
+						currentNumber,
+						{
+							y: transitionDirection === "down" ? -20 : 20,
+							opacity: 0,
+							duration: config.transitionDuration,
+							ease: "cubic-bezier(0.77,0,0.18,1)",
+						},
+						0
+					);
+				}
 				transitionTimeline.fromTo(
 					newNumber,
 					{
@@ -1318,16 +1301,18 @@ const GlitchSliderClient = () => {
 				);
 
 				// Title with scramble
-				transitionTimeline.to(
-					currentTitle,
-					{
-						y: transitionDirection === "down" ? -60 : 60,
-						opacity: 0,
-						duration: config.transitionDuration,
-						ease: "cubic-bezier(0.77,0,0.18,1)",
-					},
-					0.02
-				);
+				if (currentTitle) {
+					transitionTimeline.to(
+						currentTitle,
+						{
+							y: transitionDirection === "down" ? -60 : 60,
+							opacity: 0,
+							duration: config.transitionDuration,
+							ease: "cubic-bezier(0.77,0,0.18,1)",
+						},
+						0.02
+					);
+				}
 				transitionTimeline.fromTo(
 					newTitle,
 					{
@@ -1357,16 +1342,18 @@ const GlitchSliderClient = () => {
 				);
 
 				// Description with scramble
-				transitionTimeline.to(
-					currentDescription,
-					{
-						y: transitionDirection === "down" ? -24 : 24,
-						opacity: 0,
-						duration: config.transitionDuration,
-						ease: "cubic-bezier(0.77,0,0.18,1)",
-					},
-					0.04
-				);
+				if (currentDescription) {
+					transitionTimeline.to(
+						currentDescription,
+						{
+							y: transitionDirection === "down" ? -24 : 24,
+							opacity: 0,
+							duration: config.transitionDuration,
+							ease: "cubic-bezier(0.77,0,0.18,1)",
+						},
+						0.04
+					);
+				}
 				transitionTimeline.fromTo(
 					newDescription,
 					{
@@ -1396,8 +1383,12 @@ const GlitchSliderClient = () => {
 				);
 
 				// Paragraph lines
-				[currentParagraphLine1, currentParagraphLine2].forEach(
-					(line, index) => {
+				[
+					currentParagraphLine1,
+					currentParagraphLine2,
+					currentParagraphLine3,
+				].forEach((line, index) => {
+					if (line) {
 						transitionTimeline.to(
 							line,
 							{
@@ -1409,8 +1400,7 @@ const GlitchSliderClient = () => {
 							0.06 + index * 0.02
 						);
 					}
-				);
-
+				});
 				newParagraphLines.forEach((line, index) => {
 					transitionTimeline.fromTo(
 						line,
@@ -1426,24 +1416,8 @@ const GlitchSliderClient = () => {
 						},
 						0.06 + index * 0.02
 					);
-					transitionTimeline.to(
-						line,
-						{
-							duration: 1.4,
-							scrambleText: {
-								text: slideData[nextIndex].paragraphLines[
-									index
-								],
-								chars: "01!<>-_\\/[]{}—=+*^?#________",
-								revealDelay: 0.6 + index * 0.1,
-								speed: 0.25,
-							},
-						},
-						0.5 + index * 0.1
-					);
 				});
 			}
-
 			function handleScrollInteraction(scrollDirection: string) {
 				const currentTimestamp = Date.now();
 				if (state.isTransitioning || !state.scrollingEnabled) return;
@@ -1653,77 +1627,6 @@ const GlitchSliderClient = () => {
 					aria-hidden="true"
 				></canvas>
 
-				{/* Fixed corner and center text */}
-				<aside
-					className={`${styles.cornerText} ${styles.cornerTextTopLeft}`}
-					aria-hidden="true"
-				>
-					<div>ANCIENT</div>
-					<div>ONES</div>
-					<div>COSMIC</div>
-					<div>HORROR</div>
-				</aside>
-
-				<aside
-					className={`${styles.cornerText} ${styles.cornerTextTopRight}`}
-					aria-hidden="true"
-				>
-					<div>MADNESS</div>
-					<div>RISES</div>
-				</aside>
-
-				<aside
-					className={`${styles.cornerText} ${styles.cornerTextBottomLeft}`}
-					aria-hidden="true"
-				>
-					<div>TENTACLES</div>
-					<div>EMERGE</div>
-					<div>FROM</div>
-					<div>DEPTHS</div>
-				</aside>
-
-				<aside
-					className={`${styles.cornerText} ${styles.cornerTextBottomRight}`}
-					aria-hidden="true"
-				>
-					<div>ELDRITCH</div>
-					<div>AWAKENS</div>
-				</aside>
-
-				<nav
-					className={`${styles.cornerText} ${styles.cornerTextShortcuts}`}
-					aria-label="Keyboard shortcuts"
-				>
-					<p>H - TOGGLE SETTINGS</p>
-					<p>1 - DATAMOSH</p>
-					<p>2 - PIXEL SORT</p>
-					<p>3 - DIGITAL STATIC</p>
-					<p>4 - STATIC SWEEP</p>
-					<p>5 - GLITCH WIPE</p>
-					<p>6 - ANALOG DECAY</p>
-					<p>P - CYCLE PRESETS</p>
-					<p>+/- INTENSITY</p>
-					<p>[ ] SPEED</p>
-					<p>R - RESET</p>
-				</nav>
-
-				<aside
-					className={`${styles.cornerText} ${styles.cornerTextCenter}`}
-					aria-hidden="true"
-				>
-					<div>R&apos;LYEH</div>
-					<div></div>
-					<div>FHTAGN</div>
-					<div></div>
-					<div></div>
-					<div></div>
-					<div>CTHULHU</div>
-					<div></div>
-					<div>THE</div>
-					<div>SLEEPER</div>
-					<div>STIRS</div>
-				</aside>
-
 				<section className={styles.featuredImage} data-featured-image>
 					<div
 						className={styles.featuredImageWrapper}
@@ -1742,13 +1645,13 @@ const GlitchSliderClient = () => {
 						<span>∅1</span>
 					</div>
 					<div className={styles.slideTitle} data-slide-title>
-						<h1>Awakening Abyss</h1>
+						<h1>大数据分析 与 调研</h1>
 					</div>
 					<div
 						className={styles.slideDescription}
 						data-slide-description
 					>
-						<p>Eldritch Emergence</p>
+						<p>DATA ANALYTICS & RESEARCH</p>
 					</div>
 				</header>
 
@@ -1757,17 +1660,21 @@ const GlitchSliderClient = () => {
 						className={styles.slideParagraphLine}
 						data-paragraph-line-1
 					>
-						<span>
-							Archived VHS documentary footage captures the moment
-						</span>
+						<span>核心价值：理性与确定性的基石</span>
 					</div>
 					<div
 						className={styles.slideParagraphLine}
 						data-paragraph-line-2
 					>
 						<span>
-							an ancient cosmic entity ruptures frozen silence.
+							代表从"主观臆断"到"客观洞察"的转变，确保品牌的每一个决策都建立在数据
 						</span>
+					</div>
+					<div
+						className={styles.slideParagraphLine}
+						data-paragraph-line-3
+					>
+						<span>和事实之上，从而规避风险，找准赛道。</span>
 					</div>
 				</div>
 			</main>
