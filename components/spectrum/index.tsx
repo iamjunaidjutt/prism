@@ -536,13 +536,15 @@ const Spectrum: React.FC = () => {
 							className={`${styles.heroText} ${styles.splitText}`}
 						>
 							The &quot;Transcendence &amp; Buyability&quot;
-							Framework, pioneered by PRÏSM, Empowered by an
-							A-Team of data scientists, statisticians, and global
-							creatives一and guided by proven channel strategy一we
-							systematically dismantle barriers to growth by
-							deeply analyzing, strategically deconstructing, and
-							powerfully reinventing your global brand and product
-							portfolio.
+							Framework, pioneered by PRÏSM,
+							<br />
+							<br />
+							Empowered by an A-Team of data scientists,
+							statisticians, and global creatives一and guided by
+							proven channel strategy一we systematically dismantle
+							barriers to growth by deeply analyzing,
+							strategically deconstructing, and powerfully
+							reinventing your global brand and product portfolio.
 						</div>
 						<div
 							id="hero-text-1"

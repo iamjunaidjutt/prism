@@ -466,6 +466,8 @@
 	overflow: hidden;
 	transition: color 0.3s ease;
 	text-align: justify;
+	hyphens: auto;
+	text-wrap: balance;
 }
 
 .heroTextChinese {
