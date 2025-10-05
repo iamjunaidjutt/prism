@@ -5,7 +5,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import styles from "./spectrum.module.scss";
-import path from "path";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
