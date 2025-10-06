@@ -43,6 +43,7 @@ const easingFunctions = {
 
 const FutureCircle = () => {
   const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // WebNominee animation refs
@@ -318,6 +319,17 @@ const FutureCircle = () => {
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   useGSAP(
     () => {
       if (!containerRef.current || !isMounted) return;
@@ -508,37 +520,41 @@ const FutureCircle = () => {
         "-=0.3",
       );
 
-      // Phase 4: Left side text appears (next 25% of scroll)
-      scrollTl.fromTo(
-        leftSideText,
-        {
-          opacity: 0,
-          x: -100,
-        },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 1.5,
-          ease: "power2.out",
-        },
-        "+=1",
-      );
+      // Phase 4: Left side text appears (next 25% of scroll) - only on desktop
+      if (!isMobile && leftSideText) {
+        scrollTl.fromTo(
+          leftSideText,
+          {
+            opacity: 0,
+            x: -100,
+          },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 1.5,
+            ease: "power2.out",
+          },
+          "+=1",
+        );
+      }
 
-      // Phase 5: Right side text appears (final 25% of scroll)
-      scrollTl.fromTo(
-        rightSideText,
-        {
-          opacity: 0,
-          x: 100,
-        },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 1.5,
-          ease: "power2.out",
-        },
-        "+=1",
-      );
+      // Phase 5: Right side text appears (final 25% of scroll) - only on desktop
+      if (!isMobile && rightSideText) {
+        scrollTl.fromTo(
+          rightSideText,
+          {
+            opacity: 0,
+            x: 100,
+          },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 1.5,
+            ease: "power2.out",
+          },
+          "+=1",
+        );
+      }
 
       // Phase 3: WebNominee badge simple appearance
       // WebNominee animation setup
@@ -556,6 +572,7 @@ const FutureCircle = () => {
       scope: containerRef,
       dependencies: [
         isMounted,
+        isMobile,
         handleResize,
         tick,
         setSize,
