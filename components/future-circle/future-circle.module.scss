@@ -1,281 +1,93 @@
 .container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100vh;
-	position: relative;
-	overflow: hidden;
-}
+  @apply flex justify-center items-center relative overflow-hidden h-screen;
 
-.prismaeonText {
-	position: absolute;
-	z-index: 2;
-	font-size: 4rem;
-	font-weight: 100;
-	color: #fff;
-	text-align: center;
-	opacity: 0;
-	transform: scale(0.8);
-	letter-spacing: 0.1em;
-	text-transform: uppercase;
-}
+  .logo {
+    @apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute z-2 w-[100px] sm:w-[130px] md:w-[150px] lg:w-[150px] xl:w-[220px] 2xl:w-[200px] 2xlM:w-[250px] 3xl:w-[360px] h-auto;
+  }
 
-.webbyNominee {
-	--badge-size: min(20vw, 20rem);
+  .prismaeonText {
+    @apply absolute text-center opacity-0 uppercase z-2 text-primary-text text-xl sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl font-medium tracking-wide-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[0.8];
+  }
 
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
+  // SVG with animated circles - Direct child of .container
+  .svg {
+    @apply absolute z-1 w-[400px] sm:w-[250px] minTab:w-[280px] md:w-[300px] lg:w-[300px] xl:w-[350px] 2xl:w-[400px] 2xlM:w-[450px] 3xl:w-[700px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	opacity: 0; // Initially hidden for GSAP animation
+    circle {
+      &.outer {
+        stroke-dasharray: 377;
+      }
 
-	&:before {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		z-index: 2;
+      &.dotted {
+        stroke-dasharray: 2 25;
+      }
 
-		display: block;
-		width: 150%;
-		height: 140%;
+      &.inner_slim {
+        stroke-dasharray: 283;
+      }
 
-		background: radial-gradient(
-			ellipse at 50% 55%,
-			transparent 10%,
-			#303030 50%
-		);
-		transform: translate3d(-50%, -50%, 0);
+      &.inner_fat {
+        stroke-dasharray: 1131 0;
+        stroke-dashoffset: -47.25;
+        stroke-width: 3px;
+      }
+    }
+  }
 
-		content: "";
-	}
+  .webbyNominee {
+    @apply absolute top-0 left-0 w-full h-full flex items-center justify-center opacity-0;
 
-	&:after {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		z-index: 5;
+    &::before {
+      @apply absolute block w-[150%] h-[140%] z-2 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+      background: var(--radial-dark);
+      content: "";
+    }
 
-		display: block;
-		width: 100%;
-		height: 100%;
+    &::after {
+      @apply absolute block w-full h-full z-5 mix-blend-overlay top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+      background: var(--radial-champagne);
+      content: "";
+    }
 
-		background: radial-gradient(
-			ellipse at 50% 75%,
-			#f7e7ce 20%,
-			transparent 75%
-		);
-		mix-blend-mode: overlay;
-		transform: translate3d(-50%, -50%, 0);
+    .badge {
+      @apply absolute rounded-full overflow-hidden z-10 opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/80 w-[180px] h-[180px] md:w-[220px] md:h-[220px] lg:w-[var(--badge-size)] lg:h-[var(--badge-size)] 3xl:w-[500px] 3xl:h-[500px];
 
-		content: "";
-	}
-}
+      .badgeImg {
+        @apply absolute block object-contain z-2 w-[65%] h-[65%] transition-all duration-1000 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+        transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+      }
+    }
 
-.svg {
-	width: 400px;
-	position: absolute;
-	z-index: 1;
-}
+    .aura {
+      @apply absolute pointer-events-none z-3 opacity-75 mix-blend-plus-lighter blur-[60px] animate-aura-glow top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-b-full;
+      width: calc(var(--badge-size) * 1.25);
+      height: calc(var(--badge-size) * 1.25);
+      background: var(--aura-gradient) 0 100% / 100% 200%;
+    }
 
-.logo {
-	position: absolute;
-	z-index: 2;
-}
+    .overlay {
+      @apply absolute top-0 left-0 w-full h-full pointer-events-none z-10 mix-blend-overlay opacity-15;
+      background: var(--scanline-gradient);
+    }
 
-.prismaeonText {
-	position: absolute;
-	z-index: 2;
-	font-size: 1.8rem;
-	font-weight: 500;
-	color: #fff;
-	text-align: center;
-	opacity: 0;
-	transform: scale(0.8);
-	letter-spacing: 0.15em;
-	text-transform: uppercase;
-}
+    .canvas {
+      @apply absolute top-0 left-0 block w-full h-full pointer-events-none;
+    }
+  }
 
-.outer {
-	stroke-dasharray: 377;
-}
+  .leftSideText {
+    @apply absolute text-left opacity-0 z-15 text-primary-text left-[5%] md:left-[7%] lg:left-[10%] top-1/2 -translate-y-1/2 text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl 2xlM:text-2xl 3xl:text-3xl;
 
-.dotted {
-	stroke-dasharray: 2 25;
-}
+    .leftTextLine1 {
+      @apply font-light tracking-wide-1;
+    }
 
-.inner_slim {
-	stroke-dasharray: 283;
-}
+    .leftTextLine2 {
+      @apply italic font-extralight opacity-75;
+    }
+  }
 
-.inner_fat {
-	stroke-dasharray: 1131 0;
-	stroke-dashoffset: -47.25;
-	stroke-width: 3px;
-}
-
-.canvas {
-	position: absolute;
-	top: 0;
-	left: 0;
-
-	display: block;
-	width: 100%;
-	height: 100%;
-	pointer-events: none;
-}
-
-.badge {
-	position: absolute;
-	top: calc(50% - var(--badge-size) * 0.5);
-	left: calc(50% - var(--badge-size) * 0.5);
-	z-index: 10;
-
-	width: var(--badge-size);
-	height: var(--badge-size);
-
-	background: #000c;
-	border-radius: 999rem;
-	overflow: hidden;
-	opacity: 1; /* Changed from 0 to 1 since webbyNominee controls visibility */
-}
-
-.badgeImg {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	z-index: 2;
-
-	display: block;
-	width: 65%;
-	height: 65%;
-	object-fit: contain;
-	transform: translate(-50%, -50%);
-
-	transition: transform 1s cubic-bezier(0.87, 0, 0.13, 1);
-}
-
-@keyframes auraGlow {
-	0% {
-		background-position: 0 100%;
-	}
-	100% {
-		background-position: 0 300%;
-	}
-}
-
-.aura {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	z-index: 3;
-
-	width: calc(var(--badge-size) * 1.25);
-	height: calc(var(--badge-size) * 1.25);
-
-	background: linear-gradient(
-			15deg,
-			#f7e7ce,
-			#b0b0b0 16.5%,
-			#f7e7ce80 33%,
-			#b0b0b020 49.5%,
-			#f7e7ce 66%,
-			#b0b0b060 85.5%,
-			#f7e7ce 100%
-		)
-		0 100% / 100% 200%;
-	border-radius: 0 0 50% 50%;
-	filter: blur(60px);
-	mix-blend-mode: plus-lighter;
-	opacity: 0.75;
-	transform: translate3d(-50%, -50%, 0);
-
-	animation: auraGlow 5s infinite linear;
-
-	pointer-events: none;
-}
-
-.overlay {
-	position: absolute;
-	top: 0;
-	left: 0;
-	z-index: 10;
-
-	width: 100%;
-	height: 100%;
-
-	background: repeating-linear-gradient(
-		transparent 5px,
-		transparent 3px,
-		white 1px,
-		white 2px
-	);
-	mix-blend-mode: overlay;
-	opacity: 0.1;
-
-	pointer-events: none;
-}
-
-// Side text styles
-.leftSideText {
-	position: absolute;
-	left: 10%;
-	top: 50%;
-	transform: translateY(-50%);
-	z-index: 15;
-	opacity: 0;
-	color: white;
-	text-align: left;
-
-	.leftTextLine1 {
-		font-size: 2rem;
-		font-weight: 300;
-		margin-bottom: 0.5rem;
-		letter-spacing: 0.05em;
-	}
-
-	.leftTextLine2 {
-		font-size: 1.4rem;
-		font-weight: 200;
-		opacity: 0.8;
-		font-style: italic;
-	}
-}
-
-.rightSideText {
-	position: absolute;
-	right: 10%;
-	top: 50%;
-	transform: translateY(-50%);
-	z-index: 15;
-	opacity: 0;
-	color: white;
-	text-align: right;
-	font-size: 1.5rem;
-	font-weight: 300;
-	line-height: 1.4;
-	max-width: 300px;
-}
-
-// Responsive adjustments
-@media (max-width: 768px) {
-	.leftSideText {
-		left: 2%;
-		.leftTextLine1 {
-			font-size: 1.4rem;
-		}
-		.leftTextLine2 {
-			font-size: 1rem;
-		}
-	}
-
-	.rightSideText {
-		right: 2%;
-		font-size: 1.2rem;
-		max-width: 250px;
-	}
+  .rightSideText {
+    @apply absolute text-right opacity-0 z-15 text-primary-text font-light leading-[1.4] right-[5%] md:right-[7%] lg:right-[10%] text-xs md:text-sm lg:text-base xl:text-lg 2xl:text-xl 2xlM:text-2xl 3xl:text-3xl top-1/2 -translate-y-1/2;
+  }
 }

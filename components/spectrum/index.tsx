@@ -53,7 +53,9 @@ const Spectrum: React.FC = () => {
 			// Wait for fonts to be ready
 			await document.fonts.ready;
 
-			const isMobileView = window.innerWidth <= 768;
+			const isMobileView = window.innerWidth < 768;
+			const isTabletView =
+				window.innerWidth >= 768 && window.innerWidth < 1024;
 
 			// Hero Timeline - Initial animations
 			const heroTl = gsap.timeline({ delay: 0.5 });

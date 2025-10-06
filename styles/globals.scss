@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font Face Declarations */
+@font-face {
+  font-family: "PP Neue Montreal";
+  src: url("https://assets.codepen.io/7558/PPNeueMontreal-Variable.woff2")
+    format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PP Supply Mono";
+  src: url("https://assets.codepen.io/7558/PPSupplyMono-Variable.woff2")
+    format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PPSupplyMono";
+  src: url("https://assets.codepen.io/7558/PPSupplyMono-Regular.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* CSS Variables */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Font Families */
+  --font-mono: "PPSupplyMono", monospace;
+  --font-sans: "PP Neue Montreal", sans-serif;
+
+  /* Color Theme - Chrome gray and light champagne */
+  --color-bg: #1a1a1a;
+  --color-text: #ffffff;
+  --color-text-light: #e5e5e5;
+  --color-text-lighter: #cccccc;
+
+  /* Gradient Colors - Chrome gray to light champagne */
+  --grad-color-1: #1a1a1a;
+  --grad-color-2: #404040;
+  --grad-color-3: #666666;
+  --grad-color-4: #f7e7ce;
+  --grad-color-5: #f7e7ce;
+  --grad-color-6: #b0b0b0;
+
+  --badge-size: min(20vw, 20rem);
+
+  /* Future Circle Gradients */
+  --radial-dark: radial-gradient(
+    ellipse at 50% 55%,
+    transparent 10%,
+    #303030 50%
+  );
+  --radial-champagne: radial-gradient(
+    ellipse at 50% 75%,
+    #f7e7ce 20%,
+    transparent 75%
+  );
+  --aura-gradient: linear-gradient(
+    15deg,
+    #f7e7ce,
+    #b0b0b0 16.5%,
+    rgba(247, 231, 206, 0.5) 33%,
+    rgba(176, 176, 176, 0.125) 49.5%,
+    #f7e7ce 66%,
+    rgba(176, 176, 176, 0.375) 85.5%,
+    #f7e7ce 100%
+  );
+  --scanline-gradient: repeating-linear-gradient(
+    transparent 5px,
+    transparent 3px,
+    white 1px,
+    white 2px
+  );
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #303030;
+    --foreground: #ededed;
+    --color-bg: #303030;
+    --color-text: #ededed;
+  }
+}
+
+/* Global Resets */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+/* Scroll sections */
+.scroll-container {
+  width: 100%;
+  height: 100%;
+}
+
+.scroll-section {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Hide scrollbar but keep functionality */
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
