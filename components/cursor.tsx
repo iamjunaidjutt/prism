@@ -1,67 +1,83 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
 const Cursor: React.FC = () => {
-	const cursorRef = useRef<HTMLDivElement>(null);
+  const [showCursor, setShowCursor] = useState(false);
+  const cursorRef = useRef<HTMLDivElement>(null);
 
-	useGSAP(() => {
-		const cursor = cursorRef.current;
-		if (!cursor) return;
+  // Only show on desktop
+  useEffect(() => {
+    const check = () => setShowCursor(window.innerWidth >= 1024);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
-		let mouseX = window.innerWidth / 2;
-		let mouseY = window.innerHeight / 2;
+  useGSAP(() => {
+    if (!showCursor) return;
+    const cursor = cursorRef.current;
+    if (!cursor) return;
 
-		const moveCursor = (e: MouseEvent) => {
-			mouseX = e.clientX;
-			mouseY = e.clientY;
-		};
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
 
-		window.addEventListener("mousemove", moveCursor);
+    const moveCursor = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    };
 
-		// GSAP animation loop
-		gsap.ticker.add(() => {
-			gsap.to(cursor, {
-				x: mouseX,
-				y: mouseY,
-				duration: 0.2,
-				ease: "power3.out",
-			});
-		});
+    window.addEventListener("mousemove", moveCursor);
 
-		// Scale on click
-		const handleClick = () => {
-			gsap.to(cursor, {
-				scale: 1.5,
-				duration: 0.15,
-				yoyo: true,
-				repeat: 1,
-			});
-		};
-		window.addEventListener("mousedown", handleClick);
-	});
+    // GSAP animation loop
+    gsap.ticker.add(() => {
+      gsap.to(cursor, {
+        x: mouseX,
+        y: mouseY,
+        duration: 0.2,
+        ease: "power3.out",
+      });
+    });
 
-	return (
-		<div
-			ref={cursorRef}
-			style={{
-				position: "fixed",
-				top: 0,
-				left: 0,
-				width: 32,
-				height: 32,
-				borderRadius: "50%",
-				background: "#f7e7ce",
-				pointerEvents: "none",
-				zIndex: 9999,
-				mixBlendMode: "difference",
-				transform: "translate(-50%, -50%)",
-				willChange: "transform",
-			}}
-		/>
-	);
+    // Scale on click
+    const handleClick = () => {
+      gsap.to(cursor, {
+        scale: 1.5,
+        duration: 0.15,
+        yoyo: true,
+        repeat: 1,
+      });
+    };
+    window.addEventListener("mousedown", handleClick);
+    return () => {
+      window.removeEventListener("mousemove", moveCursor);
+      window.removeEventListener("mousedown", handleClick);
+    };
+  }, [showCursor]);
+
+  if (!showCursor) return null;
+
+  return (
+    <div
+      ref={cursorRef}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: 32,
+        height: 32,
+        borderRadius: "50%",
+        background: "#f7e7ce",
+        pointerEvents: "none",
+        zIndex: 9999,
+        mixBlendMode: "difference",
+        transform: "translate(-50%, -50%)",
+        willChange: "transform",
+      }}
+    />
+  );
 };
 
 export default Cursor;
