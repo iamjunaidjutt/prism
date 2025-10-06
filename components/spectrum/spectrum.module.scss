@@ -154,7 +154,7 @@
         }
 
         .heroTextChinese {
-          @@apply md:w-45% lg:w-35% 2xl:w-35% text-[6px] minTab:text-xs lg:text-xs 2xl:text-base 2xlM:text-[26px] font-mono uppercase tracking-0.5px xl:tracking-normal text-primary-text leading-relaxed 2xlM:leading-[3rem] text-justify overflow-hidden transition-colors duration-300;
+          @apply md:w-45% lg:w-35% 2xl:w-35% text-[6px] minTab:text-xs lg:text-xs 2xl:text-base 2xlM:text-[26px] font-mono uppercase tracking-0.5px xl:tracking-normal text-primary-text leading-relaxed 2xlM:leading-[3rem] text-justify overflow-hidden transition-colors duration-300;
         }
       }
     }
