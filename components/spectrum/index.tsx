@@ -5,7 +5,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import styles from "./spectrum.module.scss";
-import path from "path";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
@@ -54,7 +53,9 @@ const Spectrum: React.FC = () => {
 			// Wait for fonts to be ready
 			await document.fonts.ready;
 
-			const isMobileView = window.innerWidth <= 768;
+			const isMobileView = window.innerWidth < 768;
+			const isTabletView =
+				window.innerWidth >= 768 && window.innerWidth < 1024;
 
 			// Hero Timeline - Initial animations
 			const heroTl = gsap.timeline({ delay: 0.5 });
@@ -537,20 +538,22 @@ const Spectrum: React.FC = () => {
 							className={`${styles.heroText} ${styles.splitText}`}
 						>
 							The &quot;Transcendence &amp; Buyability&quot;
-							Framework, pioneered by PRÏSM, Empowered by an
-							A-Team of data scientists, statisticians, and global
-							creatives一and guided by proven channel strategy一we
-							systematically dismantle barriers to growth by
-							deeply analyzing, strategically deconstructing, and
-							powerfully reinventing your global brand and product
-							portfolio.
+							Framework, pioneered by PRÏSM,
+							<br />
+							<br />
+							Empowered by an A-Team of data scientists,
+							statisticians, and global creatives一and guided by
+							proven channel strategy一we systematically dismantle
+							barriers to growth by deeply analyzing,
+							strategically deconstructing, and powerfully
+							reinventing your global brand and product portfolio.
 						</div>
 						<div
 							id="hero-text-1"
 							className={`${styles.heroTextChinese} ${styles.splitText}`}
 						>
-							PRÏSM 领域独创的「穿越化·买点论」
-							是系统化解决品牌及产品在全球化增长中的认知、审美与商业隔阂的方法论。依托A级数据分析团队与统计学博士团队，结合海内外一线的创意设计力量，并由深耕多年的渠道认知反推，全方位洞察·解构·重塑您的品牌与产品
+							PRïSM瓴境
+							独创的「穿越化·买点论」，是驱动品牌全球增长的核心引擎。它系统化地解决在全球化征程中遇到的认知、审美与商业隔阂。这不仅仅是一套方法论，更是一种战略操作系统：它将陌生的文化翻译为共鸣的故事，将抽象的数据激活为具体的买点，将原有的产品重构为市场的焦点。不仅打破市场壁垒，更深层次地重塑产品价值与品牌引力。我们依托4A级数据分析团队与统计学博士团队，融汇海内外一线的创意设计力量，并以深耕多年的渠道认知为战略罗盘，全方位地洞察、解构与重塑您的品牌与产品，为成功的全球化拓展奠定坚实基础。
 						</div>
 					</div>
 				</div>

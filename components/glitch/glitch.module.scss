@@ -1,0 +1,174 @@
+.glitchContainer {
+  @apply w-full relative overflow-hidden h-[100vh];
+
+  // Image slider with WebGL canvas
+  .imageSlider {
+    @apply relative w-screen h-screen overflow-hidden opacity-0 pointer-events-none transition-opacity duration-[1500ms];
+
+    &.loaded {
+      @apply opacity-100 pointer-events-auto;
+    }
+
+    // WebGL canvas for effects
+    .webglCanvas {
+      @apply block w-full h-full absolute top-0 left-0 z-1;
+    }
+
+    // Featured image container
+    .featuredImage {
+      @apply absolute left-1/2 z-2 w-[25%] h-[50%];
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      .featuredImageWrapper {
+        @apply absolute top-0 left-0 w-full h-full;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        will-change: clip-path;
+      }
+    }
+
+    // Slide text content (title, number, description)
+    .slideText {
+      @apply absolute z-2 text-primary-text;
+      top: 12%;
+      left: 18%;
+      transform: translate(-50%, -50%);
+
+      .slideNumber {
+        @apply relative overflow-hidden mb-2 w-[500px] h-[20px];
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+
+        span {
+          @apply absolute top-0 left-0 uppercase whitespace-nowrap w-full m-0 p-0 text-primary-text font-mono text-[12px] font-normal leading-[1.5] tracking-wide-2;
+          transform: translateY(0px);
+          will-change: transform;
+        }
+      }
+
+      .slideTitle {
+        @apply relative overflow-hidden mb-3 w-[500px] h-[60px];
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+
+        h1 {
+          @apply absolute top-0 left-0 m-0 p-0 whitespace-nowrap w-fit text-primary-text font-sans text-[48px] font-medium leading-[1.2] tracking-tight-2 border-b-2 border-primary-text;
+          transform: translateY(0px);
+          will-change: transform;
+        }
+      }
+
+      .slideDescription {
+        @apply relative overflow-hidden w-[500px] h-[24px];
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+
+        p {
+          @apply absolute top-0 left-0 uppercase m-0 p-0 whitespace-nowrap w-full text-primary-text font-mono text-[12px] font-normal leading-[1.2] tracking-wide-1;
+          transform: translateY(0px);
+          will-change: transform;
+        }
+      }
+    }
+
+    // Slide properties list
+    .slideProperties {
+      @apply absolute overflow-hidden z-2 text-primary-text w-[500px];
+      top: 50%;
+      left: 18%;
+      transform: translate(-50%, -50%);
+
+      .slidePropertyLine {
+        @apply relative w-full overflow-hidden mb-1 h-[50px];
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+
+        &:last-child {
+          @apply mb-0;
+        }
+
+        // Hide property lines with empty spans
+        &:has(span:empty) {
+          @apply hidden;
+        }
+
+        span {
+          @apply block absolute top-0 left-0 whitespace-nowrap w-full m-0 p-0 text-primary-text font-sans text-[1.5em] font-normal leading-[2];
+          transform: translateY(0px);
+          will-change: transform;
+        }
+      }
+    }
+
+    // Slide paragraph (bottom right)
+    .slideParagraph {
+      @apply absolute overflow-hidden z-2 text-primary-text w-[500px] h-[250px];
+      bottom: 10%;
+      right: 20%;
+      transform: translate(50%, -50%);
+
+      .slideParagraphLine {
+        @apply relative w-full overflow-hidden mb-2 h-[70px];
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+
+        &:last-child {
+          @apply mb-0;
+        }
+
+        span {
+          @apply block absolute top-0 left-0 m-0 p-0 w-full text-primary-text font-sans text-[1.5em] font-medium leading-[1.4];
+          transform: translateY(0px);
+          will-change: transform;
+          white-space: normal;
+        }
+      }
+    }
+
+    // Top and bottom center text overlays
+    .topCenterText {
+      @apply fixed left-1/2 uppercase pointer-events-none z-2 text-primary-text font-mono text-[14px] font-medium tracking-wide-4;
+      top: 1rem;
+      transform: translateX(-50%);
+    }
+
+    .bottomCenterText {
+      @apply fixed left-1/2 pointer-events-none z-2 text-primary-text font-sans text-[14px] font-medium tracking-wide-2;
+      bottom: 1rem;
+      transform: translateX(-50%);
+    }
+
+    // Corner text elements
+    .cornerText {
+      @apply fixed uppercase pointer-events-none z-1 text-primary-text font-mono text-[12px] tracking-wide-2 leading-[1.5];
+
+      div {
+        @apply mb-1;
+      }
+
+      &.cornerTextTopLeft {
+        @apply top-8 left-8;
+      }
+
+      &.cornerTextTopRight {
+        @apply text-right top-8 right-8;
+      }
+
+      &.cornerTextBottomLeft {
+        @apply bottom-8 left-8;
+      }
+
+      &.cornerTextBottomRight {
+        @apply text-right bottom-8 right-8;
+      }
+
+      &.cornerTextShortcuts {
+        @apply left-8 text-left text-[10px];
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      &.cornerTextCenter {
+        @apply text-center flex flex-col justify-between h-[80vh];
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+  }
+}
