@@ -1742,7 +1742,7 @@ const GlitchSlider = () => {
 	}, []);
 
 	return (
-		<div ref={containerRef}>
+		<div ref={containerRef} className={styles.glitchContainer}>
 			<main
 				className={`${styles.imageSlider} ${
 					isLoaded ? styles.loaded : ""

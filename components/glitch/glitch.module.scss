@@ -1,452 +1,174 @@
-:root {
-	--font-mono: "PP Supply Mono", monospace;
-	--font-sans: "PP Neue Montreal", sans-serif;
-	--color-text: #fff;
-	--content-z: 2;
-	--desktop-width: 500px;
-	--mobile-width: 300px;
-}
-
-@font-face {
-	font-family: "PP Neue Montreal";
-	src: url("https://assets.codepen.io/7558/PPNeueMontreal-Variable.woff2")
-		format("woff2");
-	font-weight: 100 900;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "PP Supply Mono";
-	src: url("https://assets.codepen.io/7558/PPSupplyMono-Variable.woff2")
-		format("woff2");
-	font-weight: 100 900;
-	font-style: normal;
-	font-display: swap;
-}
-
 .glitchContainer {
-	width: 100%;
-	height: 100vh;
-	position: relative;
-	overflow: hidden;
-}
+  @apply w-full relative overflow-hidden h-[100vh];
 
-:global(*) {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-}
+  // Image slider with WebGL canvas
+  .imageSlider {
+    @apply relative w-screen h-screen overflow-hidden opacity-0 pointer-events-none transition-opacity duration-[1500ms];
 
-:global(html),
-:global(body) {
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
-	font-family: var(--font-sans);
-	background: black;
-}
+    &.loaded {
+      @apply opacity-100 pointer-events-auto;
+    }
 
-:global(img) {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	will-change: transform;
-}
+    // WebGL canvas for effects
+    .webglCanvas {
+      @apply block w-full h-full absolute top-0 left-0 z-1;
+    }
 
-:global(.tp-dfwv) {
-	visibility: hidden !important;
-}
+    // Featured image container
+    .featuredImage {
+      @apply absolute left-1/2 z-2 w-[25%] h-[50%];
+      top: 50%;
+      transform: translate(-50%, -50%);
 
-.imageSlider {
-	position: relative;
-	width: 100vw;
-	height: 100vh;
-	overflow: hidden;
-	opacity: 0;
-	transition: opacity 1.5s ease-in;
-	pointer-events: none;
+      .featuredImageWrapper {
+        @apply absolute top-0 left-0 w-full h-full;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        will-change: clip-path;
+      }
+    }
 
-	&.loaded {
-		opacity: 1;
-		pointer-events: auto;
-	}
-}
+    // Slide text content (title, number, description)
+    .slideText {
+      @apply absolute z-2 text-primary-text;
+      top: 12%;
+      left: 18%;
+      transform: translate(-50%, -50%);
 
-.webglCanvas {
-	display: block;
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	top: 0;
-	left: 0;
-	z-index: 1;
-}
+      .slideNumber {
+        @apply relative overflow-hidden mb-2 w-[500px] h-[20px];
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 
-.topCenterText {
-	position: fixed;
-	top: 1rem;
-	left: 50%;
-	transform: translateX(-50%);
-	color: var(--color-text);
-	font-family: var(--font-mono);
-	font-size: 14px;
-	font-weight: 500;
-	letter-spacing: 0.2em;
-	text-transform: uppercase;
-	z-index: var(--content-z);
-	pointer-events: none;
-}
+        span {
+          @apply absolute top-0 left-0 uppercase whitespace-nowrap w-full m-0 p-0 text-primary-text font-mono text-[12px] font-normal leading-[1.5] tracking-wide-2;
+          transform: translateY(0px);
+          will-change: transform;
+        }
+      }
 
-.bottomCenterText {
-	position: fixed;
-	bottom: 1rem;
-	left: 50%;
-	transform: translateX(-50%);
-	color: var(--color-text);
-	font-family: var(--font-sans);
-	font-size: 14px;
-	font-weight: 500;
-	letter-spacing: 0.1em;
-	z-index: var(--content-z);
-	pointer-events: none;
-}
+      .slideTitle {
+        @apply relative overflow-hidden mb-3 w-[500px] h-[60px];
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 
-/* Corner Text Styles */
-.cornerText {
-	position: fixed;
-	color: white;
-	font-family: var(--font-mono);
-	font-size: 12px;
-	text-transform: uppercase;
-	letter-spacing: 0.1em;
-	line-height: 1.5;
-	z-index: 1;
-	pointer-events: none;
+        h1 {
+          @apply absolute top-0 left-0 m-0 p-0 whitespace-nowrap w-fit text-primary-text font-sans text-[48px] font-medium leading-[1.2] tracking-tight-2 border-b-2 border-primary-text;
+          transform: translateY(0px);
+          will-change: transform;
+        }
+      }
 
-	div {
-		margin-bottom: 4px;
-	}
-}
+      .slideDescription {
+        @apply relative overflow-hidden w-[500px] h-[24px];
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 
-.cornerTextTopLeft {
-	top: 2rem;
-	left: 2rem;
-}
+        p {
+          @apply absolute top-0 left-0 uppercase m-0 p-0 whitespace-nowrap w-full text-primary-text font-mono text-[12px] font-normal leading-[1.2] tracking-wide-1;
+          transform: translateY(0px);
+          will-change: transform;
+        }
+      }
+    }
 
-.cornerTextTopRight {
-	top: 2rem;
-	right: 2rem;
-	text-align: right;
-}
+    // Slide properties list
+    .slideProperties {
+      @apply absolute overflow-hidden z-2 text-primary-text w-[500px];
+      top: 50%;
+      left: 18%;
+      transform: translate(-50%, -50%);
 
-.cornerTextBottomLeft {
-	bottom: 2rem;
-	left: 2rem;
-}
+      .slidePropertyLine {
+        @apply relative w-full overflow-hidden mb-1 h-[50px];
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 
-.cornerTextBottomRight {
-	bottom: 2rem;
-	right: 2rem;
-	text-align: right;
-}
+        &:last-child {
+          @apply mb-0;
+        }
 
-.cornerTextShortcuts {
-	top: 50%;
-	left: 2rem;
-	transform: translateY(-50%);
-	font-size: 10px;
-	text-align: left;
-}
+        // Hide property lines with empty spans
+        &:has(span:empty) {
+          @apply hidden;
+        }
 
-.cornerTextCenter {
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	text-align: center;
-	height: 80vh;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-}
+        span {
+          @apply block absolute top-0 left-0 whitespace-nowrap w-full m-0 p-0 text-primary-text font-sans text-[1.5em] font-normal leading-[2];
+          transform: translateY(0px);
+          will-change: transform;
+        }
+      }
+    }
 
-.featuredImage {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	width: 25%;
-	height: 50%;
-	z-index: var(--content-z);
-}
+    // Slide paragraph (bottom right)
+    .slideParagraph {
+      @apply absolute overflow-hidden z-2 text-primary-text w-[500px] h-[250px];
+      bottom: 10%;
+      right: 20%;
+      transform: translate(50%, -50%);
 
-.featuredImageWrapper {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
-	will-change: clip-path;
-}
+      .slideParagraphLine {
+        @apply relative w-full overflow-hidden mb-2 h-[70px];
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 
-.slideText {
-	position: absolute;
-	top: 12%;
-	left: 18%;
-	transform: translate(-50%, -50%);
-	color: var(--color-text);
-	z-index: var(--content-z);
-}
+        &:last-child {
+          @apply mb-0;
+        }
 
-.slideNumber {
-	position: relative;
-	width: var(--desktop-width);
-	height: 20px;
-	margin-bottom: 0.5em;
-	clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-	overflow: hidden;
+        span {
+          @apply block absolute top-0 left-0 m-0 p-0 w-full text-primary-text font-sans text-[1.5em] font-medium leading-[1.4];
+          transform: translateY(0px);
+          will-change: transform;
+          white-space: normal;
+        }
+      }
+    }
 
-	span {
-		position: absolute;
-		top: 0;
-		left: 0;
-		color: var(--color-text);
-		font-family: var(--font-mono);
-		font-size: 12px;
-		font-weight: 400;
-		line-height: 1.5;
-		transform: translateY(0px);
-		will-change: transform;
-		margin: 0;
-		padding: 0;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		white-space: nowrap;
-		width: 100%;
-	}
-}
+    // Top and bottom center text overlays
+    .topCenterText {
+      @apply fixed left-1/2 uppercase pointer-events-none z-2 text-primary-text font-mono text-[14px] font-medium tracking-wide-4;
+      top: 1rem;
+      transform: translateX(-50%);
+    }
 
-.slideTitle {
-	position: relative;
-	width: var(--desktop-width);
-	height: 60px;
-	clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-	overflow: hidden;
-	margin-bottom: 0.7rem;
+    .bottomCenterText {
+      @apply fixed left-1/2 pointer-events-none z-2 text-primary-text font-sans text-[14px] font-medium tracking-wide-2;
+      bottom: 1rem;
+      transform: translateX(-50%);
+    }
 
-	h1 {
-		position: absolute;
-		top: 0;
-		left: 0;
-		color: var(--color-text);
-		font-family: var(--font-sans);
-		font-size: 48px;
-		font-weight: 500;
-		letter-spacing: -0.02em;
-		line-height: 1.2;
-		transform: translateY(0px);
-		will-change: transform;
-		margin: 0;
-		padding: 0;
-		width: fit-content;
-		white-space: nowrap;
-		border-bottom: 2px solid var(--color-text);
-	}
-}
+    // Corner text elements
+    .cornerText {
+      @apply fixed uppercase pointer-events-none z-1 text-primary-text font-mono text-[12px] tracking-wide-2 leading-[1.5];
 
-.slideDescription {
-	position: relative;
-	width: var(--desktop-width);
-	height: 24px;
-	clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-	overflow: hidden;
+      div {
+        @apply mb-1;
+      }
 
-	p {
-		position: absolute;
-		top: 0;
-		left: 0;
-		color: var(--color-text);
-		font-family: var(--font-mono);
-		font-size: 12px;
-		font-weight: 400;
-		line-height: 1.2;
-		transform: translateY(0px);
-		will-change: transform;
-		margin: 0;
-		padding: 0;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		width: 100%;
-		white-space: nowrap;
-	}
-}
+      &.cornerTextTopLeft {
+        @apply top-8 left-8;
+      }
 
-.slideProperties {
-	position: absolute;
-	top: 50%;
-	left: 18%;
-	transform: translate(-50%, -50%);
-	color: var(--color-text);
-	z-index: var(--content-z);
-	width: var(--desktop-width);
-	overflow: hidden;
-}
+      &.cornerTextTopRight {
+        @apply text-right top-8 right-8;
+      }
 
-.slidePropertyLine {
-	position: relative;
-	width: 100%;
-	height: 50px;
-	clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-	overflow: hidden;
-	margin-bottom: 0.3rem;
+      &.cornerTextBottomLeft {
+        @apply bottom-8 left-8;
+      }
 
-	&:last-child {
-		margin-bottom: 0;
-	}
+      &.cornerTextBottomRight {
+        @apply text-right bottom-8 right-8;
+      }
 
-	// Hide property lines with empty spans
-	&:has(span:empty) {
-		display: none;
-	}
+      &.cornerTextShortcuts {
+        @apply left-8 text-left text-[10px];
+        top: 50%;
+        transform: translateY(-50%);
+      }
 
-	span {
-		display: block;
-		position: absolute;
-		top: 0;
-		left: 0;
-		color: var(--color-text);
-		font-family: var(--font-sans);
-		font-size: 1.5em;
-		font-weight: 400;
-		line-height: 2;
-		transform: translateY(0px);
-		will-change: transform;
-		margin: 0;
-		padding: 0;
-		white-space: nowrap;
-		width: 100%;
-	}
-}
-
-.slideParagraph {
-	position: absolute;
-	bottom: 10%;
-	right: 20%;
-	transform: translate(50%, -50%);
-	color: var(--color-text);
-	z-index: var(--content-z);
-	width: 500px;
-	height: 250px;
-	overflow: hidden;
-}
-
-.slideParagraphLine {
-	position: relative;
-	width: 100%;
-	height: 70px;
-	clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
-	overflow: hidden;
-	margin-bottom: 0.5rem;
-
-	&:last-child {
-		margin-bottom: 0;
-	}
-
-	span {
-		display: block;
-		position: absolute;
-		top: 0;
-		left: 0;
-		color: var(--color-text);
-		font-family: var(--font-sans);
-		font-size: 1.5em;
-		font-weight: 500;
-		line-height: 1.4;
-		transform: translateY(0px);
-		will-change: transform;
-		margin: 0;
-		padding: 0;
-		white-space: normal;
-		// word-wrap: break-word;
-		width: 100%;
-	}
-}
-
-@media (max-width: 900px) {
-	.featuredImage {
-		width: 75%;
-	}
-
-	.slideText {
-		top: 60%;
-		left: 60%;
-	}
-
-	.slideNumber {
-		width: var(--mobile-width);
-		height: 18px;
-
-		span {
-			font-size: 10px;
-		}
-	}
-
-	.slideTitle {
-		width: var(--mobile-width);
-		height: 50px;
-
-		h1 {
-			font-size: 36px;
-		}
-	}
-
-	.slideDescription {
-		width: var(--mobile-width);
-		height: 20px;
-
-		p {
-			font-size: 12px;
-		}
-	}
-
-	.slideParagraph {
-		top: 75%;
-		right: 20%;
-		width: 280px;
-		overflow: hidden;
-	}
-
-	.slideParagraphLine {
-		height: 24px;
-		margin-bottom: 4px;
-
-		span {
-			font-size: 10px;
-			line-height: 1.4;
-			top: 2px;
-		}
-	}
-
-	.cornerText {
-		font-size: 10px;
-	}
-
-	.cornerTextShortcuts {
-		font-size: 8px;
-	}
-
-	.cornerTextCenter {
-		height: 70vh;
-	}
-
-	.topCenterText {
-		font-size: 12px;
-		top: 1.5rem;
-	}
-
-	.bottomCenterText {
-		font-size: 32px;
-		bottom: 1.5rem;
-	}
+      &.cornerTextCenter {
+        @apply text-center flex flex-col justify-between h-[80vh];
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+  }
 }
