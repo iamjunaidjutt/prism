@@ -337,7 +337,8 @@ const FutureCircle = () => {
       const container = containerRef.current;
       const elements = container.querySelectorAll("#future-svg circle");
       const logo = container.querySelector("#logo-image");
-      const prismaeonText = container.querySelector(`.${styles.prismaeonText}`);
+      const prismaeonText = container.querySelector(`.${styles.prismaeonText}`); // PRISMAEON
+      const chineseText = container.querySelector(`.${styles.chineseText}`); // 穿越化
       const leftSideText = container.querySelector(`.${styles.leftSideText}`);
       const rightSideText = container.querySelector(`.${styles.rightSideText}`);
       const outer = container.querySelector("#outer-circle");
@@ -349,6 +350,7 @@ const FutureCircle = () => {
         !elements.length ||
         !logo ||
         !prismaeonText ||
+        !chineseText ||
         !leftSideText ||
         !rightSideText ||
         !outer ||
@@ -364,7 +366,7 @@ const FutureCircle = () => {
         transformOrigin: "50% 50%",
       });
 
-      gsap.set(prismaeonText, {
+      gsap.set([prismaeonText, chineseText], {
         opacity: 0,
         scale: 0.8,
         transformOrigin: "50% 50%",
@@ -436,7 +438,7 @@ const FutureCircle = () => {
         ease: "power2.out",
       });
 
-      // Fade out logo and fade in PRISMAEON text during FutureCircle animation
+      // Fade out logo during initial circle scale
       scrollTl.to(
         logo,
         {
@@ -448,25 +450,14 @@ const FutureCircle = () => {
         "-=0.5",
       );
 
-      scrollTl.to(
-        prismaeonText,
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 1,
-          ease: "back.out(1.7)",
-        },
-        "-=0.4",
-      );
-
-      // Morph animations
+      // Start morph animations - this is where text transitions happen
       scrollTl.to(
         innerFat,
         {
           strokeDasharray: "188.5 377",
           duration: 1,
         },
-        "-=0.5",
+        "+=0.2",
       );
 
       scrollTl.to(
@@ -475,7 +466,7 @@ const FutureCircle = () => {
           attr: { r: 210 },
           duration: 1,
         },
-        "-=0.5",
+        "-=1",
       );
 
       scrollTl.to(
@@ -487,10 +478,45 @@ const FutureCircle = () => {
         "-=1",
       );
 
-      // Phase 2: Transition (fade out FutureCircle completely, fade in WebNominee badge only)
-      // Fade out circles and PRISMAEON text
+      // Fade in PRISMAEON text during morph animations
       scrollTl.to(
-        [elements, prismaeonText],
+        prismaeonText,
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          ease: "back.out(1.7)",
+        },
+        "-=1", // Start during morph
+      );
+
+      // Fade out PRISMAEON and fade in Chinese text during morph
+      scrollTl.to(
+        prismaeonText,
+        {
+          opacity: 0,
+          scale: 0.8,
+          duration: 0.4,
+          ease: "power2.in",
+        },
+        "+=0.2", // Small pause after PRISMAEON
+      );
+
+      scrollTl.to(
+        chineseText,
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.6,
+          ease: "back.out(1.7)",
+        },
+        "-=0.2", // Overlap slightly with fade out
+      );
+
+      // Phase 2: Transition (fade out FutureCircle completely, fade in WebNominee badge only)
+      // Fade out circles, PRISMAEON text, and Chinese text
+      scrollTl.to(
+        [elements, prismaeonText, chineseText],
         {
           opacity: 0,
           scale: 0.8,
@@ -594,6 +620,7 @@ const FutureCircle = () => {
         className={styles.logo}
       />
       <div className={styles.prismaeonText}>PRISMAEON</div>
+      <div className={styles.chineseText}>穿越化</div>
       <svg id="future-svg" className={styles.svg} viewBox="0 0 500 500">
         <circle
           id="outer-circle"
