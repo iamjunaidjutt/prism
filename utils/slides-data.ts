@@ -15,7 +15,7 @@ export const slideData = [
   },
   {
     title: "顶层战略架构与策划",
-    description: "STRATEGY ARCHITECTURE & PLANMING",
+    description: "STRATEGY ARCHITECTURE & PLANNING",
     number: "∅2",
     properties: [
       "- 品牌产品解构与重塑",
