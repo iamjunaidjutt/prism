@@ -61,10 +61,7 @@
     @apply text-primary-text no-underline relative inline-block transition-colors duration-300;
 
     &::after {
-      @apply absolute top-0 left-0 w-0 h-full -z-1;
-      @apply transition-all duration-300;
-      @apply content-[''];
-      @apply bg-primary-text;
+      @apply absolute top-0 left-0 w-0 h-full -z-1 transition-all duration-300  content-[''] bg-primary-text;
       transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
@@ -81,37 +78,31 @@
     @apply fixed top-0 left-0 w-screen h-screen pointer-events-none z-1 opacity-15;
 
     .bgGradient {
-      @apply absolute blur-40px transition-opacity duration-500;
-      @apply will-change-opacity-filter;
+      @apply absolute blur-40px transition-opacity duration-500 will-change-opacity-filter;
 
       &.bgGradient1 {
-        @apply -top-20% -left-10% w-600px h-600px;
-        @apply bg-[radial-gradient(circle,var(--grad-color-1)_0%,var(--grad-color-2)_35%,transparent_70%)];
+        @apply -top-20% -left-10% w-600px h-600px bg-[radial-gradient(circle,var(--grad-color-1)_0%,var(--grad-color-2)_35%,transparent_70%)];
       }
 
       &.bgGradient2 {
-        @apply top-30% -right-15% w-800px h-800px;
-        @apply bg-[radial-gradient(circle,var(--grad-color-3)_0%,var(--grad-color-4)_40%,transparent_70%)];
+        @apply top-30% -right-15% w-800px h-800px bg-[radial-gradient(circle,var(--grad-color-3)_0%,var(--grad-color-4)_40%,transparent_70%)];
       }
 
       &.bgGradient3 {
-        @apply -bottom-25% left-20% w-700px h-700px;
-        @apply bg-[radial-gradient(circle,var(--grad-color-5)_0%,var(--grad-color-6)_45%,transparent_75%)];
+        @apply -bottom-25% left-20% w-700px h-700px bg-[radial-gradient(circle,var(--grad-color-5)_0%,var(--grad-color-6)_45%,transparent_75%)];
       }
     }
   }
 
   .gradientOverlay {
-    @apply fixed top-0 left-0 w-screen h-screen pointer-events-none z-5 opacity-0 blur-60px;
-    @apply transition-opacity duration-600;
-    @apply will-change-opacity-filter;
+    @apply fixed top-0 left-0 w-screen h-screen pointer-events-none z-5 opacity-0 blur-60px transition-opacity duration-600 will-change-opacity-filter;
   }
 
   .heroSection {
-    @apply h-100vh w-full px-8 flex flex-col justify-center relative mt-10 lg:mt-20;
+    @apply h-100vh w-full px-8 flex flex-col justify-center relative max-mSm:mt-28 mt-5 lg:mt-20;
 
     .heroTitle {
-      @apply mt-5 minTab:mt-20 md:mt-10 lg:mt-4 2xlM:mt-3 text-center uppercase font-medium text-primary-text transition-colors duration-300 flex justify-center items-center gap-5 minTab:gap-8 md:gap-14 2xl:gap-20 flex-nowrap whitespace-nowrap text-[4.5vw] tracking-[-0.02vw] font-sans;
+      @apply mt-0 minTab:mt-20 md:mt-10 lg:mt-4 2xlM:mt-3 text-center uppercase font-medium text-primary-text transition-colors duration-300 flex justify-center items-center gap-5 minTab:gap-8 md:gap-14 2xl:gap-20 flex-nowrap whitespace-nowrap text-[4.5vw] tracking-[-0.02vw] font-sans;
 
       .heroTitleMain,
       .heroTitleChinese {

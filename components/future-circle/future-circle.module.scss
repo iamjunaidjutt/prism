@@ -9,7 +9,10 @@
     @apply absolute text-center opacity-0 uppercase z-2 text-primary-text text-xl sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl font-medium tracking-wide-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[0.8];
   }
 
-  // SVG with animated circles - Direct child of .container
+  .chineseText {
+    @apply absolute text-center opacity-0 z-2 text-primary-text text-xl sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl 3xl:text-4xl font-medium tracking-wide-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[0.8];
+  }
+
   .svg {
     @apply absolute z-1 w-[400px] sm:w-[250px] minTab:w-[280px] md:w-[300px] lg:w-[300px] xl:w-[350px] 2xl:w-[400px] 2xlM:w-[450px] 3xl:w-[700px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
 
