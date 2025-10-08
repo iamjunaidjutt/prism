@@ -1577,27 +1577,51 @@ const GlitchSlider = () => {
         if (para1El) para1El.textContent = slideInfo.paragraphLines[0] || "";
         if (para2El) para2El.textContent = slideInfo.paragraphLines[1] || "";
         
+        // Update featured image - remove all old wrappers and reset to first image
+        const featuredImageContainer = slider.querySelector("[data-featured-image]");
+        if (featuredImageContainer) {
+          // Clear all existing wrappers
+          featuredImageContainer.innerHTML = "";
+          
+          // Create fresh wrapper with first image
+          const newWrapper = document.createElement("div");
+          newWrapper.className = styles.featuredImageWrapper;
+          newWrapper.setAttribute("data-featured-wrapper", "");
+          
+          const img = document.createElement("img");
+          img.src = imageCollection[0];
+          img.alt = `Featured image 1`;
+          img.style.transform = "translateY(0%)";
+          
+          newWrapper.appendChild(img);
+          newWrapper.style.clipPath = "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)";
+          featuredImageContainer.appendChild(newWrapper);
+        }
+        
         // Update shader texture
         if (state.shaderMaterial && state.slideTextures[0]) {
+          state.shaderMaterial.uniforms.uProgress.value = 0;
           state.shaderMaterial.uniforms.uTexture1.value = state.slideTextures[0];
+          state.shaderMaterial.uniforms.uTexture2.value = state.slideTextures[1] || state.slideTextures[0];
           state.shaderMaterial.uniforms.uTexture1Size.value = state.slideTextures[0].userData.size;
+          state.shaderMaterial.uniforms.uTexture2Size.value = (state.slideTextures[1] || state.slideTextures[0]).userData.size;
         }
       }
 
       ScrollTrigger.create({
         trigger: containerRef.current,
-        start: "top top",
+        start: "top center",
         end: "bottom top",
         onEnter: () => {
-          // Prevent any scroll interactions during reset and activation
+          // Disable interactions immediately
           state.isTransitioning = true;
-          state.isActive = false;
+          state.scrollingEnabled = false;
+          
+          // Add loaded class to show component
+          slider.classList.add(styles.loaded);
           
           // Reset to first slide
           resetToFirstSlide();
-          
-          // Add loaded class immediately
-          slider.classList.add(styles.loaded);
           
           // Fade in Glitch header/footer elements
           gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
@@ -1611,12 +1635,12 @@ const GlitchSlider = () => {
             ease: "power2.out",
           });
           
-          // Enable interaction after component is fully in viewport and animations complete
+          // Enable interaction after a longer delay to ensure reset is complete
           setTimeout(() => {
             state.isActive = true;
             state.isTransitioning = false;
             state.scrollingEnabled = true;
-          }, 500);
+          }, 1000);
         },
         onLeave: () => {
           state.isActive = false;

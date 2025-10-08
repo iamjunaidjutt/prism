@@ -204,36 +204,21 @@ const Spectrum: React.FC = () => {
       // Hide blur toggle when Glitch component comes into view
       ScrollTrigger.create({
         trigger: ".glitchContainer",
-        start: "top top",
+        start: "top center",
         end: "bottom top",
         onEnter: () => {
           if (blurToggleRef.current) {
-            // Use both opacity and pointer-events for reliability
             gsap.to(blurToggleRef.current, {
               opacity: 0,
-              pointerEvents: "none",
               duration: 0.3,
               ease: "power2.out",
             });
-          }
-        },
-        onLeave: () => {
-          // Keep hidden when scrolling past Glitch
-          if (blurToggleRef.current) {
-            gsap.set(blurToggleRef.current, { opacity: 0, pointerEvents: "none" });
-          }
-        },
-        onEnterBack: () => {
-          // Keep hidden when coming back to Glitch
-          if (blurToggleRef.current) {
-            gsap.set(blurToggleRef.current, { opacity: 0, pointerEvents: "none" });
           }
         },
         onLeaveBack: () => {
           if (blurToggleRef.current) {
             gsap.to(blurToggleRef.current, {
               opacity: 1,
-              pointerEvents: "auto",
               duration: 0.5,
               ease: "power2.out",
             });
