@@ -1394,8 +1394,16 @@ const GlitchSlider = () => {
             // Only handle scroll if component is active
             if (!state.isActive) return;
             
-            wheelEvent.preventDefault();
             const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
+            
+            // If scrolling up and already at first slide, allow page scroll to exit
+            if (scrollDirection === "up" && state.currentImageIndex === 0) {
+              // Don't preventDefault - allow natural page scroll
+              return;
+            }
+            
+            // Otherwise, handle slide navigation
+            wheelEvent.preventDefault();
             handleScrollInteraction(scrollDirection);
           },
           { passive: false },
@@ -1417,7 +1425,6 @@ const GlitchSlider = () => {
         window.addEventListener(
           "touchmove",
           (touchMoveEvent) => {
-            touchMoveEvent.preventDefault();
             if (
               !state.isActive ||
               !state.isTouchActive ||
@@ -1431,8 +1438,18 @@ const GlitchSlider = () => {
               state.touchStartPosition - touchCurrentPosition;
 
             if (Math.abs(touchDifference) > config.touchThreshold) {
-              state.isTouchActive = false;
               const swipeDirection = touchDifference > 0 ? "down" : "up";
+              
+              // If swiping down (scrollDirection up) and at first slide, allow page scroll
+              if (swipeDirection === "up" && state.currentImageIndex === 0) {
+                // Don't preventDefault - allow page scroll
+                state.isTouchActive = false;
+                return;
+              }
+              
+              // Otherwise, prevent default and handle slide transition
+              touchMoveEvent.preventDefault();
+              state.isTouchActive = false;
               handleScrollInteraction(swipeDirection);
             }
           },
