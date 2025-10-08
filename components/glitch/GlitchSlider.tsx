@@ -27,8 +27,8 @@ const GlitchSlider = () => {
       ) as HTMLElement;
       if (!slider) return;
 
-      // Initialize slider immediately
-      slider.classList.add(styles.loaded);
+      // Don't initialize slider immediately - wait for viewport
+      // slider.classList.add(styles.loaded);
 
       // Image collection
       const imageCollection = [
@@ -99,7 +99,7 @@ const GlitchSlider = () => {
         lastScrollTimestamp: 0,
         touchStartPosition: 0,
         isTouchActive: false,
-        isInViewport: false,
+        isActive: false,
         renderer: null as THREE.WebGLRenderer | null,
         scene: null as THREE.Scene | null,
         camera: null as THREE.OrthographicCamera | null,
@@ -1387,26 +1387,12 @@ const GlitchSlider = () => {
 
       // Event listeners
       function initEventListeners() {
-        // Set up intersection observer to detect when component is in viewport
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              state.isInViewport = entry.isIntersecting;
-            });
-          },
-          { threshold: 0.5 } // Trigger when 50% of component is visible
-        );
-        
-        if (containerRef.current) {
-          observer.observe(containerRef.current);
-        }
-
         // Mouse wheel
         window.addEventListener(
           "wheel",
           (wheelEvent) => {
-            // Only handle scroll if component is in viewport
-            if (!state.isInViewport) return;
+            // Only handle scroll if component is active
+            if (!state.isActive) return;
             
             wheelEvent.preventDefault();
             const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
@@ -1419,8 +1405,8 @@ const GlitchSlider = () => {
         window.addEventListener(
           "touchstart",
           (touchStartEvent) => {
-            // Only handle touch if component is in viewport
-            if (!state.isInViewport) return;
+            // Only handle touch if component is active
+            if (!state.isActive) return;
             
             state.touchStartPosition = touchStartEvent.touches[0].clientY;
             state.isTouchActive = true;
@@ -1433,7 +1419,7 @@ const GlitchSlider = () => {
           (touchMoveEvent) => {
             touchMoveEvent.preventDefault();
             if (
-              !state.isInViewport ||
+              !state.isActive ||
               !state.isTouchActive ||
               state.isTransitioning ||
               !state.scrollingEnabled
@@ -1559,6 +1545,78 @@ const GlitchSlider = () => {
       // Initialize everything
       await initializeRenderer();
       initEventListeners();
+
+      // Set up ScrollTrigger to activate component when it comes into view
+      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+      gsap.registerPlugin(ScrollTrigger);
+
+      ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: "top center",
+        end: "bottom top",
+        onEnter: () => {
+          state.isActive = true;
+          state.currentImageIndex = 0; // Reset to first slide
+          slider.classList.add(styles.loaded);
+          
+          // Fade in Glitch header/footer elements
+          gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          });
+          gsap.to(slider.querySelector(`.${styles.bottomCenterText}`), {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          });
+        },
+        onLeave: () => {
+          state.isActive = false;
+          
+          // Fade out Glitch header/footer elements
+          gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.in",
+          });
+          gsap.to(slider.querySelector(`.${styles.bottomCenterText}`), {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.in",
+          });
+        },
+        onEnterBack: () => {
+          state.isActive = true;
+          
+          // Fade in Glitch header/footer elements
+          gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          });
+          gsap.to(slider.querySelector(`.${styles.bottomCenterText}`), {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          });
+        },
+        onLeaveBack: () => {
+          state.isActive = false;
+          
+          // Fade out Glitch header/footer elements
+          gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.in",
+          });
+          gsap.to(slider.querySelector(`.${styles.bottomCenterText}`), {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.in",
+          });
+        }
+      });
     };
 
     initSlider();
@@ -1567,7 +1625,7 @@ const GlitchSlider = () => {
   return (
     <div ref={containerRef} className={styles.glitchContainer}>
       <main
-        className={`${styles.imageSlider} ${styles.loaded}`}
+        className={`${styles.imageSlider}`}
         role="region"
         aria-label="Image carousel"
         data-image-slider-init

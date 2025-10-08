@@ -40,6 +40,7 @@ const Spectrum: React.FC = () => {
   const mainTitleRef = useRef<HTMLDivElement>(null);
   const gradientOverlayRef = useRef<HTMLDivElement>(null);
   const svgGroupRef = useRef<SVGGElement>(null);
+  const blurToggleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -55,6 +56,11 @@ const Spectrum: React.FC = () => {
 
       const isMobileView = window.innerWidth < 768;
       const isTabletView = window.innerWidth >= 768 && window.innerWidth < 1024;
+
+      // Set initial state - blur toggle hidden until Spectrum is in view
+      if (blurToggleRef.current) {
+        gsap.set(blurToggleRef.current, { opacity: 0 });
+      }
 
       // Hero Timeline - Initial animations
       const heroTl = gsap.timeline({ delay: 0.5 });
@@ -195,6 +201,103 @@ const Spectrum: React.FC = () => {
         ease: "power2.out",
       });
 
+      // Hide blur toggle when Glitch component comes into view
+      ScrollTrigger.create({
+        trigger: ".glitchContainer",
+        start: "top bottom",
+        end: "bottom top",
+        onEnter: () => {
+          if (blurToggleRef.current) {
+            gsap.to(blurToggleRef.current, {
+              opacity: 0,
+              duration: 0.5,
+              ease: "power2.in",
+            });
+          }
+        },
+        onLeaveBack: () => {
+          if (blurToggleRef.current) {
+            gsap.to(blurToggleRef.current, {
+              opacity: 1,
+              duration: 0.8,
+              ease: "power2.out",
+            });
+          }
+        },
+      });
+
+      // Control Spectrum header/nav visibility
+      ScrollTrigger.create({
+        trigger: ".spectrum",
+        start: "top bottom",
+        end: "bottom top",
+        onEnter: () => {
+          // Show all nav items and blur toggle when entering Spectrum
+          gsap.to("#nav-top-left, #nav-top-right", {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          });
+          if (blurToggleRef.current) {
+            gsap.to(blurToggleRef.current, {
+              opacity: 1,
+              duration: 0.8,
+              ease: "power2.out",
+            });
+          }
+        },
+        onLeave: () => {
+          // Blur toggle will be hidden by Glitch ScrollTrigger
+          // So we don't hide it here - allows it to stay visible after Spectrum
+        },
+        onEnterBack: () => {
+          // Show blur toggle when coming back to Spectrum
+          if (blurToggleRef.current) {
+            gsap.to(blurToggleRef.current, {
+              opacity: 1,
+              duration: 0.8,
+              ease: "power2.out",
+            });
+          }
+        },
+        onLeaveBack: () => {
+          // Hide all when leaving Spectrum (scrolling up)
+          gsap.to("#nav-top-left, #nav-top-right", {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.in",
+          });
+          if (blurToggleRef.current) {
+            gsap.to(blurToggleRef.current, {
+              opacity: 0,
+              duration: 0.5,
+              ease: "power2.in",
+            });
+          }
+        },
+      });
+
+      // Fade out nav items (but not blur toggle) when scrolling past hero section
+      ScrollTrigger.create({
+        trigger: "#animation-section",
+        start: "top bottom",
+        end: "bottom top",
+        onEnter: () => {
+          gsap.to("#nav-top-left, #nav-top-right", {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.out",
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to("#nav-top-left, #nav-top-right", {
+            opacity: 1,
+            duration: 0.5,
+            ease: "power2.out",
+          });
+        },
+      });
+
       // Prepare wavelength labels and main title
       const wavelengthLabels =
         textGridRef.current?.querySelectorAll("#wavelength-label");
@@ -250,7 +353,7 @@ const Spectrum: React.FC = () => {
           0.3,
         )
         .to(
-          "#nav-bottom-left, #nav-bottom-right, #nav-bottom-center",
+          "#nav-bottom-left, #nav-bottom-right",
           {
             opacity: 0,
             duration: 0.6,
@@ -378,7 +481,7 @@ const Spectrum: React.FC = () => {
     <div className={styles.spectrum}>
       {/* Header */}
       <header className={styles.header}>
-        <div className={styles.blurToggle}>
+        <div ref={blurToggleRef} id="spectrum-blur-toggle" className={styles.blurToggle}>
           <span className={styles.blurBtn} onClick={handleBlurToggle}>
             {blurEnabled ? "Blur Off" : "Blur On"}
           </span>
