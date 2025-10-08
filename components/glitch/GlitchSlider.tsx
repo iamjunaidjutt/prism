@@ -1550,13 +1550,53 @@ const GlitchSlider = () => {
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       gsap.registerPlugin(ScrollTrigger);
 
+      // Function to reset to first slide without animation
+      function resetToFirstSlide() {
+        state.currentImageIndex = 0;
+        
+        const slideInfo = slideData[0];
+        
+        // Update all text elements instantly
+        const numberEl = slider.querySelector("[data-slide-number] span");
+        const titleEl = slider.querySelector("[data-slide-title] h1");
+        const descEl = slider.querySelector("[data-slide-description] p");
+        
+        if (numberEl) numberEl.textContent = slideInfo.number;
+        if (titleEl) titleEl.textContent = slideInfo.title;
+        if (descEl) descEl.textContent = slideInfo.description;
+        
+        // Update properties
+        for (let i = 0; i < 5; i++) {
+          const propEl = slider.querySelector(`[data-property-line-${i + 1}] span`);
+          if (propEl) propEl.textContent = slideInfo.properties[i] || "";
+        }
+        
+        // Update paragraphs
+        const para1El = slider.querySelector("[data-paragraph-line-1] span");
+        const para2El = slider.querySelector("[data-paragraph-line-2] span");
+        if (para1El) para1El.textContent = slideInfo.paragraphLines[0] || "";
+        if (para2El) para2El.textContent = slideInfo.paragraphLines[1] || "";
+        
+        // Update shader texture
+        if (state.shaderMaterial && state.slideTextures[0]) {
+          state.shaderMaterial.uniforms.uTexture1.value = state.slideTextures[0];
+          state.shaderMaterial.uniforms.uTexture1Size.value = state.slideTextures[0].userData.size;
+        }
+      }
+
       ScrollTrigger.create({
         trigger: containerRef.current,
-        start: "top center",
+        start: "top top",
         end: "bottom top",
         onEnter: () => {
-          state.isActive = true;
-          state.currentImageIndex = 0; // Reset to first slide
+          // Prevent any scroll interactions during reset and activation
+          state.isTransitioning = true;
+          state.isActive = false;
+          
+          // Reset to first slide
+          resetToFirstSlide();
+          
+          // Add loaded class immediately
           slider.classList.add(styles.loaded);
           
           // Fade in Glitch header/footer elements
@@ -1570,6 +1610,13 @@ const GlitchSlider = () => {
             duration: 0.8,
             ease: "power2.out",
           });
+          
+          // Enable interaction after component is fully in viewport and animations complete
+          setTimeout(() => {
+            state.isActive = true;
+            state.isTransitioning = false;
+            state.scrollingEnabled = true;
+          }, 500);
         },
         onLeave: () => {
           state.isActive = false;
