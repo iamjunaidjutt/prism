@@ -1,5 +1,5 @@
 .glitchContainer {
-  @apply w-full relative overflow-hidden h-[100vh];
+  @apply w-full relative overflow-hidden h-[100vh] z-20;
 
   .imageSlider {
     @apply relative w-screen h-screen overflow-hidden opacity-0 pointer-events-none transition-opacity duration-[1500ms];

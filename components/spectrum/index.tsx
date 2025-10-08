@@ -179,6 +179,22 @@ const Spectrum: React.FC = () => {
         },
       });
 
+      // Add fade-out animation when Glitch component comes into view
+      const fadeOutTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".glitchContainer",
+          start: "top bottom",
+          end: "top center",
+          scrub: 1,
+        },
+      });
+
+      fadeOutTl.to("#svg-container, #text-grid, #main-title", {
+        opacity: 0,
+        duration: 1,
+        ease: "power2.out",
+      });
+
       // Prepare wavelength labels and main title
       const wavelengthLabels =
         textGridRef.current?.querySelectorAll("#wavelength-label");

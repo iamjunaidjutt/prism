@@ -9,7 +9,6 @@ import Image from "next/image";
 
 const GlitchSlider = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useGSAP(() => {
     const initSlider = async () => {
@@ -28,13 +27,8 @@ const GlitchSlider = () => {
       ) as HTMLElement;
       if (!slider) return;
 
-      // Show loading screen
-      createLoadingManager(() => {
-        setIsLoaded(true);
-        setTimeout(() => {
-          slider.classList.add(styles.loaded);
-        }, 500);
-      });
+      // Initialize slider immediately
+      slider.classList.add(styles.loaded);
 
       // Image collection
       const imageCollection = [
@@ -105,6 +99,7 @@ const GlitchSlider = () => {
         lastScrollTimestamp: 0,
         touchStartPosition: 0,
         isTouchActive: false,
+        isInViewport: false,
         renderer: null as THREE.WebGLRenderer | null,
         scene: null as THREE.Scene | null,
         camera: null as THREE.OrthographicCamera | null,
@@ -1392,10 +1387,27 @@ const GlitchSlider = () => {
 
       // Event listeners
       function initEventListeners() {
+        // Set up intersection observer to detect when component is in viewport
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              state.isInViewport = entry.isIntersecting;
+            });
+          },
+          { threshold: 0.5 } // Trigger when 50% of component is visible
+        );
+        
+        if (containerRef.current) {
+          observer.observe(containerRef.current);
+        }
+
         // Mouse wheel
         window.addEventListener(
           "wheel",
           (wheelEvent) => {
+            // Only handle scroll if component is in viewport
+            if (!state.isInViewport) return;
+            
             wheelEvent.preventDefault();
             const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
             handleScrollInteraction(scrollDirection);
@@ -1407,6 +1419,9 @@ const GlitchSlider = () => {
         window.addEventListener(
           "touchstart",
           (touchStartEvent) => {
+            // Only handle touch if component is in viewport
+            if (!state.isInViewport) return;
+            
             state.touchStartPosition = touchStartEvent.touches[0].clientY;
             state.isTouchActive = true;
           },
@@ -1418,6 +1433,7 @@ const GlitchSlider = () => {
           (touchMoveEvent) => {
             touchMoveEvent.preventDefault();
             if (
+              !state.isInViewport ||
               !state.isTouchActive ||
               state.isTransitioning ||
               !state.scrollingEnabled
@@ -1551,7 +1567,7 @@ const GlitchSlider = () => {
   return (
     <div ref={containerRef} className={styles.glitchContainer}>
       <main
-        className={`${styles.imageSlider} ${isLoaded ? styles.loaded : ""}`}
+        className={`${styles.imageSlider} ${styles.loaded}`}
         role="region"
         aria-label="Image carousel"
         data-image-slider-init
@@ -1622,92 +1638,5 @@ const GlitchSlider = () => {
   );
 };
 
-// Helper function to create loading manager
-function createLoadingManager(onComplete: () => void) {
-  const overlay = document.createElement("div");
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #000000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000;
-  `;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = 300;
-  canvas.height = 300;
-
-  const ctx = canvas.getContext("2d");
-  overlay.appendChild(canvas);
-  document.body.appendChild(overlay);
-
-  let startTime: number | null = null;
-  const duration = 3000;
-
-  const animate = (timestamp: number) => {
-    if (!startTime) startTime = timestamp;
-    if (!ctx) return;
-
-    const time = (timestamp - startTime) * 0.001;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Simple loading animation
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    // Draw center dot
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 3, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(255, 0, 0, 0.9)";
-    ctx.fill();
-
-    // Draw pulsing rings
-    for (let i = 0; i < 5; i++) {
-      const radius = 20 + i * 15;
-      const count = 8 + i * 4;
-
-      for (let j = 0; j < count; j++) {
-        const angle = (j / count) * Math.PI * 2;
-        const radiusPulse = Math.sin(time * 2 - i * 0.4) * 3;
-        const x = centerX + Math.cos(angle) * (radius + radiusPulse);
-        const y = centerY + Math.sin(angle) * (radius + radiusPulse);
-
-        const opacity = 0.4 + Math.sin(time * 2 - i * 0.4 + j * 0.2) * 0.6;
-
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(x, y);
-        ctx.lineWidth = 0.8;
-        ctx.strokeStyle = `rgba(255, 102, 102, ${opacity * 0.5})`;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 102, 102, ${opacity})`;
-        ctx.fill();
-      }
-    }
-
-    if (timestamp - startTime >= duration) {
-      overlay.style.opacity = "0";
-      overlay.style.transition = "opacity 0.8s ease";
-      setTimeout(() => {
-        overlay.remove();
-        onComplete();
-      }, 800);
-      return;
-    }
-
-    requestAnimationFrame(animate);
-  };
-
-  requestAnimationFrame(animate);
-}
 
 export default GlitchSlider;
