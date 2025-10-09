@@ -1,5 +1,5 @@
 .glitchContainer {
-  @apply w-full relative overflow-hidden h-[100vh];
+  @apply w-full relative overflow-hidden h-[100vh] z-20;
 
   .imageSlider {
     @apply relative w-screen h-screen overflow-hidden opacity-0 pointer-events-none transition-opacity duration-[1500ms];
@@ -95,11 +95,11 @@
     }
 
     .topCenterText {
-      @apply fixed left-1/2 top-4 3xl:top-8 -translate-x-1/2 uppercase pointer-events-none z-2 text-primary-text font-mono text-[10px] minTab:text-[12px] 2xl:text-[14px] 3xl:text-xl font-medium tracking-wide-4;
+      @apply fixed left-1/2 top-4 3xl:top-8 -translate-x-1/2 uppercase pointer-events-none z-2 text-primary-text font-mono text-[10px] minTab:text-[12px] 2xl:text-[14px] 3xl:text-xl font-medium tracking-wide-4 opacity-0;
     }
 
     .bottomCenterText {
-      @apply fixed left-1/2 bottom-4 3xl:bottom-8 -translate-x-1/2 pointer-events-none z-2 text-primary-text font-sans text-[10px] minTab:text-[12px] 2xl:text-[14px] 3xl:text-xl font-medium tracking-wide-2;
+      @apply fixed left-1/2 bottom-4 3xl:bottom-8 -translate-x-1/2 pointer-events-none z-2 text-primary-text font-sans text-[10px] minTab:text-[12px] 2xl:text-[14px] 3xl:text-xl font-medium tracking-wide-2 opacity-0;
     }
 
     .cornerText {

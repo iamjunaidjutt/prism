@@ -9,7 +9,6 @@ import Image from "next/image";
 
 const GlitchSlider = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useGSAP(() => {
     const initSlider = async () => {
@@ -28,13 +27,8 @@ const GlitchSlider = () => {
       ) as HTMLElement;
       if (!slider) return;
 
-      // Show loading screen
-      createLoadingManager(() => {
-        setIsLoaded(true);
-        setTimeout(() => {
-          slider.classList.add(styles.loaded);
-        }, 500);
-      });
+      // Don't initialize slider immediately - wait for viewport
+      // slider.classList.add(styles.loaded);
 
       // Image collection
       const imageCollection = [
@@ -105,6 +99,7 @@ const GlitchSlider = () => {
         lastScrollTimestamp: 0,
         touchStartPosition: 0,
         isTouchActive: false,
+        isActive: false,
         renderer: null as THREE.WebGLRenderer | null,
         scene: null as THREE.Scene | null,
         camera: null as THREE.OrthographicCamera | null,
@@ -1396,8 +1391,19 @@ const GlitchSlider = () => {
         window.addEventListener(
           "wheel",
           (wheelEvent) => {
-            wheelEvent.preventDefault();
+            // Only handle scroll if component is active
+            if (!state.isActive) return;
+            
             const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
+            
+            // If scrolling up and already at first slide, allow page scroll to exit
+            if (scrollDirection === "up" && state.currentImageIndex === 0) {
+              // Don't preventDefault - allow natural page scroll
+              return;
+            }
+            
+            // Otherwise, handle slide navigation
+            wheelEvent.preventDefault();
             handleScrollInteraction(scrollDirection);
           },
           { passive: false },
@@ -1407,6 +1413,9 @@ const GlitchSlider = () => {
         window.addEventListener(
           "touchstart",
           (touchStartEvent) => {
+            // Only handle touch if component is active
+            if (!state.isActive) return;
+            
             state.touchStartPosition = touchStartEvent.touches[0].clientY;
             state.isTouchActive = true;
           },
@@ -1416,8 +1425,8 @@ const GlitchSlider = () => {
         window.addEventListener(
           "touchmove",
           (touchMoveEvent) => {
-            touchMoveEvent.preventDefault();
             if (
+              !state.isActive ||
               !state.isTouchActive ||
               state.isTransitioning ||
               !state.scrollingEnabled
@@ -1429,8 +1438,18 @@ const GlitchSlider = () => {
               state.touchStartPosition - touchCurrentPosition;
 
             if (Math.abs(touchDifference) > config.touchThreshold) {
-              state.isTouchActive = false;
               const swipeDirection = touchDifference > 0 ? "down" : "up";
+              
+              // If swiping down (scrollDirection up) and at first slide, allow page scroll
+              if (swipeDirection === "up" && state.currentImageIndex === 0) {
+                // Don't preventDefault - allow page scroll
+                state.isTouchActive = false;
+                return;
+              }
+              
+              // Otherwise, prevent default and handle slide transition
+              touchMoveEvent.preventDefault();
+              state.isTouchActive = false;
               handleScrollInteraction(swipeDirection);
             }
           },
@@ -1543,6 +1562,149 @@ const GlitchSlider = () => {
       // Initialize everything
       await initializeRenderer();
       initEventListeners();
+
+      // Set up ScrollTrigger to activate component when it comes into view
+      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Function to reset to first slide without animation
+      function resetToFirstSlide() {
+        state.currentImageIndex = 0;
+        
+        const slideInfo = slideData[0];
+        
+        // Update all text elements instantly
+        const numberEl = slider.querySelector("[data-slide-number] span");
+        const titleEl = slider.querySelector("[data-slide-title] h1");
+        const descEl = slider.querySelector("[data-slide-description] p");
+        
+        if (numberEl) numberEl.textContent = slideInfo.number;
+        if (titleEl) titleEl.textContent = slideInfo.title;
+        if (descEl) descEl.textContent = slideInfo.description;
+        
+        // Update properties
+        for (let i = 0; i < 5; i++) {
+          const propEl = slider.querySelector(`[data-property-line-${i + 1}] span`);
+          if (propEl) propEl.textContent = slideInfo.properties[i] || "";
+        }
+        
+        // Update paragraphs
+        const para1El = slider.querySelector("[data-paragraph-line-1] span");
+        const para2El = slider.querySelector("[data-paragraph-line-2] span");
+        if (para1El) para1El.textContent = slideInfo.paragraphLines[0] || "";
+        if (para2El) para2El.textContent = slideInfo.paragraphLines[1] || "";
+        
+        // Update featured image - remove all old wrappers and reset to first image
+        const featuredImageContainer = slider.querySelector("[data-featured-image]");
+        if (featuredImageContainer) {
+          // Clear all existing wrappers
+          featuredImageContainer.innerHTML = "";
+          
+          // Create fresh wrapper with first image
+          const newWrapper = document.createElement("div");
+          newWrapper.className = styles.featuredImageWrapper;
+          newWrapper.setAttribute("data-featured-wrapper", "");
+          
+          const img = document.createElement("img");
+          img.src = imageCollection[0];
+          img.alt = `Featured image 1`;
+          img.style.transform = "translateY(0%)";
+          
+          newWrapper.appendChild(img);
+          newWrapper.style.clipPath = "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)";
+          featuredImageContainer.appendChild(newWrapper);
+        }
+        
+        // Update shader texture
+        if (state.shaderMaterial && state.slideTextures[0]) {
+          state.shaderMaterial.uniforms.uProgress.value = 0;
+          state.shaderMaterial.uniforms.uTexture1.value = state.slideTextures[0];
+          state.shaderMaterial.uniforms.uTexture2.value = state.slideTextures[1] || state.slideTextures[0];
+          state.shaderMaterial.uniforms.uTexture1Size.value = state.slideTextures[0].userData.size;
+          state.shaderMaterial.uniforms.uTexture2Size.value = (state.slideTextures[1] || state.slideTextures[0]).userData.size;
+        }
+      }
+
+      ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: "top center",
+        end: "bottom top",
+        onEnter: () => {
+          // Disable interactions immediately
+          state.isTransitioning = true;
+          state.scrollingEnabled = false;
+          
+          // Add loaded class to show component
+          slider.classList.add(styles.loaded);
+          
+          // Reset to first slide
+          resetToFirstSlide();
+          
+          // Fade in Glitch header/footer elements
+          gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          });
+          gsap.to(slider.querySelector(`.${styles.bottomCenterText}`), {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          });
+          
+          // Enable interaction after a longer delay to ensure reset is complete
+          setTimeout(() => {
+            state.isActive = true;
+            state.isTransitioning = false;
+            state.scrollingEnabled = true;
+          }, 1000);
+        },
+        onLeave: () => {
+          state.isActive = false;
+          
+          // Fade out Glitch header/footer elements
+          gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.in",
+          });
+          gsap.to(slider.querySelector(`.${styles.bottomCenterText}`), {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.in",
+          });
+        },
+        onEnterBack: () => {
+          state.isActive = true;
+          
+          // Fade in Glitch header/footer elements
+          gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          });
+          gsap.to(slider.querySelector(`.${styles.bottomCenterText}`), {
+            opacity: 1,
+            duration: 0.8,
+            ease: "power2.out",
+          });
+        },
+        onLeaveBack: () => {
+          state.isActive = false;
+          
+          // Fade out Glitch header/footer elements
+          gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.in",
+          });
+          gsap.to(slider.querySelector(`.${styles.bottomCenterText}`), {
+            opacity: 0,
+            duration: 0.5,
+            ease: "power2.in",
+          });
+        }
+      });
     };
 
     initSlider();
@@ -1551,7 +1713,7 @@ const GlitchSlider = () => {
   return (
     <div ref={containerRef} className={styles.glitchContainer}>
       <main
-        className={`${styles.imageSlider} ${isLoaded ? styles.loaded : ""}`}
+        className={`${styles.imageSlider}`}
         role="region"
         aria-label="Image carousel"
         data-image-slider-init
@@ -1622,92 +1784,5 @@ const GlitchSlider = () => {
   );
 };
 
-// Helper function to create loading manager
-function createLoadingManager(onComplete: () => void) {
-  const overlay = document.createElement("div");
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #000000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000;
-  `;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = 300;
-  canvas.height = 300;
-
-  const ctx = canvas.getContext("2d");
-  overlay.appendChild(canvas);
-  document.body.appendChild(overlay);
-
-  let startTime: number | null = null;
-  const duration = 3000;
-
-  const animate = (timestamp: number) => {
-    if (!startTime) startTime = timestamp;
-    if (!ctx) return;
-
-    const time = (timestamp - startTime) * 0.001;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Simple loading animation
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    // Draw center dot
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 3, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(255, 0, 0, 0.9)";
-    ctx.fill();
-
-    // Draw pulsing rings
-    for (let i = 0; i < 5; i++) {
-      const radius = 20 + i * 15;
-      const count = 8 + i * 4;
-
-      for (let j = 0; j < count; j++) {
-        const angle = (j / count) * Math.PI * 2;
-        const radiusPulse = Math.sin(time * 2 - i * 0.4) * 3;
-        const x = centerX + Math.cos(angle) * (radius + radiusPulse);
-        const y = centerY + Math.sin(angle) * (radius + radiusPulse);
-
-        const opacity = 0.4 + Math.sin(time * 2 - i * 0.4 + j * 0.2) * 0.6;
-
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(x, y);
-        ctx.lineWidth = 0.8;
-        ctx.strokeStyle = `rgba(255, 102, 102, ${opacity * 0.5})`;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(x, y, 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 102, 102, ${opacity})`;
-        ctx.fill();
-      }
-    }
-
-    if (timestamp - startTime >= duration) {
-      overlay.style.opacity = "0";
-      overlay.style.transition = "opacity 0.8s ease";
-      setTimeout(() => {
-        overlay.remove();
-        onComplete();
-      }, 800);
-      return;
-    }
-
-    requestAnimationFrame(animate);
-  };
-
-  requestAnimationFrame(animate);
-}
 
 export default GlitchSlider;
