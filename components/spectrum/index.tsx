@@ -195,28 +195,36 @@ const Spectrum: React.FC = () => {
         },
       });
 
+      // Fade out SVG elements
       fadeOutTl.to("#svg-container, #text-grid, #main-title", {
         opacity: 0,
         duration: 1,
         ease: "power2.out",
-      });
+      }, 0);
 
-      // Hide blur toggle when Glitch component comes into view
+      // Fade out blur toggle at the same time as SVG
+      if (blurToggleRef.current) {
+        fadeOutTl.to(blurToggleRef.current, {
+          opacity: 0,
+          duration: 1,
+          ease: "power2.out",
+          onComplete: () => {
+            // Disable pointer events when fully hidden
+            if (blurToggleRef.current) {
+              blurToggleRef.current.style.pointerEvents = "none";
+            }
+          }
+        }, 0);
+      }
+
+      // Show blur toggle when scrolling back from Glitch
       ScrollTrigger.create({
         trigger: ".glitchContainer",
         start: "top center",
         end: "bottom top",
-        onEnter: () => {
-          if (blurToggleRef.current) {
-            gsap.to(blurToggleRef.current, {
-              opacity: 0,
-              duration: 0.3,
-              ease: "power2.out",
-            });
-          }
-        },
         onLeaveBack: () => {
           if (blurToggleRef.current) {
+            blurToggleRef.current.style.pointerEvents = "auto";
             gsap.to(blurToggleRef.current, {
               opacity: 1,
               duration: 0.5,
@@ -353,7 +361,7 @@ const Spectrum: React.FC = () => {
           0.3,
         )
         .to(
-          "#nav-bottom-left, #nav-bottom-right",
+          "#nav-bottom-left, #nav-bottom-right, #nav-bottom-center",
           {
             opacity: 0,
             duration: 0.6,
