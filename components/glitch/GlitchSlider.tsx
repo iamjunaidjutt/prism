@@ -1711,7 +1711,7 @@ const GlitchSlider = () => {
   }, []);
 
   return (
-    <div ref={containerRef} className={styles.glitchContainer}>
+    <div ref={containerRef} className={styles.glitchContainer} data-glitch-section>
       <main
         className={`${styles.imageSlider}`}
         role="region"

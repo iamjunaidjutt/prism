@@ -188,7 +188,7 @@ const Spectrum: React.FC = () => {
       // Add fade-out animation when Glitch component comes into view
       const fadeOutTl = gsap.timeline({
         scrollTrigger: {
-          trigger: ".glitchContainer",
+          trigger: "[data-glitch-section]",
           start: "top bottom",
           end: "top center",
           scrub: 1,
@@ -219,7 +219,7 @@ const Spectrum: React.FC = () => {
 
       // Show blur toggle when scrolling back from Glitch
       ScrollTrigger.create({
-        trigger: ".glitchContainer",
+        trigger: "[data-glitch-section]",
         start: "top center",
         end: "bottom top",
         onLeaveBack: () => {
