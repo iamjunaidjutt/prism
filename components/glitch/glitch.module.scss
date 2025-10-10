@@ -1,5 +1,5 @@
 .glitchContainer {
-  @apply w-full relative overflow-hidden h-[100vh];
+  @apply w-full relative overflow-hidden h-[100vh] z-20;
 
   .imageSlider {
     @apply relative w-screen h-screen overflow-hidden opacity-0 pointer-events-none transition-opacity duration-[1500ms];
@@ -14,6 +14,7 @@
 
     .featuredImage {
       @apply absolute left-1/2 z-2 w-[85%] h-[30%] md:w-[35%] md:h-[40%] top-1/2 -translate-x-1/2 -translate-y-1/2;
+      left: calc(50% - 20px) overflow-x-hidden;
 
       .featuredImageWrapper {
         @apply absolute top-0 left-0 w-full h-full will-change-[clip-path];
@@ -29,7 +30,9 @@
         clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 
         span {
-          @apply absolute top-0 left-0 uppercase whitespace-nowrap w-full m-0 p-0 text-primary-text font-mono text-[12px] lg:text-sm xl:text-base 2xl:text-lg 2xlM:text-xl 3xl:text-2xl font-normal leading-[1.5] tracking-wide-2 translate-y-0 will-change-transform;
+          @apply absolute top-0 left-0 uppercase whitespace-nowrap w-full m-0 p-0 text-primary-text font-mono text-[12px] lg:text-sm xl:text-base 2xl:text-lg 2xlM:text-xl 3xl:text-2xl font-bold leading-[1.5] tracking-wide-2 translate-y-0 will-change-transform;
+          -webkit-text-stroke: 0.1px #000;
+          text-stroke: 0.1px #000;
         }
       }
 
@@ -38,7 +41,9 @@
         clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 
         h1 {
-          @apply absolute top-0 left-0 m-0 p-0 whitespace-nowrap w-fit text-primary-text font-sans text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl 2xlM:text-5xl 3xl:text-6xl font-medium leading-[1.2] tracking-tight-2 border-b-2 border-primary-text translate-y-0 will-change-transform;
+          @apply absolute top-0 left-0 m-0 p-0 whitespace-nowrap w-fit text-primary-text font-sans text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl 2xlM:text-5xl 3xl:text-6xl font-semibold leading-[1.2] tracking-tight-2 border-b-2 border-primary-text translate-y-0 will-change-transform;
+          -webkit-text-stroke: 1.2px #000;
+          text-stroke: 1.2px #000;
         }
       }
 
@@ -47,7 +52,9 @@
         clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 
         p {
-          @apply absolute top-0 left-0 uppercase m-0 p-0 whitespace-nowrap w-full text-primary-text font-mono text-[10px] lg:text-sm xl:text-base 2xl:text-lg 2xlM:text-xl 3xl:text-2xl font-normal leading-[1.2] tracking-wide-1 translate-y-0 will-change-transform;
+          @apply absolute top-0 left-0 uppercase m-0 p-0 whitespace-nowrap w-full text-primary-text font-mono text-[10px] lg:text-sm xl:text-base 2xl:text-lg 2xlM:text-xl 3xl:text-2xl font-bold leading-[1.2] tracking-wide-1 translate-y-0 will-change-transform;
+          -webkit-text-stroke: 0.2px #000;
+          text-stroke: 0.2px #000;
         }
       }
     }
@@ -68,7 +75,9 @@
         }
 
         span {
-          @apply block absolute top-0 left-0 whitespace-nowrap w-full m-0 p-0 text-primary-text font-sans font-normal leading-[2] translate-y-0 will-change-[transform];
+          @apply block absolute top-0 left-0 whitespace-nowrap w-full m-0 p-0 text-primary-text font-sans font-semibold leading-[2] translate-y-0 will-change-[transform];
+          -webkit-text-stroke: 1.2px #000;
+          text-stroke: 1.2px #000;
         }
       }
     }
@@ -81,7 +90,7 @@
         clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 
         &:first-child {
-          @apply md:h-[25px] lg:h-[35px] 3xl:h-[60px];
+          @apply md:h-[30px] lg:h-[40px] 3xl:h-[75px];
         }
 
         &:last-child {
@@ -89,17 +98,23 @@
         }
 
         span {
-          @apply block absolute top-0 left-0 m-0 p-0 w-full text-primary-text font-sans font-medium leading-[1.4] translate-y-0 will-change-transform whitespace-normal;
+          @apply block absolute top-0 left-0 m-0 p-0 w-full text-primary-text font-sans font-semibold leading-[1.4] translate-y-0 will-change-transform whitespace-normal;
+          -webkit-text-stroke: 1.2px #000;
+          text-stroke: 1.2px #000;
         }
       }
     }
 
     .topCenterText {
-      @apply fixed left-1/2 top-4 3xl:top-8 -translate-x-1/2 uppercase pointer-events-none z-2 text-primary-text font-mono text-[10px] minTab:text-[12px] 2xl:text-[14px] 3xl:text-xl font-medium tracking-wide-4;
+      @apply fixed left-1/2 top-4 3xl:top-8 -translate-x-1/2 uppercase pointer-events-none z-2 text-primary-text font-mono text-[10px] minTab:text-[12px] 2xl:text-[14px] 3xl:text-xl font-bold tracking-wide-4 opacity-0;
+      -webkit-text-stroke: 0.1px #000;
+      text-stroke: 0.1px #000;
     }
 
     .bottomCenterText {
-      @apply fixed left-1/2 bottom-4 3xl:bottom-8 -translate-x-1/2 pointer-events-none z-2 text-primary-text font-sans text-[10px] minTab:text-[12px] 2xl:text-[14px] 3xl:text-xl font-medium tracking-wide-2;
+      @apply fixed left-1/2 bottom-4 3xl:bottom-8 -translate-x-1/2 pointer-events-none z-2 text-primary-text font-sans text-[10px] minTab:text-[12px] 2xl:text-[14px] 3xl:text-xl font-medium tracking-wide-2 opacity-0 font-semibold;
+      -webkit-text-stroke: 0.1px #000;
+      text-stroke: 0.1px #000;
     }
 
     .cornerText {

@@ -2,7 +2,7 @@
   @apply font-mono text-12px uppercase tracking-0.5px bg-primary-bg overflow-x-hidden transition-colors duration-300 h-[250vh] flex flex-col;
 
   .header {
-    @apply pointer-events-none relative fixed top-0 left-0 right-0 z-100;
+    @apply pointer-events-none fixed top-0 left-0 right-0 z-100;
 
     .blurToggle {
       @apply absolute top-3 minTab:top-5 lg:top-6 2xlM:top-10 left-1/2 -translate-x-1/2 pointer-events-auto px-5 py-2;
@@ -29,7 +29,7 @@
   }
 
   .navItem {
-    @apply fixed text-primary-text text-[5px] minTab:text-[8px] lg:text-[10px] xl:text-[14px] 2xlM:text-25px uppercase tracking-0.5px pointer-events-auto z-1000 transition-colors duration-300;
+    @apply fixed text-primary-text text-[5px] minTab:text-[8px] lg:text-[10px] xl:text-[14px] 2xlM:text-25px uppercase tracking-0.5px pointer-events-auto z-1000 transition-colors duration-300 opacity-0;
 
     &.navBottomLeft,
     &.navBottomRight {
