@@ -14,7 +14,7 @@
 
     .featuredImage {
       @apply absolute left-1/2 z-2 w-[85%] h-[30%] md:w-[35%] md:h-[40%] top-1/2 -translate-x-1/2 -translate-y-1/2;
-      left: calc(50% - 20px);
+      left: calc(50% - 20px) overflow-x-hidden;
 
       .featuredImageWrapper {
         @apply absolute top-0 left-0 w-full h-full will-change-[clip-path];

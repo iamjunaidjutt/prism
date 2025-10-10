@@ -32,15 +32,15 @@ const GlitchSlider = () => {
 
       // Image collection
       const imageCollection = [
-        "https://assets.codepen.io/7558/horror-01.jpg",
-        "https://assets.codepen.io/7558/horror-02.jpg",
-        "https://assets.codepen.io/7558/horror-03.jpg",
-        "https://assets.codepen.io/7558/horror-04.jpg",
-        "https://assets.codepen.io/7558/horror-05.jpg",
-        "https://assets.codepen.io/7558/horror-01.jpg",
-        "https://assets.codepen.io/7558/horror-02.jpg",
-        "https://assets.codepen.io/7558/horror-03.jpg",
-        "https://assets.codepen.io/7558/horror-04.jpg",
+        "/glitch/1.webp",
+        "/glitch/2.webp",
+        "/glitch/3.webp",
+        "/glitch/4.webp",
+        "/glitch/5.webp",
+        "/glitch/6.webp",
+        "/glitch/7.webp",
+        "/glitch/8.webp",
+        "/glitch/9.webp",
       ];
 
       // Configuration
