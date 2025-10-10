@@ -14,6 +14,7 @@
 
     .featuredImage {
       @apply absolute left-1/2 z-2 w-[85%] h-[30%] md:w-[35%] md:h-[40%] top-1/2 -translate-x-1/2 -translate-y-1/2;
+      left: calc(50% - 20px);
 
       .featuredImageWrapper {
         @apply absolute top-0 left-0 w-full h-full will-change-[clip-path];
@@ -81,7 +82,7 @@
         clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 
         &:first-child {
-          @apply md:h-[25px] lg:h-[35px] 3xl:h-[60px];
+          @apply md:h-[30px] lg:h-[40px] 3xl:h-[75px];
         }
 
         &:last-child {
