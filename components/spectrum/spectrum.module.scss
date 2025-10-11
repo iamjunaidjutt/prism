@@ -1,5 +1,5 @@
 .spectrum {
-  @apply font-mono text-12px uppercase tracking-0.5px bg-primary-bg overflow-x-hidden transition-colors duration-300 h-[250vh] flex flex-col;
+  @apply font-mono text-12px uppercase tracking-0.5px bg-primary-bg overflow-x-hidden transition-colors duration-300 h-[250vh] flex flex-col relative;
 
   .header {
 
@@ -7,7 +7,7 @@
       @apply relative;
 
       .navItem {
-        @apply fixed text-primary-text text-[5px] minTab:text-[8px] lg:text-[10px] xl:text-[14px] 2xlM:text-25px uppercase tracking-0.5px pointer-events-auto z-1000 transition-colors duration-300 opacity-0;
+        @apply absolute text-primary-text text-[5px] minTab:text-[8px] lg:text-[10px] xl:text-[14px] 2xlM:text-25px uppercase tracking-0.5px pointer-events-auto z-1000 transition-colors duration-300 opacity-0;
 
         &.navBottomLeft,
         &.navBottomRight {
@@ -56,7 +56,7 @@
   }
 
   .bgGradients {
-    @apply fixed top-0 left-0 w-screen h-screen pointer-events-none z-1 opacity-15;
+    @apply absolute top-0 left-0 w-full h-full pointer-events-none z-1 opacity-15;
 
     .bgGradient {
       @apply absolute blur-40px transition-opacity duration-500 will-change-opacity-filter;
@@ -79,7 +79,7 @@
   }
 
   .gradientOverlay {
-    @apply fixed top-0 left-0 w-screen h-screen pointer-events-none z-5 opacity-0 blur-60px transition-opacity duration-600 will-change-opacity-filter;
+    @apply absolute top-0 left-0 w-full h-full pointer-events-none z-5 opacity-0 blur-60px transition-opacity duration-600 will-change-opacity-filter;
   }
 
   .heroSection {

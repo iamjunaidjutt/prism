@@ -190,7 +190,7 @@ const Spectrum: React.FC = () => {
       });
 
       // Fade out SVG elements
-      fadeOutTl.to("#svg-container, #text-grid, #main-title", {
+      fadeOutTl.to("[data-spectrum-component] #svg-container, [data-spectrum-component] #text-grid, [data-spectrum-component] #main-title", {
         opacity: 0,
         duration: 1,
         ease: "power2.out",
@@ -205,7 +205,7 @@ const Spectrum: React.FC = () => {
         end: "bottom top",
         onEnter: () => {
           // Show all nav items when entering Spectrum
-          gsap.to("#nav-top-left, #nav-top-right", {
+          gsap.to("[data-spectrum-component] #nav-top-left, [data-spectrum-component] #nav-top-right", {
             opacity: 1,
             duration: 0.8,
             ease: "power2.out",
@@ -219,7 +219,7 @@ const Spectrum: React.FC = () => {
         },
         onLeaveBack: () => {
           // Hide nav items when leaving Spectrum (scrolling up)
-          gsap.to("#nav-top-left, #nav-top-right", {
+          gsap.to("[data-spectrum-component] #nav-top-left, [data-spectrum-component] #nav-top-right", {
             opacity: 0,
             duration: 0.5,
             ease: "power2.in",
@@ -233,14 +233,14 @@ const Spectrum: React.FC = () => {
         start: "top bottom",
         end: "bottom top",
         onEnter: () => {
-          gsap.to("#nav-top-left, #nav-top-right", {
+          gsap.to("[data-spectrum-component] #nav-top-left, [data-spectrum-component] #nav-top-right", {
             opacity: 0,
             duration: 0.5,
             ease: "power2.out",
           });
         },
         onLeaveBack: () => {
-          gsap.to("#nav-top-left, #nav-top-right", {
+          gsap.to("[data-spectrum-component] #nav-top-left, [data-spectrum-component] #nav-top-right", {
             opacity: 1,
             duration: 0.5,
             ease: "power2.out",
@@ -281,11 +281,11 @@ const Spectrum: React.FC = () => {
 
       // Scroll animations
       scrollTl
-        .to("#svg-container", { autoAlpha: 1, duration: 0.01 }, 0)
-        .to("#text-grid", { autoAlpha: 1, duration: 0.01 }, 0)
-        .to("#main-title", { autoAlpha: 1, duration: 0.01 }, 0)
+        .to("[data-spectrum-component] #svg-container", { autoAlpha: 1, duration: 0.01 }, 0)
+        .to("[data-spectrum-component] #text-grid", { autoAlpha: 1, duration: 0.01 }, 0)
+        .to("[data-spectrum-component] #main-title", { autoAlpha: 1, duration: 0.01 }, 0)
         .to(
-          "#svg-container",
+          "[data-spectrum-component] #svg-container",
           {
             transform: "scaleY(0.05) translateY(-30px)",
             duration: 0.3,
@@ -294,7 +294,7 @@ const Spectrum: React.FC = () => {
           0,
         )
         .to(
-          "#svg-container",
+          "[data-spectrum-component] #svg-container",
           {
             transform: "scaleY(1) translateY(0px)",
             duration: 1.2,
@@ -303,7 +303,7 @@ const Spectrum: React.FC = () => {
           0.3,
         )
         .to(
-          "#nav-bottom-left, #nav-bottom-right, #nav-bottom-center",
+          "[data-spectrum-component] #nav-bottom-left, [data-spectrum-component] #nav-bottom-right, [data-spectrum-component] #nav-bottom-center",
           {
             opacity: 0,
             duration: 0.6,
@@ -417,7 +417,7 @@ const Spectrum: React.FC = () => {
   }
 
   return (
-    <div className={styles.spectrum}>
+    <div className={styles.spectrum} data-spectrum-component>
       {/* Header */}
       <header className={styles.header}>
         <nav>
