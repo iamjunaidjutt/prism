@@ -10,6 +10,49 @@ import Image from "next/image";
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
+// Performance monitoring utility
+const performanceMonitor = {
+  startTime: 0,
+  frameCount: 0,
+  
+  start: () => {
+    performanceMonitor.startTime = performance.now();
+    performanceMonitor.frameCount = 0;
+  },
+  
+  frame: () => {
+    performanceMonitor.frameCount++;
+    const now = performance.now();
+    const elapsed = now - performanceMonitor.startTime;
+    
+    if (elapsed > 1000) { // Every second
+      const fps = Math.round((performanceMonitor.frameCount * 1000) / elapsed);
+      if (fps < 30) {
+        console.warn(`Future Circle Animation Low FPS: ${fps}, consider reducing animation complexity`);
+      }
+      performanceMonitor.startTime = now;
+      performanceMonitor.frameCount = 0;
+    }
+  }
+};
+
+// Debounce utility function
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): T & { cancel: () => void } {
+  let timeout: NodeJS.Timeout;
+  
+  const debounced = (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+  
+  debounced.cancel = () => clearTimeout(timeout);
+  
+  return debounced as T & { cancel: () => void };
+}
+
 // WebNominee animation interfaces
 interface Disc {
   x: number;
@@ -74,40 +117,64 @@ const FutureCircle = () => {
     [],
   );
 
-  // WebNominee animation functions
+  // WebNominee animation functions with error handling
   const setSize = useCallback(() => {
-    if (!webbyNomineeRef.current || !canvasRef.current || !badgeRef.current)
-      return;
+    try {
+      if (!webbyNomineeRef.current || !canvasRef.current || !badgeRef.current) {
+        console.warn("Required refs not available for setSize");
+        return;
+      }
 
-    const rect = webbyNomineeRef.current.getBoundingClientRect();
-    const badgeRect = badgeRef.current.getBoundingClientRect();
+      const rect = webbyNomineeRef.current.getBoundingClientRect();
+      const badgeRect = badgeRef.current.getBoundingClientRect();
+      
+      if (rect.width <= 0 || rect.height <= 0) {
+        console.warn("Invalid container dimensions:", rect);
+        return;
+      }
+      
+      if (badgeRect.width <= 0 || badgeRect.height <= 0) {
+        console.warn("Invalid badge dimensions:", badgeRect);
+        return;
+      }
 
-    renderRef.current = {
-      width: rect.width,
-      height: rect.height,
-      dpi: window.devicePixelRatio || 1,
-    };
+      renderRef.current = {
+        width: rect.width,
+        height: rect.height,
+        dpi: window.devicePixelRatio || 1,
+      };
 
-    const canvas = canvasRef.current;
-    canvas.width = renderRef.current.width * renderRef.current.dpi;
-    canvas.height = renderRef.current.height * renderRef.current.dpi;
+      const canvas = canvasRef.current;
+      const canvasWidth = renderRef.current.width * renderRef.current.dpi;
+      const canvasHeight = renderRef.current.height * renderRef.current.dpi;
+      
+      if (canvasWidth > 0 && canvasHeight > 0) {
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+      } else {
+        console.warn("Invalid canvas dimensions calculated:", { canvasWidth, canvasHeight });
+        return;
+      }
 
-    const { width, height } = renderRef.current;
-    const diag = Math.hypot(width, height);
+      const { width, height } = renderRef.current;
+      const diag = Math.hypot(width, height);
 
-    startDiscRef.current = {
-      x: width * 0.5,
-      y: height * 0.5,
-      w: diag * 0.5,
-      h: diag * 0.5,
-    };
+      startDiscRef.current = {
+        x: width * 0.5,
+        y: height * 0.5,
+        w: diag * 0.5,
+        h: diag * 0.5,
+      };
 
-    endDiscRef.current = {
-      x: width * 0.5,
-      y: height * 0.5,
-      w: badgeRect.width * 0.5,
-      h: badgeRect.height * 0.5,
-    };
+      endDiscRef.current = {
+        x: width * 0.5,
+        y: height * 0.5,
+        w: badgeRect.width * 0.5,
+        h: badgeRect.height * 0.5,
+      };
+    } catch (error) {
+      console.error("Error in setSize function:", error);
+    }
   }, []);
 
   // Tween disc properties
@@ -198,69 +265,81 @@ const FutureCircle = () => {
   }, []);
   // Draw functions
   const drawDiscs = useCallback((ctx: CanvasRenderingContext2D) => {
-    ctx.strokeStyle = "#444";
-    ctx.lineWidth = 2;
+    try {
+      ctx.strokeStyle = "#444";
+      ctx.lineWidth = 2;
 
-    // Outer disc
-    const outerDisc = startDiscRef.current;
-    ctx.beginPath();
-    ctx.ellipse(
-      outerDisc.x,
-      outerDisc.y,
-      outerDisc.w,
-      outerDisc.h,
-      0,
-      0,
-      Math.PI * 2,
-    );
-    ctx.stroke();
-    ctx.closePath();
-
-    // Inner discs
-    discsRef.current.forEach((disc) => {
+      // Outer disc
+      const outerDisc = startDiscRef.current;
       ctx.beginPath();
-      ctx.ellipse(disc.x, disc.y, disc.w, disc.h, 0, 0, Math.PI * 2);
+      ctx.ellipse(
+        outerDisc.x,
+        outerDisc.y,
+        outerDisc.w,
+        outerDisc.h,
+        0,
+        0,
+        Math.PI * 2,
+      );
       ctx.stroke();
       ctx.closePath();
-    });
+
+      // Inner discs
+      discsRef.current.forEach((disc) => {
+        ctx.beginPath();
+        ctx.ellipse(disc.x, disc.y, disc.w, disc.h, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.closePath();
+      });
+    } catch (error) {
+      console.error("Error in drawDiscs function:", error);
+    }
   }, []);
 
   const drawLines = useCallback((ctx: CanvasRenderingContext2D) => {
-    ctx.beginPath();
-    linesRef.current.forEach(({ p0, p1 }) => {
-      ctx.moveTo(p0.x, p0.y);
-      ctx.lineTo(p1.x, p1.y);
-    });
-    ctx.strokeStyle = "#4449";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.closePath();
-  }, []);
-
-  const drawParticles = useCallback((ctx: CanvasRenderingContext2D) => {
-    particlesRef.current.forEach((particle) => {
-      const line = linesRef.current[particle.lineIndex];
-      if (!line) return;
-
-      const start = {
-        x: line.p0.x + line.l.x * particle.p,
-        y: line.p0.y + line.l.y * particle.p,
-      };
-
-      const p0 = { x: start.x, y: start.y };
-      const p1 = {
-        x: start.x + line.l.x * particle.l,
-        y: start.y + line.l.y * particle.l,
-      };
-
+    try {
       ctx.beginPath();
-      ctx.moveTo(p0.x, p0.y);
-      ctx.lineTo(p1.x, p1.y);
-      ctx.strokeStyle = `rgba(255, 255, 255, ${particle.a})`;
+      linesRef.current.forEach(({ p0, p1 }) => {
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+      });
+      ctx.strokeStyle = "#4449";
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.closePath();
-    });
+    } catch (error) {
+      console.error("Error in drawLines function:", error);
+    }
+  }, []);
+
+  const drawParticles = useCallback((ctx: CanvasRenderingContext2D) => {
+    try {
+      particlesRef.current.forEach((particle) => {
+        const line = linesRef.current[particle.lineIndex];
+        if (!line) return;
+
+        const start = {
+          x: line.p0.x + line.l.x * particle.p,
+          y: line.p0.y + line.l.y * particle.p,
+        };
+
+        const p0 = { x: start.x, y: start.y };
+        const p1 = {
+          x: start.x + line.l.x * particle.l,
+          y: start.y + line.l.y * particle.l,
+        };
+
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${particle.a})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.closePath();
+      });
+    } catch (error) {
+      console.error("Error in drawParticles function:", error);
+    }
   }, []);
 
   // Animation functions
@@ -281,38 +360,71 @@ const FutureCircle = () => {
     });
   }, []);
 
-  // Main animation loop
+  // Main animation loop with performance monitoring and error handling
   const tick = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    try {
+      const startTime = performance.now();
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        console.warn("Canvas element not available");
+        return;
+      }
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        console.warn("Canvas context not available");
+        return;
+      }
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
-    ctx.scale(renderRef.current.dpi, renderRef.current.dpi);
+      if (canvas.width === 0 || canvas.height === 0) {
+        console.warn("Canvas has invalid dimensions");
+        return;
+      }
 
-    moveDiscs();
-    moveParticles();
-    setLines();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.scale(renderRef.current.dpi, renderRef.current.dpi);
 
-    drawDiscs(ctx);
-    drawLines(ctx);
-    drawParticles(ctx);
+      moveDiscs();
+      moveParticles();
+      setLines();
 
-    ctx.restore();
+      drawDiscs(ctx);
+      drawLines(ctx);
+      drawParticles(ctx);
 
-    animationFrameRef.current = requestAnimationFrame(tick);
+      ctx.restore();
+
+      // Performance monitoring
+      const endTime = performance.now();
+      const frameTime = endTime - startTime;
+      if (frameTime > 16) {
+        console.warn(`Canvas animation performance issue: ${frameTime.toFixed(2)}ms per frame`);
+      }
+
+      animationFrameRef.current = requestAnimationFrame(tick);
+    } catch (error) {
+      console.error("Canvas animation error:", error);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    }
   }, [moveDiscs, moveParticles, setLines, drawDiscs, drawLines, drawParticles]);
 
-  // Resize handler
+  // Resize handler with debouncing
   const handleResize = useCallback(() => {
     setSize();
     setDiscs();
     setLines();
     setParticles();
   }, [setSize, setDiscs, setLines, setParticles]);
+
+  // Debounced resize handler
+  const debouncedResize = useCallback(
+    debounce(handleResize, 100),
+    [handleResize]
+  );
 
   // Ensure client-side mounting to prevent hydration mismatch
   useEffect(() => {
@@ -589,17 +701,30 @@ const FutureCircle = () => {
       setLines();
       setParticles();
 
-      window.addEventListener("resize", handleResize);
+      window.addEventListener("resize", debouncedResize, { passive: true });
 
       // Variable to track animation state
       let animationActive = false;
+
+      // Cleanup function
+      return () => {
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+        window.removeEventListener("resize", debouncedResize);
+        if (debouncedResize.cancel) {
+          debouncedResize.cancel();
+        }
+        ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      };
     },
     {
       scope: containerRef,
       dependencies: [
         isMounted,
         isMobile,
-        handleResize,
+        debouncedResize,
         tick,
         setSize,
         setDiscs,
@@ -618,6 +743,9 @@ const FutureCircle = () => {
         width={200}
         height={200}
         className={styles.logo}
+        onError={() => console.error("Logo image failed to load")}
+        onLoad={() => console.log("Logo image loaded successfully")}
+        priority
       />
       <div className={styles.prismaeonText}>PRISMAEON</div>
       <div className={styles.chineseText}>穿越化</div>
@@ -669,6 +797,8 @@ const FutureCircle = () => {
             width={300}
             height={300}
             className={styles.badgeImg}
+            onError={() => console.error("Badge image failed to load")}
+            onLoad={() => console.log("Badge image loaded successfully")}
           />
         </div>
 

@@ -11,6 +11,23 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 }
 
+// Simple debounce utility for resize events
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): T & { cancel: () => void } {
+  let timeout: NodeJS.Timeout;
+  
+  const debounced = (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+  
+  debounced.cancel = () => clearTimeout(timeout);
+  
+  return debounced as T & { cancel: () => void };
+}
+
 // Monochrome theme colors - Chrome gray and light champagne
 const MONOCHROME_COLORS = [
   // "#1A1A1A", // Dark chrome gray
@@ -49,11 +66,12 @@ const Spectrum: React.FC = () => {
     if (!isMounted) return;
 
     const initAnimations = async () => {
-      // Wait for fonts to be ready
-      await document.fonts.ready;
+      try {
+        // Wait for fonts to be ready
+        await document.fonts.ready;
 
-      const isMobileView = window.innerWidth < 768;
-      const isTabletView = window.innerWidth >= 768 && window.innerWidth < 1024;
+        const isMobileView = window.innerWidth < 768;
+        const isTabletView = window.innerWidth >= 768 && window.innerWidth < 1024;
 
 
       // Hero Timeline - Initial animations
@@ -328,16 +346,20 @@ const Spectrum: React.FC = () => {
         .to(".level-3", { y: "-15vh", duration: 0.8, ease: "power2.out" }, 0.9)
         .to(".level-2", { y: "-10vh", duration: 0.8, ease: "power2.out" }, 0.9)
         .to(".level-1", { y: "-5vh", duration: 0.8, ease: "power2.out" }, 0.9);
+      } catch (error) {
+        console.error("Spectrum animation initialization failed:", error);
+      }
     };
 
     initAnimations();
 
-    // Handle resize
-    const handleResize = () => ScrollTrigger.refresh();
-    window.addEventListener("resize", handleResize);
+    // Handle resize with debouncing
+    const debouncedResize = debounce(() => ScrollTrigger.refresh(), 100);
+    window.addEventListener("resize", debouncedResize, { passive: true });
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", debouncedResize);
+      debouncedResize.cancel();
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
   }, [isMounted]);
@@ -347,9 +369,10 @@ const Spectrum: React.FC = () => {
     if (!isMounted || !heroNavRef.current || !gradientOverlayRef.current)
       return;
 
-    const heroNav = heroNavRef.current;
-    const gradientOverlay = gradientOverlayRef.current;
-    const navItems = heroNav.querySelectorAll("[id^='hero-nav-item']");
+    try {
+      const heroNav = heroNavRef.current;
+      const gradientOverlay = gradientOverlayRef.current;
+      const navItems = heroNav.querySelectorAll("[id^='hero-nav-item']");
 
     const navGradients = [
       "radial-gradient(circle, #1A1A1A 0%, #404040 50%, transparent 100%)",
@@ -403,12 +426,15 @@ const Spectrum: React.FC = () => {
 
     heroNav.addEventListener("mouseleave", handleMouseLeave);
 
-    return () => {
-      navItems.forEach((item, index) => {
-        item.removeEventListener("mouseenter", () => handleMouseEnter(index));
-      });
-      heroNav.removeEventListener("mouseleave", handleMouseLeave);
-    };
+      return () => {
+        navItems.forEach((item, index) => {
+          item.removeEventListener("mouseenter", () => handleMouseEnter(index));
+        });
+        heroNav.removeEventListener("mouseleave", handleMouseLeave);
+      };
+    } catch (error) {
+      console.error("Spectrum hover effects initialization failed:", error);
+    }
   }, [isMounted]);
 
 

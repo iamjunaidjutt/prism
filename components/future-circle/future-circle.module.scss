@@ -2,7 +2,7 @@
   @apply flex justify-center items-center relative overflow-hidden h-screen;
 
   .logo {
-    @apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute z-2 w-[100px] sm:w-[130px] md:w-[150px] lg:w-[150px] xl:w-[220px] 2xl:w-[200px] 2xlM:w-[250px] 3xl:w-[360px] h-auto;
+    @apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute z-2 w-[100px] sm:w-[130px] md:w-[150px] lg:w-[100px] xl:w-[220px] 2xl:w-[200px] 2xlM:w-[250px] 3xl:w-[360px] h-auto;
   }
 
   .prismaeonText {
@@ -42,18 +42,18 @@
 
     &::before {
       @apply absolute block w-[150%] h-[140%] z-2 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
-      background: var(--radial-dark);
+      background: var(--radial-dark, radial-gradient(circle, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%));
       content: "";
     }
 
     &::after {
       @apply absolute block w-full h-full z-5 mix-blend-overlay top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
-      background: var(--radial-champagne);
+      background: var(--radial-champagne, radial-gradient(circle, rgba(247,231,206,0.3) 0%, rgba(247,231,206,0.1) 50%, transparent 100%));
       content: "";
     }
 
     .badge {
-      @apply absolute rounded-full overflow-hidden z-10 opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/80 w-[180px] h-[180px] md:w-[220px] md:h-[220px] lg:w-[var(--badge-size)] lg:h-[var(--badge-size)] 3xl:w-[500px] 3xl:h-[500px];
+      @apply absolute rounded-full overflow-hidden z-10 opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/80 w-[180px] h-[180px] md:w-[220px] md:h-[220px] lg:w-[var(--badge-size,280px)] lg:h-[var(--badge-size,280px)] 3xl:w-[500px] 3xl:h-[500px];
 
       .badgeImg {
         @apply absolute block object-contain z-2 w-[65%] h-[65%] transition-all duration-1000 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
@@ -65,12 +65,12 @@
       @apply absolute pointer-events-none z-3 opacity-75 mix-blend-plus-lighter blur-[60px] animate-aura-glow top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-b-full;
       width: calc(var(--badge-size) * 1.25);
       height: calc(var(--badge-size) * 1.25);
-      background: var(--aura-gradient) 0 100% / 100% 200%;
+      background: var(--aura-gradient, linear-gradient(180deg, rgba(247,231,206,0.8) 0%, rgba(247,231,206,0.2) 100%)) 0 100% / 100% 200%;
     }
 
     .overlay {
       @apply absolute top-0 left-0 w-full h-full pointer-events-none z-10 mix-blend-overlay opacity-15;
-      background: var(--scanline-gradient);
+      background: var(--scanline-gradient, repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px));
     }
 
     .canvas {

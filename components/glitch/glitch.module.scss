@@ -83,7 +83,7 @@
     }
 
     .slideParagraph {
-      @apply absolute overflow-hidden z-[2] text-primary-text md:w-[230px] lg:w-[300px] xl:w-[380px] 2xl:w-[430px] 3xl:w-[750px] md:h-[220px] lg:h-[220px] xl:h-[250px] 3xl:h-[450px] bottom-[10%] md:right-[17%] lg:right-[17%] xl:right-[16%] 2xl:right-[16%] xl:bottom-[15%] 2xl:bottom-[15%] 2xlM:bottom-[25%] 3xl:right-[17%] 3xl:bottom-[17%] lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-5xl  translate-x-1/2 -translate-y-1/2 max-md:hidden;
+      @apply absolute overflow-hidden z-[2] text-primary-text md:w-[230px] lg:w-[300px] xl:w-[380px] 2xl:w-[430px] 3xl:w-[750px] md:h-[220px] lg:h-[180px] xl:h-[250px] 3xl:h-[450px] bottom-[10%] md:right-[17%] lg:right-[17%] xl:right-[16%] xl:bottom-[15%] 2xl:right-[16%] 2xl:bottom-[15%] 2xlM:bottom-[15%] 3xl:right-[17%] 3xl:bottom-[17%] lg:text-lg xl:text-xl 2xl:text-2xl 3xl:text-5xl  translate-x-1/2 -translate-y-1/2 max-md:hidden;
 
       .slideParagraphLine {
         @apply relative w-full h-full overflow-hidden mb-2 tracking-wider text-justify;
