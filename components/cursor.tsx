@@ -1,20 +1,49 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
+
+// Debounce utility for performance
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): T & { cancel: () => void } {
+  let timeout: NodeJS.Timeout;
+  
+  const debounced = (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+  
+  debounced.cancel = () => clearTimeout(timeout);
+  
+  return debounced as T & { cancel: () => void };
+}
 
 const Cursor: React.FC = () => {
   const [showCursor, setShowCursor] = useState(false);
   const cursorRef = useRef<HTMLDivElement>(null);
 
-  // Only show on desktop
-  useEffect(() => {
-    const check = () => setShowCursor(window.innerWidth >= 1024);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+  // Optimized resize handler
+  const checkCursorVisibility = useCallback(() => {
+    setShowCursor(window.innerWidth >= 1024);
   }, []);
+
+  const debouncedResize = useCallback(
+    debounce(checkCursorVisibility, 100),
+    [checkCursorVisibility]
+  );
+
+  // Only show on desktop with optimized resize handling
+  useEffect(() => {
+    checkCursorVisibility();
+    window.addEventListener("resize", debouncedResize, { passive: true });
+    return () => {
+      window.removeEventListener("resize", debouncedResize);
+      debouncedResize.cancel();
+    };
+  }, [checkCursorVisibility, debouncedResize]);
 
   useGSAP(() => {
     if (!showCursor) return;
