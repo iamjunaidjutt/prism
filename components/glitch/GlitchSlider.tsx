@@ -851,14 +851,15 @@ const GlitchSlider = () => {
         }
 
         if (state.slideTextures.length >= 2) {
+          // Initialize with first texture for both to ensure clean start at slide 1
           state.shaderMaterial.uniforms.uTexture1.value =
             state.slideTextures[0];
           state.shaderMaterial.uniforms.uTexture2.value =
-            state.slideTextures[1];
+            state.slideTextures[0];
           state.shaderMaterial.uniforms.uTexture1Size.value =
             state.slideTextures[0].userData.size;
           state.shaderMaterial.uniforms.uTexture2Size.value =
-            state.slideTextures[1].userData.size;
+            state.slideTextures[0].userData.size;
           state.texturesLoaded = true;
           state.scrollingEnabled = true;
         }
@@ -1391,8 +1392,8 @@ const GlitchSlider = () => {
         window.addEventListener(
           "wheel",
           (wheelEvent) => {
-            // Only handle scroll if component is active
-            if (!state.isActive) return;
+            // Only handle scroll if component is active AND scrolling is enabled
+            if (!state.isActive || !state.scrollingEnabled) return;
             
             const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
             
@@ -1413,8 +1414,8 @@ const GlitchSlider = () => {
         window.addEventListener(
           "touchstart",
           (touchStartEvent) => {
-            // Only handle touch if component is active
-            if (!state.isActive) return;
+            // Only handle touch if component is active AND scrolling is enabled
+            if (!state.isActive || !state.scrollingEnabled) return;
             
             state.touchStartPosition = touchStartEvent.touches[0].clientY;
             state.isTouchActive = true;
@@ -1615,13 +1616,13 @@ const GlitchSlider = () => {
           featuredImageContainer.appendChild(newWrapper);
         }
         
-        // Update shader texture
+        // Update shader texture - set both to first slide for clean reset
         if (state.shaderMaterial && state.slideTextures[0]) {
           state.shaderMaterial.uniforms.uProgress.value = 0;
           state.shaderMaterial.uniforms.uTexture1.value = state.slideTextures[0];
-          state.shaderMaterial.uniforms.uTexture2.value = state.slideTextures[1] || state.slideTextures[0];
+          state.shaderMaterial.uniforms.uTexture2.value = state.slideTextures[0];
           state.shaderMaterial.uniforms.uTexture1Size.value = state.slideTextures[0].userData.size;
-          state.shaderMaterial.uniforms.uTexture2Size.value = (state.slideTextures[1] || state.slideTextures[0]).userData.size;
+          state.shaderMaterial.uniforms.uTexture2Size.value = state.slideTextures[0].userData.size;
         }
       }
 
