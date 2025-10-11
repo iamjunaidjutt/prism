@@ -1424,46 +1424,46 @@ const GlitchSlider = () => {
       }
 
       // Event listeners with error handling
+      let eventListenersCleanup: (() => void) | null = null;
+      
       function initEventListeners() {
+        // Clean up existing listeners first
+        if (eventListenersCleanup) {
+          eventListenersCleanup();
+        }
+        
         try {
-          // Mouse wheel
-          window.addEventListener(
-            "wheel",
-            (wheelEvent) => {
-              // Only handle scroll if component is active AND scrolling is enabled
-              if (!state.isActive || !state.scrollingEnabled) return;
-              
-              const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
-              
-              // If scrolling up and already at first slide, allow page scroll to exit
-              if (scrollDirection === "up" && state.currentImageIndex === 0) {
-                // Don't preventDefault - allow natural page scroll
-                return;
-              }
-              
-              // Otherwise, handle slide navigation
-              wheelEvent.preventDefault();
-              handleScrollInteraction(scrollDirection);
-            },
-            { passive: false },
-          );
+          // Mouse wheel handler
+          const wheelHandler = (wheelEvent: WheelEvent) => {
+            // Only handle scroll if component is active AND scrolling is enabled
+            if (!state.isActive || !state.scrollingEnabled) return;
+            
+            const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
+            
+            // If scrolling up and already at first slide, allow page scroll to exit
+            if (scrollDirection === "up" && state.currentImageIndex === 0) {
+              // Don't preventDefault - allow natural page scroll
+              return;
+            }
+            
+            // Otherwise, handle slide navigation
+            wheelEvent.preventDefault();
+            handleScrollInteraction(scrollDirection);
+          };
+          
+          window.addEventListener("wheel", wheelHandler, { passive: false });
 
-        // Touch events
-        window.addEventListener(
-          "touchstart",
-          (touchStartEvent) => {
+          // Touch start handler
+          const touchStartHandler = (touchStartEvent: TouchEvent) => {
             // Only handle touch if component is active AND scrolling is enabled
             if (!state.isActive || !state.scrollingEnabled) return;
             
             state.touchStartPosition = touchStartEvent.touches[0].clientY;
             state.isTouchActive = true;
-          },
-          { passive: false },
-        );
-
-        window.addEventListener(
-          "touchmove",
-          (touchMoveEvent) => {
+          };
+          
+          // Touch move handler
+          const touchMoveHandler = (touchMoveEvent: TouchEvent) => {
             if (
               !state.isActive ||
               !state.isTouchActive ||
@@ -1491,113 +1491,129 @@ const GlitchSlider = () => {
               state.isTouchActive = false;
               handleScrollInteraction(swipeDirection);
             }
-          },
-          { passive: false },
-        );
+          };
+          
+          // Touch end handler
+          const touchEndHandler = () => {
+            state.isTouchActive = false;
+          };
+          
+          window.addEventListener("touchstart", touchStartHandler, { passive: false });
+          window.addEventListener("touchmove", touchMoveHandler, { passive: false });
+          window.addEventListener("touchend", touchEndHandler);
 
-        window.addEventListener("touchend", () => {
-          state.isTouchActive = false;
-        });
+          // Keyboard handler
+          const keyboardHandler = (e: KeyboardEvent) => {
+            e.preventDefault();
 
-        // Keyboard shortcuts
-        document.addEventListener("keydown", (e) => {
-          e.preventDefault();
+            switch (e.code) {
+              case "KeyH":
+                const paneElement = document.querySelector(
+                  ".tp-dfwv",
+                ) as HTMLElement;
+                if (paneElement) {
+                  const isHidden = paneElement.style.visibility === "hidden";
+                  paneElement.style.visibility = isHidden ? "visible" : "hidden";
+                  paneElement.style.opacity = isHidden ? "1" : "0";
+                }
+                break;
 
-          switch (e.code) {
-            case "KeyH":
-              const paneElement = document.querySelector(
-                ".tp-dfwv",
-              ) as HTMLElement;
-              if (paneElement) {
-                const isHidden = paneElement.style.visibility === "hidden";
-                paneElement.style.visibility = isHidden ? "visible" : "hidden";
-                paneElement.style.opacity = isHidden ? "1" : "0";
-              }
-              break;
+              case "Digit1":
+                config.currentEffect = "datamosh";
+                if (state.shaderMaterial) {
+                  state.shaderMaterial.uniforms.uEffectType.value = 0;
+                }
+                break;
+              case "Digit2":
+                config.currentEffect = "pixelSort";
+                if (state.shaderMaterial) {
+                  state.shaderMaterial.uniforms.uEffectType.value = 1;
+                }
+                break;
+              case "Digit3":
+                config.currentEffect = "digitalStatic";
+                if (state.shaderMaterial) {
+                  state.shaderMaterial.uniforms.uEffectType.value = 2;
+                }
+                break;
+              case "Digit4":
+                config.currentEffect = "staticSweep";
+                if (state.shaderMaterial) {
+                  state.shaderMaterial.uniforms.uEffectType.value = 3;
+                }
+                break;
+              case "Digit5":
+                config.currentEffect = "glitchWipe";
+                if (state.shaderMaterial) {
+                  state.shaderMaterial.uniforms.uEffectType.value = 4;
+                }
+                break;
+              case "Digit6":
+                config.currentEffect = "analogDecay";
+                if (state.shaderMaterial) {
+                  state.shaderMaterial.uniforms.uEffectType.value = 5;
+                }
+                break;
 
-            case "Digit1":
-              config.currentEffect = "datamosh";
-              if (state.shaderMaterial) {
-                state.shaderMaterial.uniforms.uEffectType.value = 0;
-              }
-              break;
-            case "Digit2":
-              config.currentEffect = "pixelSort";
-              if (state.shaderMaterial) {
-                state.shaderMaterial.uniforms.uEffectType.value = 1;
-              }
-              break;
-            case "Digit3":
-              config.currentEffect = "digitalStatic";
-              if (state.shaderMaterial) {
-                state.shaderMaterial.uniforms.uEffectType.value = 2;
-              }
-              break;
-            case "Digit4":
-              config.currentEffect = "staticSweep";
-              if (state.shaderMaterial) {
-                state.shaderMaterial.uniforms.uEffectType.value = 3;
-              }
-              break;
-            case "Digit5":
-              config.currentEffect = "glitchWipe";
-              if (state.shaderMaterial) {
-                state.shaderMaterial.uniforms.uEffectType.value = 4;
-              }
-              break;
-            case "Digit6":
-              config.currentEffect = "analogDecay";
-              if (state.shaderMaterial) {
-                state.shaderMaterial.uniforms.uEffectType.value = 5;
-              }
-              break;
+              case "Equal":
+              case "NumpadAdd":
+                config.globalIntensity = Math.min(
+                  2.0,
+                  config.globalIntensity + 0.1,
+                );
+                if (state.shaderMaterial) {
+                  state.shaderMaterial.uniforms.uGlobalIntensity.value =
+                    config.globalIntensity;
+                }
+                break;
+              case "Minus":
+              case "NumpadSubtract":
+                config.globalIntensity = Math.max(
+                  0.1,
+                  config.globalIntensity - 0.1,
+                );
+                if (state.shaderMaterial) {
+                  state.shaderMaterial.uniforms.uGlobalIntensity.value =
+                    config.globalIntensity;
+                }
+                break;
 
-            case "Equal":
-            case "NumpadAdd":
-              config.globalIntensity = Math.min(
-                2.0,
-                config.globalIntensity + 0.1,
+              case "KeyR":
+                config.globalIntensity = 1.0;
+                config.speedMultiplier = 1.0;
+                if (state.shaderMaterial) {
+                  state.shaderMaterial.uniforms.uGlobalIntensity.value = 1.0;
+                  state.shaderMaterial.uniforms.uSpeedMultiplier.value = 1.0;
+                }
+                break;
+            }
+          };
+          
+          // Resize handler with debouncing
+          const debouncedResize = debounce(() => {
+            if (state.renderer && state.shaderMaterial) {
+              state.renderer.setSize(window.innerWidth, window.innerHeight);
+              state.shaderMaterial.uniforms.uResolution.value.set(
+                window.innerWidth,
+                window.innerHeight,
               );
-              if (state.shaderMaterial) {
-                state.shaderMaterial.uniforms.uGlobalIntensity.value =
-                  config.globalIntensity;
-              }
-              break;
-            case "Minus":
-            case "NumpadSubtract":
-              config.globalIntensity = Math.max(
-                0.1,
-                config.globalIntensity - 0.1,
-              );
-              if (state.shaderMaterial) {
-                state.shaderMaterial.uniforms.uGlobalIntensity.value =
-                  config.globalIntensity;
-              }
-              break;
-
-            case "KeyR":
-              config.globalIntensity = 1.0;
-              config.speedMultiplier = 1.0;
-              if (state.shaderMaterial) {
-                state.shaderMaterial.uniforms.uGlobalIntensity.value = 1.0;
-                state.shaderMaterial.uniforms.uSpeedMultiplier.value = 1.0;
-              }
-              break;
-          }
-        });
-
-        // Resize handler with debouncing
-        const debouncedResize = debounce(() => {
-          if (state.renderer && state.shaderMaterial) {
-            state.renderer.setSize(window.innerWidth, window.innerHeight);
-            state.shaderMaterial.uniforms.uResolution.value.set(
-              window.innerWidth,
-              window.innerHeight,
-            );
-          }
-        }, 100);
-
-        window.addEventListener("resize", debouncedResize, { passive: true });
+            }
+          }, 100);
+          
+          document.addEventListener("keydown", keyboardHandler);
+          window.addEventListener("resize", debouncedResize, { passive: true });
+          
+          // Create cleanup function
+          eventListenersCleanup = () => {
+            window.removeEventListener("wheel", wheelHandler);
+            window.removeEventListener("touchstart", touchStartHandler);
+            window.removeEventListener("touchmove", touchMoveHandler);
+            window.removeEventListener("touchend", touchEndHandler);
+            document.removeEventListener("keydown", keyboardHandler);
+            window.removeEventListener("resize", debouncedResize);
+            debouncedResize.cancel();
+          };
+          
         } catch (error) {
           console.error("Event listeners initialization failed:", error);
         }
@@ -1605,7 +1621,6 @@ const GlitchSlider = () => {
 
       // Initialize everything
       await initializeRenderer();
-      initEventListeners();
 
       // Set up ScrollTrigger to activate component when it comes into view
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
@@ -1701,10 +1716,19 @@ const GlitchSlider = () => {
             state.isActive = true;
             state.isTransitioning = false;
             state.scrollingEnabled = true;
+            
+            // Initialize event listeners only after component is fully ready
+            initEventListeners();
           }, 1000);
         },
         onLeave: () => {
           state.isActive = false;
+          
+          // Clean up event listeners when leaving viewport
+          if (eventListenersCleanup) {
+            eventListenersCleanup();
+            eventListenersCleanup = null;
+          }
           
           // Fade out Glitch header/footer elements
           gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
@@ -1720,6 +1744,7 @@ const GlitchSlider = () => {
         },
         onEnterBack: () => {
           state.isActive = true;
+          state.scrollingEnabled = true;
           
           // Fade in Glitch header/footer elements
           gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
@@ -1732,9 +1757,18 @@ const GlitchSlider = () => {
             duration: 0.8,
             ease: "power2.out",
           });
+          
+          // Initialize event listeners when re-entering
+          initEventListeners();
         },
         onLeaveBack: () => {
           state.isActive = false;
+          
+          // Clean up event listeners when leaving viewport
+          if (eventListenersCleanup) {
+            eventListenersCleanup();
+            eventListenersCleanup = null;
+          }
           
           // Fade out Glitch header/footer elements
           gsap.to(slider.querySelector(`.${styles.topCenterText}`), {
