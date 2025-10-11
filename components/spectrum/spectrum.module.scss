@@ -1,59 +1,40 @@
 .spectrum {
-  @apply font-mono text-12px uppercase tracking-0.5px bg-primary-bg overflow-x-hidden transition-colors duration-300 h-[250vh] flex flex-col;
+  @apply font-mono text-12px uppercase tracking-0.5px bg-primary-bg overflow-x-hidden transition-colors duration-300 h-[250vh] flex flex-col relative;
 
   .header {
-    @apply pointer-events-none fixed top-0 left-0 right-0 z-100;
 
-    .blurToggle {
-      @apply absolute top-3 minTab:top-5 lg:top-6 2xlM:top-10 left-1/2 -translate-x-1/2 pointer-events-auto px-5 py-2;
+    nav {
+      @apply relative;
 
-      .blurBtn {
-        @apply text-[4px] minTab:text-[6px] lg:text-[8px] xl:text-[10px] 2xlM:text-17px uppercase tracking-0.5px text-primary-text cursor-pointer no-underline relative inline-block select-none transition-all duration-200;
-        transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+      .navItem {
+        @apply absolute text-primary-text text-[5px] minTab:text-[8px] lg:text-[10px] xl:text-[14px] 2xlM:text-25px uppercase tracking-0.5px pointer-events-auto z-1000 transition-colors duration-300 opacity-0;
 
-        &::before {
-          @apply absolute -left-3 top-0 opacity-0 text-primary-text-light transition-all duration-200;
-          content: "•";
-          transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+        &.navBottomLeft,
+        &.navBottomRight {
+          @apply text-primary-text-lighter transition-colors duration-300;
+        }
+
+        &.navTopLeft {
+          @apply top-8 left-8;
+        }
+
+        &.navTopRight {
+          @apply top-8 right-8 flex items-center gap-1;
+        }
+
+        &.navBottomLeft {
+          @apply bottom-8 left-8;
+        }
+
+        &.navBottomRight {
+          @apply bottom-8 right-8;
+        }
+
+        &.navBottomCenter {
+          @apply bottom-8 left-1/2 -translate-x-1/2;
         }
       }
 
-      &:hover .blurBtn {
-        @apply translate-x-2;
-
-        &::before {
-          @apply opacity-100;
-        }
-      }
-    }
-  }
-
-  .navItem {
-    @apply fixed text-primary-text text-[5px] minTab:text-[8px] lg:text-[10px] xl:text-[14px] 2xlM:text-25px uppercase tracking-0.5px pointer-events-auto z-1000 transition-colors duration-300 opacity-0;
-
-    &.navBottomLeft,
-    &.navBottomRight {
-      @apply text-primary-text-lighter transition-colors duration-300;
-    }
-
-    &.navTopLeft {
-      @apply top-8 left-8;
-    }
-
-    &.navTopRight {
-      @apply top-8 right-8 flex items-center gap-1;
-    }
-
-    &.navBottomLeft {
-      @apply bottom-8 left-8;
-    }
-
-    &.navBottomRight {
-      @apply bottom-8 right-8;
-    }
-
-    &.navBottomCenter {
-      @apply bottom-8 left-1/2 -translate-x-1/2;
     }
   }
 
@@ -61,7 +42,7 @@
     @apply text-primary-text no-underline relative inline-block transition-colors duration-300;
 
     &::after {
-      @apply absolute top-0 left-0 w-0 h-full -z-1 transition-all duration-300  content-[''] bg-primary-text;
+      @apply absolute top-0 left-0 w-0 h-full -z-1 transition-all duration-300 content-[''] bg-primary-text;
       transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
@@ -75,27 +56,30 @@
   }
 
   .bgGradients {
-    @apply fixed top-0 left-0 w-screen h-screen pointer-events-none z-1 opacity-15;
+    @apply absolute top-0 left-0 w-full h-full pointer-events-none z-1 opacity-15;
 
     .bgGradient {
       @apply absolute blur-40px transition-opacity duration-500 will-change-opacity-filter;
 
       &.bgGradient1 {
-        @apply -top-20% -left-10% w-600px h-600px bg-[radial-gradient(circle,var(--grad-color-1)_0%,var(--grad-color-2)_35%,transparent_70%)];
+        @apply -top-20% -left-10% w-600px h-600px;
+        background: radial-gradient(circle, var(--grad-color-1) 0%, var(--grad-color-2) 35%, transparent 70%);
       }
 
       &.bgGradient2 {
-        @apply top-30% -right-15% w-800px h-800px bg-[radial-gradient(circle,var(--grad-color-3)_0%,var(--grad-color-4)_40%,transparent_70%)];
+        @apply top-30% -right-15% w-800px h-800px;
+        background: radial-gradient(circle, var(--grad-color-3) 0%, var(--grad-color-4) 40%, transparent 70%);
       }
 
       &.bgGradient3 {
-        @apply -bottom-25% left-20% w-700px h-700px bg-[radial-gradient(circle,var(--grad-color-5)_0%,var(--grad-color-6)_45%,transparent_75%)];
+        @apply -bottom-25% left-20% w-700px h-700px;
+        background: radial-gradient(circle, var(--grad-color-5) 0%, var(--grad-color-6) 45%, transparent 75%);
       }
     }
   }
 
   .gradientOverlay {
-    @apply fixed top-0 left-0 w-screen h-screen pointer-events-none z-5 opacity-0 blur-60px transition-opacity duration-600 will-change-opacity-filter;
+    @apply absolute top-0 left-0 w-full h-full pointer-events-none z-5 opacity-0 blur-60px transition-opacity duration-600 will-change-opacity-filter;
   }
 
   .heroSection {
@@ -181,15 +165,19 @@
             &.level-1 {
               @apply top-[55%] md:top-[60%] lg:top-[65%];
             }
+
             &.level-2 {
               @apply top-[38%] md:top-[42%] lg:top-[47%];
             }
+
             &.level-3 {
               @apply top-[23%] md:top-[28%] lg:top-[33%];
             }
+
             &.level-4 {
               @apply top-[12%] md:top-[17%] lg:top-[23%];
             }
+
             &.level-5 {
               @apply top-[7%] md:top-[10%] lg:top-[13%];
             }

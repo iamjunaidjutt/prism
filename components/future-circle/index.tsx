@@ -613,7 +613,7 @@ const FutureCircle = () => {
     <div ref={containerRef} className={styles.container}>
       <Image
         id="logo-image"
-        src="/logo-1.png"
+        src="/logo-1.webp"
         alt="Logo"
         width={200}
         height={200}
@@ -664,8 +664,8 @@ const FutureCircle = () => {
       <div ref={webbyNomineeRef} className={styles.webbyNominee}>
         <div ref={badgeRef} className={styles.badge}>
           <Image
-            src="/logo-2.png"
-            alt="Webby Nominee Badge"
+            src="/logo-2.webp"
+            alt="Prismaeon Logo"
             width={300}
             height={300}
             className={styles.badgeImg}

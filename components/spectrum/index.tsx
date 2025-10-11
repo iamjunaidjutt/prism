@@ -27,7 +27,6 @@ const MONOCHROME_COLORS = [
 ];
 
 const Spectrum: React.FC = () => {
-  const [blurEnabled, setBlurEnabled] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
   // Refs for DOM elements
@@ -40,7 +39,6 @@ const Spectrum: React.FC = () => {
   const mainTitleRef = useRef<HTMLDivElement>(null);
   const gradientOverlayRef = useRef<HTMLDivElement>(null);
   const svgGroupRef = useRef<SVGGElement>(null);
-  const blurToggleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -57,10 +55,6 @@ const Spectrum: React.FC = () => {
       const isMobileView = window.innerWidth < 768;
       const isTabletView = window.innerWidth >= 768 && window.innerWidth < 1024;
 
-      // Set initial state - blur toggle hidden until Spectrum is in view
-      if (blurToggleRef.current) {
-        gsap.set(blurToggleRef.current, { opacity: 0 });
-      }
 
       // Hero Timeline - Initial animations
       const heroTl = gsap.timeline({ delay: 0.5 });
@@ -196,43 +190,13 @@ const Spectrum: React.FC = () => {
       });
 
       // Fade out SVG elements
-      fadeOutTl.to("#svg-container, #text-grid, #main-title", {
+      fadeOutTl.to("[data-spectrum-component] #svg-container, [data-spectrum-component] #text-grid, [data-spectrum-component] #main-title", {
         opacity: 0,
         duration: 1,
         ease: "power2.out",
       }, 0);
 
-      // Fade out blur toggle at the same time as SVG
-      if (blurToggleRef.current) {
-        fadeOutTl.to(blurToggleRef.current, {
-          opacity: 0,
-          duration: 1,
-          ease: "power2.out",
-          onComplete: () => {
-            // Disable pointer events when fully hidden
-            if (blurToggleRef.current) {
-              blurToggleRef.current.style.pointerEvents = "none";
-            }
-          }
-        }, 0);
-      }
 
-      // Show blur toggle when scrolling back from Glitch
-      ScrollTrigger.create({
-        trigger: "[data-glitch-section]",
-        start: "top center",
-        end: "bottom top",
-        onLeaveBack: () => {
-          if (blurToggleRef.current) {
-            blurToggleRef.current.style.pointerEvents = "auto";
-            gsap.to(blurToggleRef.current, {
-              opacity: 1,
-              duration: 0.5,
-              ease: "power2.out",
-            });
-          }
-        },
-      });
 
       // Control Spectrum header/nav visibility
       ScrollTrigger.create({
@@ -240,65 +204,43 @@ const Spectrum: React.FC = () => {
         start: "top bottom",
         end: "bottom top",
         onEnter: () => {
-          // Show all nav items and blur toggle when entering Spectrum
-          gsap.to("#nav-top-left, #nav-top-right", {
+          // Show all nav items when entering Spectrum
+          gsap.to("[data-spectrum-component] #nav-top-left, [data-spectrum-component] #nav-top-right", {
             opacity: 1,
             duration: 0.8,
             ease: "power2.out",
           });
-          if (blurToggleRef.current) {
-            gsap.to(blurToggleRef.current, {
-              opacity: 1,
-              duration: 0.8,
-              ease: "power2.out",
-            });
-          }
         },
         onLeave: () => {
-          // Blur toggle will be hidden by Glitch ScrollTrigger
-          // So we don't hide it here - allows it to stay visible after Spectrum
+          // No action needed when leaving Spectrum
         },
         onEnterBack: () => {
-          // Show blur toggle when coming back to Spectrum
-          if (blurToggleRef.current) {
-            gsap.to(blurToggleRef.current, {
-              opacity: 1,
-              duration: 0.8,
-              ease: "power2.out",
-            });
-          }
+          // No action needed when coming back to Spectrum
         },
         onLeaveBack: () => {
-          // Hide all when leaving Spectrum (scrolling up)
-          gsap.to("#nav-top-left, #nav-top-right", {
+          // Hide nav items when leaving Spectrum (scrolling up)
+          gsap.to("[data-spectrum-component] #nav-top-left, [data-spectrum-component] #nav-top-right", {
             opacity: 0,
             duration: 0.5,
             ease: "power2.in",
           });
-          if (blurToggleRef.current) {
-            gsap.to(blurToggleRef.current, {
-              opacity: 0,
-              duration: 0.5,
-              ease: "power2.in",
-            });
-          }
         },
       });
 
-      // Fade out nav items (but not blur toggle) when scrolling past hero section
+      // Fade out nav items when scrolling past hero section
       ScrollTrigger.create({
         trigger: "#animation-section",
         start: "top bottom",
         end: "bottom top",
         onEnter: () => {
-          gsap.to("#nav-top-left, #nav-top-right", {
+          gsap.to("[data-spectrum-component] #nav-top-left, [data-spectrum-component] #nav-top-right", {
             opacity: 0,
             duration: 0.5,
             ease: "power2.out",
           });
         },
         onLeaveBack: () => {
-          gsap.to("#nav-top-left, #nav-top-right", {
+          gsap.to("[data-spectrum-component] #nav-top-left, [data-spectrum-component] #nav-top-right", {
             opacity: 1,
             duration: 0.5,
             ease: "power2.out",
@@ -339,11 +281,11 @@ const Spectrum: React.FC = () => {
 
       // Scroll animations
       scrollTl
-        .to("#svg-container", { autoAlpha: 1, duration: 0.01 }, 0)
-        .to("#text-grid", { autoAlpha: 1, duration: 0.01 }, 0)
-        .to("#main-title", { autoAlpha: 1, duration: 0.01 }, 0)
+        .to("[data-spectrum-component] #svg-container", { autoAlpha: 1, duration: 0.01 }, 0)
+        .to("[data-spectrum-component] #text-grid", { autoAlpha: 1, duration: 0.01 }, 0)
+        .to("[data-spectrum-component] #main-title", { autoAlpha: 1, duration: 0.01 }, 0)
         .to(
-          "#svg-container",
+          "[data-spectrum-component] #svg-container",
           {
             transform: "scaleY(0.05) translateY(-30px)",
             duration: 0.3,
@@ -352,7 +294,7 @@ const Spectrum: React.FC = () => {
           0,
         )
         .to(
-          "#svg-container",
+          "[data-spectrum-component] #svg-container",
           {
             transform: "scaleY(1) translateY(0px)",
             duration: 1.2,
@@ -361,7 +303,7 @@ const Spectrum: React.FC = () => {
           0.3,
         )
         .to(
-          "#nav-bottom-left, #nav-bottom-right, #nav-bottom-center",
+          "[data-spectrum-component] #nav-bottom-left, [data-spectrum-component] #nav-bottom-right, [data-spectrum-component] #nav-bottom-center",
           {
             opacity: 0,
             duration: 0.6,
@@ -469,32 +411,15 @@ const Spectrum: React.FC = () => {
     };
   }, [isMounted]);
 
-  // Toggle blur effect
-  const handleBlurToggle = () => {
-    if (svgGroupRef.current) {
-      if (blurEnabled) {
-        svgGroupRef.current.removeAttribute("filter");
-      } else {
-        svgGroupRef.current.setAttribute("filter", "url(#blur)");
-      }
-      setBlurEnabled(!blurEnabled);
-    }
-  };
 
   if (!isMounted) {
     return null; // Prevent SSR mismatch
   }
 
   return (
-    <div className={styles.spectrum}>
+    <div className={styles.spectrum} data-spectrum-component>
       {/* Header */}
       <header className={styles.header}>
-        <div ref={blurToggleRef} id="spectrum-blur-toggle" className={styles.blurToggle}>
-          <span className={styles.blurBtn} onClick={handleBlurToggle}>
-            {blurEnabled ? "Blur Off" : "Blur On"}
-          </span>
-        </div>
-
         <nav>
           <div
             id="nav-top-left"
