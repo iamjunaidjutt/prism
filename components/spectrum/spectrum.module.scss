@@ -5,7 +5,7 @@
     @apply pointer-events-none fixed top-0 left-0 right-0 z-100;
 
     .blurToggle {
-      @apply absolute top-3 minTab:top-5 lg:top-6 2xlM:top-10 left-1/2 -translate-x-1/2 pointer-events-auto px-5 py-2;
+      @apply absolute top-3 minTab:top-5 lg:top-6 2xlM:top-10 left-1/2 -translate-x-1/2 pointer-events-auto px-5 py-2 hidden;
 
       .blurBtn {
         @apply text-[4px] minTab:text-[6px] lg:text-[8px] xl:text-[10px] 2xlM:text-17px uppercase tracking-0.5px text-primary-text cursor-pointer no-underline relative inline-block select-none transition-all duration-200;
