@@ -1782,8 +1782,8 @@ const GlitchSlider = () => {
         <section className={styles.featuredImage} data-featured-image>
           <div className={styles.featuredImageWrapper} data-featured-wrapper>
             <Image
-              src="https://assets.codepen.io/7558/horror-01.jpg"
-              alt="Awakening Abyss - Eldritch horror scene"
+              src="/glitch/1.webp"
+              alt="PRÏSMAEON Glitch Effect"
               width={800}
               height={600}
               priority
