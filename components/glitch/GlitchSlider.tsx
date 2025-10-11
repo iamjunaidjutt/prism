@@ -1432,27 +1432,21 @@ const GlitchSlider = () => {
             (wheelEvent) => {
               // Only handle scroll if component is active AND scrolling is enabled
               if (!state.isActive || !state.scrollingEnabled) return;
-        // Mouse wheel
-        window.addEventListener(
-          "wheel",
-          (wheelEvent) => {
-            // Only handle scroll if component is active AND scrolling is enabled
-            if (!state.isActive || !state.scrollingEnabled) return;
-            
-            const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
-            
-            // If scrolling up and already at first slide, allow page scroll to exit
-            if (scrollDirection === "up" && state.currentImageIndex === 0) {
-              // Don't preventDefault - allow natural page scroll
-              return;
-            }
-            
-            // Otherwise, handle slide navigation
-            wheelEvent.preventDefault();
-            handleScrollInteraction(scrollDirection);
-          },
-          { passive: false },
-        );
+              
+              const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
+              
+              // If scrolling up and already at first slide, allow page scroll to exit
+              if (scrollDirection === "up" && state.currentImageIndex === 0) {
+                // Don't preventDefault - allow natural page scroll
+                return;
+              }
+              
+              // Otherwise, handle slide navigation
+              wheelEvent.preventDefault();
+              handleScrollInteraction(scrollDirection);
+            },
+            { passive: false },
+          );
 
         // Touch events
         window.addEventListener(
@@ -1755,10 +1749,10 @@ const GlitchSlider = () => {
           });
         }
       });
-      } catch (error) {
-        console.error("GlitchSlider initialization failed:", error);
-      }
-    };
+    } catch (error) {
+      console.error("GlitchSlider initialization failed:", error);
+    }
+  };
 
     initSlider();
 
