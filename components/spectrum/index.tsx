@@ -27,7 +27,6 @@ const MONOCHROME_COLORS = [
 ];
 
 const Spectrum: React.FC = () => {
-  const [blurEnabled, setBlurEnabled] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
 
   // Refs for DOM elements
@@ -40,7 +39,6 @@ const Spectrum: React.FC = () => {
   const mainTitleRef = useRef<HTMLDivElement>(null);
   const gradientOverlayRef = useRef<HTMLDivElement>(null);
   const svgGroupRef = useRef<SVGGElement>(null);
-  const blurToggleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -57,10 +55,6 @@ const Spectrum: React.FC = () => {
       const isMobileView = window.innerWidth < 768;
       const isTabletView = window.innerWidth >= 768 && window.innerWidth < 1024;
 
-      // Set initial state - blur toggle hidden until Spectrum is in view
-      if (blurToggleRef.current) {
-        gsap.set(blurToggleRef.current, { opacity: 0 });
-      }
 
       // Hero Timeline - Initial animations
       const heroTl = gsap.timeline({ delay: 0.5 });
@@ -202,37 +196,7 @@ const Spectrum: React.FC = () => {
         ease: "power2.out",
       }, 0);
 
-      // Fade out blur toggle at the same time as SVG
-      if (blurToggleRef.current) {
-        fadeOutTl.to(blurToggleRef.current, {
-          opacity: 0,
-          duration: 1,
-          ease: "power2.out",
-          onComplete: () => {
-            // Disable pointer events when fully hidden
-            if (blurToggleRef.current) {
-              blurToggleRef.current.style.pointerEvents = "none";
-            }
-          }
-        }, 0);
-      }
 
-      // Show blur toggle when scrolling back from Glitch
-      ScrollTrigger.create({
-        trigger: "[data-glitch-section]",
-        start: "top center",
-        end: "bottom top",
-        onLeaveBack: () => {
-          if (blurToggleRef.current) {
-            blurToggleRef.current.style.pointerEvents = "auto";
-            gsap.to(blurToggleRef.current, {
-              opacity: 1,
-              duration: 0.5,
-              ease: "power2.out",
-            });
-          }
-        },
-      });
 
       // Control Spectrum header/nav visibility
       ScrollTrigger.create({
@@ -240,52 +204,30 @@ const Spectrum: React.FC = () => {
         start: "top bottom",
         end: "bottom top",
         onEnter: () => {
-          // Show all nav items and blur toggle when entering Spectrum
+          // Show all nav items when entering Spectrum
           gsap.to("#nav-top-left, #nav-top-right", {
             opacity: 1,
             duration: 0.8,
             ease: "power2.out",
           });
-          if (blurToggleRef.current) {
-            gsap.to(blurToggleRef.current, {
-              opacity: 1,
-              duration: 0.8,
-              ease: "power2.out",
-            });
-          }
         },
         onLeave: () => {
-          // Blur toggle will be hidden by Glitch ScrollTrigger
-          // So we don't hide it here - allows it to stay visible after Spectrum
+          // No action needed when leaving Spectrum
         },
         onEnterBack: () => {
-          // Show blur toggle when coming back to Spectrum
-          if (blurToggleRef.current) {
-            gsap.to(blurToggleRef.current, {
-              opacity: 1,
-              duration: 0.8,
-              ease: "power2.out",
-            });
-          }
+          // No action needed when coming back to Spectrum
         },
         onLeaveBack: () => {
-          // Hide all when leaving Spectrum (scrolling up)
+          // Hide nav items when leaving Spectrum (scrolling up)
           gsap.to("#nav-top-left, #nav-top-right", {
             opacity: 0,
             duration: 0.5,
             ease: "power2.in",
           });
-          if (blurToggleRef.current) {
-            gsap.to(blurToggleRef.current, {
-              opacity: 0,
-              duration: 0.5,
-              ease: "power2.in",
-            });
-          }
         },
       });
 
-      // Fade out nav items (but not blur toggle) when scrolling past hero section
+      // Fade out nav items when scrolling past hero section
       ScrollTrigger.create({
         trigger: "#animation-section",
         start: "top bottom",
@@ -469,17 +411,6 @@ const Spectrum: React.FC = () => {
     };
   }, [isMounted]);
 
-  // Toggle blur effect
-  const handleBlurToggle = () => {
-    if (svgGroupRef.current) {
-      if (blurEnabled) {
-        svgGroupRef.current.removeAttribute("filter");
-      } else {
-        svgGroupRef.current.setAttribute("filter", "url(#blur)");
-      }
-      setBlurEnabled(!blurEnabled);
-    }
-  };
 
   if (!isMounted) {
     return null; // Prevent SSR mismatch
@@ -489,12 +420,6 @@ const Spectrum: React.FC = () => {
     <div className={styles.spectrum}>
       {/* Header */}
       <header className={styles.header}>
-        <div ref={blurToggleRef} id="spectrum-blur-toggle" className={styles.blurToggle}>
-          <span className={styles.blurBtn} onClick={handleBlurToggle}>
-            {blurEnabled ? "Blur Off" : "Blur On"}
-          </span>
-        </div>
-
         <nav>
           <div
             id="nav-top-left"
