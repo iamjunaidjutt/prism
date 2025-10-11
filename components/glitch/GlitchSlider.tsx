@@ -7,20 +7,38 @@ import type * as THREE from "three";
 import { slideData } from "@/utils/slides-data";
 import Image from "next/image";
 
+// Debounce utility for performance optimization
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): T & { cancel: () => void } {
+  let timeout: NodeJS.Timeout;
+  
+  const debounced = (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+  
+  debounced.cancel = () => clearTimeout(timeout);
+  
+  return debounced as T & { cancel: () => void };
+}
+
 const GlitchSlider = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     const initSlider = async () => {
-      // Dynamic imports to avoid SSR issues
-      const THREE = await import("three");
-      const gsap = (await import("gsap")).default;
-      const { ScrambleTextPlugin } = await import("gsap/ScrambleTextPlugin");
+      try {
+        // Dynamic imports to avoid SSR issues
+        const THREE = await import("three");
+        const gsap = (await import("gsap")).default;
+        const { ScrambleTextPlugin } = await import("gsap/ScrambleTextPlugin");
 
-      // Register GSAP plugins
-      gsap.registerPlugin(ScrambleTextPlugin);
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrambleTextPlugin);
 
-      if (!containerRef.current) return;
+        if (!containerRef.current) return;
 
       const slider = containerRef.current.querySelector(
         "[data-image-slider-init]",
@@ -705,36 +723,46 @@ const GlitchSlider = () => {
 
       function loadImageTexture(src: string): Promise<THREE.Texture> {
         return new Promise((resolve, reject) => {
-          const loader = new THREE.TextureLoader();
-          const timeout = setTimeout(() => reject(new Error("Timeout")), 10000);
-          loader.load(
-            src,
-            (texture) => {
-              clearTimeout(timeout);
-              texture.minFilter = texture.magFilter = THREE.LinearFilter;
-              texture.userData = {
-                size: new THREE.Vector2(
-                  texture.image.width,
-                  texture.image.height,
-                ),
-              };
-              resolve(texture);
-            },
-            undefined,
-            (error) => {
-              clearTimeout(timeout);
-              reject(error);
-            },
-          );
+          try {
+            const loader = new THREE.TextureLoader();
+            const timeout = setTimeout(() => reject(new Error("Timeout")), 10000);
+            loader.load(
+              src,
+              (texture) => {
+                clearTimeout(timeout);
+                texture.minFilter = texture.magFilter = THREE.LinearFilter;
+                texture.userData = {
+                  size: new THREE.Vector2(
+                    texture.image.width,
+                    texture.image.height,
+                  ),
+                };
+                resolve(texture);
+              },
+              undefined,
+              (error) => {
+                clearTimeout(timeout);
+                console.warn(`Failed to load texture: ${src}`, error);
+                reject(error);
+              },
+            );
+          } catch (error) {
+            console.error(`Error in loadImageTexture for ${src}:`, error);
+            reject(error);
+          }
         });
       }
 
-      // Initialize WebGL
+      // Initialize WebGL with error handling
       async function initializeRenderer() {
-        const canvas = slider.querySelector(
-          "[data-webgl-canvas]",
-        ) as HTMLCanvasElement;
-        if (!canvas) return;
+        try {
+          const canvas = slider.querySelector(
+            "[data-webgl-canvas]",
+          ) as HTMLCanvasElement;
+          if (!canvas) {
+            console.warn("WebGL canvas not found");
+            return;
+          }
 
         state.scene = new THREE.Scene();
         state.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -840,14 +868,20 @@ const GlitchSlider = () => {
         const mesh = new THREE.Mesh(geometry, state.shaderMaterial);
         state.scene.add(mesh);
 
-        // Load textures
+        // Load textures with error handling
         for (let i = 0; i < imageCollection.length; i++) {
           try {
             const texture = await loadImageTexture(imageCollection[i]);
             state.slideTextures.push(texture);
           } catch (error) {
-            console.warn(`Failed to load image ${i}:`, error);
+            console.warn(`Failed to load image ${i} (${imageCollection[i]}):`, error);
+            // Continue loading other images even if one fails
           }
+        }
+
+        if (state.slideTextures.length === 0) {
+          console.error("No textures loaded successfully");
+          return;
         }
 
         if (state.slideTextures.length >= 2) {
@@ -876,6 +910,9 @@ const GlitchSlider = () => {
           }
         };
         render();
+        } catch (error) {
+          console.error("WebGL renderer initialization failed:", error);
+        }
       }
 
       // Transitions
@@ -1386,14 +1423,15 @@ const GlitchSlider = () => {
         executeSlideTransition(scrollDirection);
       }
 
-      // Event listeners
+      // Event listeners with error handling
       function initEventListeners() {
-        // Mouse wheel
-        window.addEventListener(
-          "wheel",
-          (wheelEvent) => {
-            // Only handle scroll if component is active AND scrolling is enabled
-            if (!state.isActive || !state.scrollingEnabled) return;
+        try {
+          // Mouse wheel
+          window.addEventListener(
+            "wheel",
+            (wheelEvent) => {
+              // Only handle scroll if component is active AND scrolling is enabled
+              if (!state.isActive || !state.scrollingEnabled) return;
             
             const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
             
@@ -1548,8 +1586,8 @@ const GlitchSlider = () => {
           }
         });
 
-        // Resize handler
-        window.addEventListener("resize", () => {
+        // Resize handler with debouncing
+        const debouncedResize = debounce(() => {
           if (state.renderer && state.shaderMaterial) {
             state.renderer.setSize(window.innerWidth, window.innerHeight);
             state.shaderMaterial.uniforms.uResolution.value.set(
@@ -1557,7 +1595,12 @@ const GlitchSlider = () => {
               window.innerHeight,
             );
           }
-        });
+        }, 100);
+
+        window.addEventListener("resize", debouncedResize, { passive: true });
+        } catch (error) {
+          console.error("Event listeners initialization failed:", error);
+        }
       }
 
       // Initialize everything
@@ -1706,9 +1749,18 @@ const GlitchSlider = () => {
           });
         }
       });
+      } catch (error) {
+        console.error("GlitchSlider initialization failed:", error);
+      }
     };
 
     initSlider();
+
+    // Cleanup function
+    return () => {
+      // Clean up any pending timeouts or intervals
+      // ScrollTrigger cleanup is handled automatically by useGSAP
+    };
   }, []);
 
   return (
@@ -1731,11 +1783,13 @@ const GlitchSlider = () => {
         <section className={styles.featuredImage} data-featured-image>
           <div className={styles.featuredImageWrapper} data-featured-wrapper>
             <Image
-              src="https://assets.codepen.io/7558/horror-01.jpg"
-              alt="Awakening Abyss - Eldritch horror scene"
+              src="/glitch/1.webp"
+              alt="PRÏSMAEON Glitch Effect"
               width={800}
               height={600}
               priority
+              onError={() => console.error("Featured image failed to load")}
+              onLoad={() => console.log("Featured image loaded successfully")}
             />
           </div>
         </section>
