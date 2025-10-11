@@ -2,7 +2,7 @@
   @apply flex justify-center items-center relative overflow-hidden h-screen;
 
   .logo {
-    @apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute z-2 w-[100px] sm:w-[130px] md:w-[150px] lg:w-[150px] xl:w-[220px] 2xl:w-[200px] 2xlM:w-[250px] 3xl:w-[360px] h-auto;
+    @apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 absolute z-2 w-[100px] sm:w-[130px] md:w-[150px] lg:w-[100px] xl:w-[220px] 2xl:w-[200px] 2xlM:w-[250px] 3xl:w-[360px] h-auto;
   }
 
   .prismaeonText {
