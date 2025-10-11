@@ -1432,6 +1432,12 @@ const GlitchSlider = () => {
             (wheelEvent) => {
               // Only handle scroll if component is active AND scrolling is enabled
               if (!state.isActive || !state.scrollingEnabled) return;
+        // Mouse wheel
+        window.addEventListener(
+          "wheel",
+          (wheelEvent) => {
+            // Only handle scroll if component is active AND scrolling is enabled
+            if (!state.isActive || !state.scrollingEnabled) return;
             
             const scrollDirection = wheelEvent.deltaY > 0 ? "down" : "up";
             
