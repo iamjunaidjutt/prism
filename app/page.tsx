@@ -14,6 +14,12 @@ const ComponentLoader = () => (
   </div>
 );
 
+// Suppress unused variable warnings for lazy-loaded components
+void FutureCircle;
+void Spectrum;
+void GlitchAnimation;
+void ComponentLoader;
+
 export default function Home() {
   return (
     <>

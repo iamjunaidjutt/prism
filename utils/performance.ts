@@ -6,15 +6,27 @@ interface PerformanceMetrics {
   largestContentfulPaint: number;
   cumulativeLayoutShift: number;
   firstInputDelay: number;
+  totalBlockingTime: number;
+  longTasks: Array<{
+    duration: number;
+    startTime: number;
+    name: string;
+  }>;
+  timeToInteractive: number;
 }
 
 class PerformanceMonitor {
   private metrics: Partial<PerformanceMetrics> = {};
   private observer: PerformanceObserver | null = null;
+  private longTaskObserver: PerformanceObserver | null = null;
+  private longTasks: Array<{ duration: number; startTime: number; name: string }> = [];
+  private totalBlockingTime: number = 0;
+  private fcpTime: number = 0;
 
   constructor() {
     if (typeof window !== "undefined" && "PerformanceObserver" in window) {
       this.initObservers();
+      this.initLongTaskObserver();
     }
   }
 
@@ -34,6 +46,37 @@ class PerformanceMonitor {
     }
   }
 
+  private initLongTaskObserver() {
+    try {
+      // Observe Long Tasks for TBT calculation
+      this.longTaskObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          this.handleLongTask(entry as any);
+        }
+      });
+
+      this.longTaskObserver.observe({ entryTypes: ["longtask"] });
+    } catch (error) {
+      console.warn("Long Task monitoring not supported:", error);
+    }
+  }
+
+  private handleLongTask(entry: any) {
+    const longTask = {
+      duration: entry.duration,
+      startTime: entry.startTime,
+      name: entry.name || 'unknown'
+    };
+
+    this.longTasks.push(longTask);
+
+    // Calculate TBT: sum of all long tasks that occur between FCP and TTI
+    if (this.fcpTime > 0 && entry.startTime >= this.fcpTime) {
+      const blockingTime = Math.max(0, entry.duration - 50); // Tasks > 50ms are blocking
+      this.totalBlockingTime += blockingTime;
+    }
+  }
+
   private handlePerformanceEntry(entry: PerformanceEntry) {
     switch (entry.entryType) {
       case "navigation":
@@ -45,6 +88,7 @@ class PerformanceMonitor {
         const paintEntry = entry as PerformancePaintTiming;
         if (paintEntry.name === "first-contentful-paint") {
           this.metrics.firstContentfulPaint = paintEntry.startTime;
+          this.fcpTime = paintEntry.startTime;
         }
         break;
 
@@ -68,24 +112,48 @@ class PerformanceMonitor {
   }
 
   public getMetrics(): Partial<PerformanceMetrics> {
-    return { ...this.metrics };
+    return { 
+      ...this.metrics,
+      totalBlockingTime: this.totalBlockingTime,
+      longTasks: this.longTasks,
+      timeToInteractive: this.calculateTTI()
+    };
+  }
+
+  private calculateTTI(): number {
+    // Simplified TTI calculation: FCP + TBT + 100ms buffer
+    if (this.fcpTime > 0) {
+      return this.fcpTime + this.totalBlockingTime + 100;
+    }
+    return 0;
   }
 
   public logMetrics() {
     const metrics = this.getMetrics();
     
-    if (process.env.NODE_ENV === "development") {
+    if (typeof window !== "undefined" && window.location.hostname === "localhost") {
       console.group("🚀 Performance Metrics");
       console.log("Load Time:", metrics.loadTime?.toFixed(2) + "ms");
       console.log("First Contentful Paint:", metrics.firstContentfulPaint?.toFixed(2) + "ms");
       console.log("Largest Contentful Paint:", metrics.largestContentfulPaint?.toFixed(2) + "ms");
       console.log("Cumulative Layout Shift:", metrics.cumulativeLayoutShift?.toFixed(4));
       console.log("First Input Delay:", metrics.firstInputDelay?.toFixed(2) + "ms");
+      console.log("Total Blocking Time:", metrics.totalBlockingTime?.toFixed(2) + "ms");
+      console.log("Time to Interactive:", metrics.timeToInteractive?.toFixed(2) + "ms");
+      console.log("Long Tasks:", metrics.longTasks?.length || 0);
+      
+      if (metrics.longTasks && metrics.longTasks.length > 0) {
+        console.group("Long Tasks Details");
+        metrics.longTasks.forEach((task, index) => {
+          console.log(`${index + 1}. ${task.name}: ${task.duration.toFixed(2)}ms at ${task.startTime.toFixed(2)}ms`);
+        });
+        console.groupEnd();
+      }
       console.groupEnd();
     }
 
     // In production, send to analytics service
-    if (process.env.NODE_ENV === "production") {
+    if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
       this.sendToAnalytics(metrics);
     }
   }
@@ -99,6 +167,9 @@ class PerformanceMonitor {
         largest_contentful_paint: metrics.largestContentfulPaint,
         cumulative_layout_shift: metrics.cumulativeLayoutShift,
         first_input_delay: metrics.firstInputDelay,
+        total_blocking_time: metrics.totalBlockingTime,
+        time_to_interactive: metrics.timeToInteractive,
+        long_tasks_count: metrics.longTasks?.length || 0,
       });
     }
   }
@@ -107,6 +178,10 @@ class PerformanceMonitor {
     if (this.observer) {
       this.observer.disconnect();
       this.observer = null;
+    }
+    if (this.longTaskObserver) {
+      this.longTaskObserver.disconnect();
+      this.longTaskObserver = null;
     }
   }
 }
@@ -149,7 +224,10 @@ export const getWebVitals = () => {
     LCP: metrics.largestContentfulPaint, // Largest Contentful Paint
     CLS: metrics.cumulativeLayoutShift, // Cumulative Layout Shift
     FID: metrics.firstInputDelay, // First Input Delay
+    TBT: metrics.totalBlockingTime, // Total Blocking Time
+    TTI: metrics.timeToInteractive, // Time to Interactive
     loadTime: metrics.loadTime,
+    longTasks: metrics.longTasks,
   };
 };
 
@@ -159,6 +237,8 @@ export const PERFORMANCE_THRESHOLDS = {
   LCP: 2500, // 2.5s
   CLS: 0.1, // 0.1
   FID: 100, // 100ms
+  TBT: 200, // 200ms
+  TTI: 3800, // 3.8s
   loadTime: 3000, // 3s
 };
 
@@ -182,8 +262,20 @@ export const checkPerformanceWarnings = () => {
     warnings.push(`First Input Delay is high: ${vitals.FID.toFixed(2)}ms`);
   }
 
+  if (vitals.TBT && vitals.TBT > PERFORMANCE_THRESHOLDS.TBT) {
+    warnings.push(`Total Blocking Time is high: ${vitals.TBT.toFixed(2)}ms`);
+  }
+
+  if (vitals.TTI && vitals.TTI > PERFORMANCE_THRESHOLDS.TTI) {
+    warnings.push(`Time to Interactive is slow: ${vitals.TTI.toFixed(2)}ms`);
+  }
+
   if (vitals.loadTime && vitals.loadTime > PERFORMANCE_THRESHOLDS.loadTime) {
     warnings.push(`Load time is slow: ${vitals.loadTime.toFixed(2)}ms`);
+  }
+
+  if (vitals.longTasks && vitals.longTasks.length > 5) {
+    warnings.push(`Too many long tasks detected: ${vitals.longTasks.length}`);
   }
 
   return warnings;

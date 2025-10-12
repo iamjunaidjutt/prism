@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
 // Debounce utility for performance
-function debounce<T extends (...args: any[]) => any>(
+function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): T & { cancel: () => void } {
@@ -31,8 +31,10 @@ const Cursor: React.FC = () => {
   }, []);
 
   const debouncedResize = useCallback(
-    debounce(checkCursorVisibility, 100),
-    [checkCursorVisibility]
+    debounce(() => {
+      setShowCursor(window.innerWidth >= 1024);
+    }, 100),
+    []
   );
 
   // Only show on desktop with optimized resize handling

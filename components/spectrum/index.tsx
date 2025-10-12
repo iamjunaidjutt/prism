@@ -12,7 +12,7 @@ if (typeof window !== "undefined") {
 }
 
 // Simple debounce utility for resize events
-function debounce<T extends (...args: any[]) => any>(
+function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): T & { cancel: () => void } {
@@ -71,7 +71,7 @@ const Spectrum: React.FC = () => {
         await document.fonts.ready;
 
         const isMobileView = window.innerWidth < 768;
-        const isTabletView = window.innerWidth >= 768 && window.innerWidth < 1024;
+        // const isTabletView = window.innerWidth >= 768 && window.innerWidth < 1024;
 
 
       // Hero Timeline - Initial animations
