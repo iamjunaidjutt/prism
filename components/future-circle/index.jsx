@@ -6,35 +6,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import styles from "./future-circle.module.scss";
 import Image from "next/image";
+import { recordAnimationFrameTime, getAdaptiveQuality, getAdaptiveParticleCount } from "@/utils/performance";
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
-// Performance monitoring utility
-const performanceMonitor = {
-  startTime: 0,
-  frameCount: 0,
-  
-  start: () => {
-    performanceMonitor.startTime = performance.now();
-    performanceMonitor.frameCount = 0;
-  },
-  
-  frame: () => {
-    performanceMonitor.frameCount++;
-    const now = performance.now();
-    const elapsed = now - performanceMonitor.startTime;
-    
-    if (elapsed > 1000) { // Every second
-      const fps = Math.round((performanceMonitor.frameCount * 1000) / elapsed);
-      if (fps < 30) {
-        console.warn(`Future Circle Animation Low FPS: ${fps}, consider reducing animation complexity`);
-      }
-      performanceMonitor.startTime = now;
-      performanceMonitor.frameCount = 0;
-    }
-  }
-};
+// Frame counter for animation throttling
+let frameCounter = 0;
 
 // Debounce utility function
 function debounce(
@@ -183,11 +161,12 @@ const FutureCircle = () => {
 
   // Initialize discs
   const setDiscs = useCallback(() => {
-    const totalDiscs = 20;
+    const baseDiscCount = 20;
+    const discCount = getAdaptiveParticleCount('canvas', baseDiscCount);
     discsRef.current = [];
 
-    for (let i = 0; i < totalDiscs; i++) {
-      const p = i / totalDiscs;
+    for (let i = 0; i < discCount; i++) {
+      const p = i / discCount;
       const disc = tweenDisc({ x: 0, y: 0, w: 0, h: 0, p });
       discsRef.current.push(disc);
     }
@@ -226,18 +205,36 @@ const FutureCircle = () => {
 
   // Initialize particles
   const setParticles = useCallback(() => {
-    particlesRef.current = [];
-    const totalParticles = 500;
+    try {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    for (let i = 0; i < totalParticles; i++) {
-      const lineIndex = Math.round(
-        (linesRef.current.length - 1) * Math.random(),
+      const { width, height } = renderRef.current;
+      const baseParticleCount = Math.floor((width * height) / 12000); // Adaptive base count
+      const particleCount = getAdaptiveParticleCount('canvas', baseParticleCount);
+      
+      particlesRef.current = [];
+
+      // Pre-calculate line indices to avoid repeated random calls
+      const lineIndices = Array.from({ length: particleCount }, () => 
+        Math.floor(Math.random() * linesRef.current.length)
       );
-      const v = 0.005 + Math.random() * 0.005;
-      const l = 0.01 + Math.random() * 0.1;
-      const a = 0.05 + Math.random() * 0.15;
 
-      particlesRef.current.push({ lineIndex, p: Math.random(), v, l, a });
+      for (let i = 0; i < particleCount; i++) {
+        const lineIndex = lineIndices[i];
+        const line = linesRef.current[lineIndex];
+        if (!line) continue;
+
+        particlesRef.current.push({
+          p: Math.random(),
+          v: 0.002 + Math.random() * 0.002, // Reduced speed variation
+          l: 0.15 + Math.random() * 0.25, // Reduced length variation
+          a: 0.4 + Math.random() * 0.3, // Reduced alpha variation
+          lineIndex: lineIndex,
+        });
+      }
+    } catch (error) {
+      console.error("Error in setParticles function:", error);
     }
   }, []);
   // Draw functions
@@ -337,7 +334,7 @@ const FutureCircle = () => {
     });
   }, []);
 
-  // Main animation loop with performance monitoring and error handling
+  // Optimized animation loop with adaptive quality and performance monitoring
   const tick = useCallback(() => {
     try {
       const startTime = performance.now();
@@ -358,14 +355,26 @@ const FutureCircle = () => {
         return;
       }
 
+      // Skip frames if performance is too low
+      const adaptiveQuality = getAdaptiveQuality('canvas');
+      if (adaptiveQuality < 0.8 && Math.random() > adaptiveQuality) {
+        animationFrameRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
       ctx.scale(renderRef.current.dpi, renderRef.current.dpi);
 
-      moveDiscs();
-      moveParticles();
-      setLines();
+      // Only update animations if not in low performance mode or with reduced frequency
+      frameCounter++;
+      if (adaptiveQuality >= 0.8 || frameCounter % 2 === 0) {
+        moveDiscs();
+        moveParticles();
+        setLines();
+      }
 
+      // Draw with adaptive quality
       drawDiscs(ctx);
       drawLines(ctx);
       drawParticles(ctx);
@@ -375,7 +384,9 @@ const FutureCircle = () => {
       // Performance monitoring
       const endTime = performance.now();
       const frameTime = endTime - startTime;
-      if (frameTime > 16) {
+      recordAnimationFrameTime('canvas', frameTime);
+      
+      if (frameTime > 20) {
         console.warn(`Canvas animation performance issue: ${frameTime.toFixed(2)}ms per frame`);
       }
 

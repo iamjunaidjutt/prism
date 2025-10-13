@@ -4,9 +4,18 @@ class PerformanceMonitor {
   constructor() {
     this.metrics = {};
     this.observer = null;
+    this.animationMetrics = {
+      canvas: { frameCount: 0, totalTime: 0, avgFrameTime: 0 },
+      webgl: { frameCount: 0, totalTime: 0, avgFrameTime: 0 }
+    };
+    this.adaptiveQuality = {
+      canvas: 1.0,
+      webgl: 1.0
+    };
     
     if (typeof window !== "undefined" && "PerformanceObserver" in window) {
       this.initObservers();
+      this.startAnimationMonitoring();
     }
   }
 
@@ -60,7 +69,50 @@ class PerformanceMonitor {
   }
 
   getMetrics() {
-    return { ...this.metrics };
+    return { 
+      ...this.metrics,
+      animationMetrics: this.animationMetrics,
+      adaptiveQuality: this.adaptiveQuality
+    };
+  }
+
+  // Animation performance monitoring methods
+  startAnimationMonitoring() {
+    setInterval(() => {
+      this.updateAdaptiveQuality('canvas');
+      this.updateAdaptiveQuality('webgl');
+    }, 1000);
+  }
+
+  updateAdaptiveQuality(type) {
+    const metrics = this.animationMetrics[type];
+    if (metrics.frameCount > 0) {
+      metrics.avgFrameTime = metrics.totalTime / metrics.frameCount;
+      
+      if (metrics.avgFrameTime > 20) {
+        this.adaptiveQuality[type] = Math.max(0.5, this.adaptiveQuality[type] - 0.1);
+        console.warn(`${type.toUpperCase()} performance degraded. Quality: ${this.adaptiveQuality[type].toFixed(2)}`);
+      } else if (metrics.avgFrameTime < 12 && this.adaptiveQuality[type] < 1.0) {
+        this.adaptiveQuality[type] = Math.min(1.0, this.adaptiveQuality[type] + 0.05);
+      }
+      
+      // Reset metrics
+      metrics.frameCount = 0;
+      metrics.totalTime = 0;
+    }
+  }
+
+  recordFrameTime(type, frameTime) {
+    this.animationMetrics[type].frameCount++;
+    this.animationMetrics[type].totalTime += frameTime;
+  }
+
+  getAdaptiveQuality(type) {
+    return this.adaptiveQuality[type];
+  }
+
+  getAdaptiveParticleCount(type, baseCount) {
+    return Math.floor(baseCount * this.adaptiveQuality[type]);
   }
 
   logMetrics() {
@@ -123,6 +175,19 @@ export const initPerformanceMonitoring = () => {
 
 export const getPerformanceMetrics = () => {
   return performanceMonitor?.getMetrics() || {};
+};
+
+// Animation performance monitoring exports
+export const recordAnimationFrameTime = (type, frameTime) => {
+  performanceMonitor?.recordFrameTime(type, frameTime);
+};
+
+export const getAdaptiveQuality = (type) => {
+  return performanceMonitor?.getAdaptiveQuality(type) || 1.0;
+};
+
+export const getAdaptiveParticleCount = (type, baseCount) => {
+  return performanceMonitor?.getAdaptiveParticleCount(type, baseCount) || baseCount;
 };
 
 export const destroyPerformanceMonitoring = () => {

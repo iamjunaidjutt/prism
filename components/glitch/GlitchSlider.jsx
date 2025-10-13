@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import styles from "./glitch.module.scss";
 import { slideData } from "@/utils/slides-data";
 import Image from "next/image";
+import { recordAnimationFrameTime, getAdaptiveQuality } from "@/utils/performance";
 
 // Debounce utility for performance optimization
 function debounce(
@@ -769,9 +770,16 @@ const GlitchSlider = () => {
           canvas: canvas,
           antialias: false,
           alpha: false,
+          powerPreference: "high-performance",
+          preserveDrawingBuffer: false,
+          failIfMajorPerformanceCaveat: false,
         });
         state.renderer.setSize(window.innerWidth, window.innerHeight);
         state.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        // Performance optimizations
+        state.renderer.shadowMap.enabled = false;
+        state.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         // Create shader material
         state.shaderMaterial = new THREE.ShaderMaterial({
@@ -897,16 +905,49 @@ const GlitchSlider = () => {
           state.scrollingEnabled = true;
         }
 
-        // Render loop
+        // Optimized render loop with centralized performance monitoring
+        let lastFrameTime = 0;
+        let frameCount = 0;
+        
         const render = () => {
-          requestAnimationFrame(render);
+          const currentTime = performance.now();
+          const deltaTime = currentTime - lastFrameTime;
+          lastFrameTime = currentTime;
+          frameCount++;
+          
+          // Record frame time for centralized monitoring
+          recordAnimationFrameTime('webgl', deltaTime);
+          
+          // Get adaptive quality from centralized monitor
+          const adaptiveQuality = getAdaptiveQuality('webgl');
+          
+          // Skip frames if performance is too low
+          if (adaptiveQuality < 0.8 && Math.random() > adaptiveQuality) {
+            requestAnimationFrame(render);
+            return;
+          }
+          
           if (state.shaderMaterial) {
             state.shaderMaterial.uniforms.uTime.value =
               (Date.now() - state.startTime) * 0.001;
+            
+            // Reduce shader complexity in low performance mode
+            if (adaptiveQuality < 0.8) {
+              state.shaderMaterial.uniforms.uGlobalIntensity.value *= 0.8;
+              state.shaderMaterial.uniforms.uNoiseLevel.value *= 0.7;
+            }
           }
+          
           if (state.renderer && state.scene && state.camera) {
             state.renderer.render(state.scene, state.camera);
           }
+          
+          // Performance monitoring every 60 frames
+          if (frameCount % 60 === 0 && deltaTime > 16) {
+            console.warn(`WebGL render performance issue: ${deltaTime.toFixed(2)}ms per frame`);
+          }
+          
+          requestAnimationFrame(render);
         };
         render();
         } catch (error) {
