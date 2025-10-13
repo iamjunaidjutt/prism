@@ -1,4 +1,3 @@
-/** @type {import('eslint').Linter.Config[]} */
 const eslintConfig = [
   {
     ignores: [
@@ -6,7 +5,6 @@ const eslintConfig = [
       ".next/**",
       "out/**",
       "build/**",
-      "next-env.d.ts",
       "dist/**",
     ],
   },
@@ -26,25 +24,6 @@ const eslintConfig = [
       "no-console": "warn",
       "prefer-const": "error",
       "no-var": "error",
-    },
-  },
-  {
-    files: ["**/*.{ts,tsx}"],
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    rules: {
-      "no-unused-vars": "off", // Turn off base rule
-      "no-console": "warn",
-      "prefer-const": "error",
-      "no-var": "error",
-      "@typescript-eslint/no-unused-vars": "warn",
     },
   },
 ];

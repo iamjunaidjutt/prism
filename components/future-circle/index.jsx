@@ -37,67 +37,44 @@ const performanceMonitor = {
 };
 
 // Debounce utility function
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { cancel: () => void } {
-  let timeout: NodeJS.Timeout;
+function debounce(
+  func,
+  wait
+) {
+  let timeout;
   
-  const debounced = (...args: Parameters<T>) => {
+  const debounced = (...args) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
   
   debounced.cancel = () => clearTimeout(timeout);
   
-  return debounced as T & { cancel: () => void };
-}
-
-// WebNominee animation interfaces
-interface Disc {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  p: number;
-}
-
-interface Line {
-  p0: { x: number; y: number };
-  p1: { x: number; y: number };
-  l: { x: number; y: number };
-}
-
-interface Particle {
-  lineIndex: number;
-  p: number;
-  v: number;
-  l: number;
-  a: number;
+  return debounced;
 }
 
 // Easing functions
 const easingFunctions = {
-  linear: (t: number) => t,
-  easeInExpo: (t: number) => (t === 0 ? 0 : Math.pow(2, 10 * (t - 1))),
-  easeOutCubic: (t: number) => 1 - Math.pow(1 - t, 3),
-  easeInCubic: (t: number) => t * t * t,
+  linear: (t) => t,
+  easeInExpo: (t) => (t === 0 ? 0 : Math.pow(2, 10 * (t - 1))),
+  easeOutCubic: (t) => 1 - Math.pow(1 - t, 3),
+  easeInCubic: (t) => t * t * t,
 };
 
 const FutureCircle = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef(null);
 
   // WebNominee animation refs
-  const webbyNomineeRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const badgeRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
+  const webbyNomineeRef = useRef(null);
+  const canvasRef = useRef(null);
+  const badgeRef = useRef(null);
+  const animationFrameRef = useRef(null);
 
-  const discsRef = useRef<Disc[]>([]);
-  const linesRef = useRef<Line[]>([]);
-  const particlesRef = useRef<Particle[]>([]);
+  const discsRef = useRef([]);
+  const linesRef = useRef([]);
+  const particlesRef = useRef([]);
   const renderRef = useRef({ width: 0, height: 0, dpi: 1 });
   const startDiscRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
   const endDiscRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
@@ -105,10 +82,10 @@ const FutureCircle = () => {
   // Utility function to tween values with easing
   const tweenValue = useCallback(
     (
-      start: number,
-      end: number,
-      p: number,
-      ease: keyof typeof easingFunctions = "linear",
+      start,
+      end,
+      p,
+      ease = "linear",
     ) => {
       const delta = end - start;
       const easeFn = easingFunctions[ease];
@@ -179,7 +156,7 @@ const FutureCircle = () => {
 
   // Tween disc properties
   const tweenDisc = useCallback(
-    (disc: Disc) => {
+    (disc) => {
       disc.x = tweenValue(startDiscRef.current.x, endDiscRef.current.x, disc.p);
       disc.y = tweenValue(
         startDiscRef.current.y,
@@ -264,7 +241,7 @@ const FutureCircle = () => {
     }
   }, []);
   // Draw functions
-  const drawDiscs = useCallback((ctx: CanvasRenderingContext2D) => {
+  const drawDiscs = useCallback((ctx) => {
     try {
       ctx.strokeStyle = "#444";
       ctx.lineWidth = 2;
@@ -296,7 +273,7 @@ const FutureCircle = () => {
     }
   }, []);
 
-  const drawLines = useCallback((ctx: CanvasRenderingContext2D) => {
+  const drawLines = useCallback((ctx) => {
     try {
       ctx.beginPath();
       linesRef.current.forEach(({ p0, p1 }) => {
@@ -312,7 +289,7 @@ const FutureCircle = () => {
     }
   }, []);
 
-  const drawParticles = useCallback((ctx: CanvasRenderingContext2D) => {
+  const drawParticles = useCallback((ctx) => {
     try {
       particlesRef.current.forEach((particle) => {
         const line = linesRef.current[particle.lineIndex];

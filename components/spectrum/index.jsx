@@ -12,20 +12,20 @@ if (typeof window !== "undefined") {
 }
 
 // Simple debounce utility for resize events
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { cancel: () => void } {
-  let timeout: NodeJS.Timeout;
+function debounce(
+  func,
+  wait
+) {
+  let timeout;
   
-  const debounced = (...args: Parameters<T>) => {
+  const debounced = (...args) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
   
   debounced.cancel = () => clearTimeout(timeout);
   
-  return debounced as T & { cancel: () => void };
+  return debounced;
 }
 
 // Monochrome theme colors - Chrome gray and light champagne
@@ -43,19 +43,19 @@ const MONOCHROME_COLORS = [
   "#f7e7ce", // Light champagne
 ];
 
-const Spectrum: React.FC = () => {
+const Spectrum = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   // Refs for DOM elements
-  const heroTitleRef = useRef<HTMLHeadingElement>(null);
-  const heroNavRef = useRef<HTMLDivElement>(null);
-  const heroTextRef = useRef<HTMLDivElement>(null);
-  const scrollHintRef = useRef<HTMLDivElement>(null);
-  const svgContainerRef = useRef<HTMLDivElement>(null);
-  const textGridRef = useRef<HTMLDivElement>(null);
-  const mainTitleRef = useRef<HTMLDivElement>(null);
-  const gradientOverlayRef = useRef<HTMLDivElement>(null);
-  const svgGroupRef = useRef<SVGGElement>(null);
+  const heroTitleRef = useRef(null);
+  const heroNavRef = useRef(null);
+  const heroTextRef = useRef(null);
+  const scrollHintRef = useRef(null);
+  const svgContainerRef = useRef(null);
+  const textGridRef = useRef(null);
+  const mainTitleRef = useRef(null);
+  const gradientOverlayRef = useRef(null);
+  const svgGroupRef = useRef(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -109,7 +109,7 @@ const Spectrum: React.FC = () => {
 
       if (navItems) {
         navItems.forEach((item) => {
-          const split = new SplitText(item as HTMLElement, {
+          const split = new SplitText(item, {
             type: "lines",
           });
           gsap.set(split.lines, {
@@ -269,11 +269,11 @@ const Spectrum: React.FC = () => {
       // Prepare wavelength labels and main title
       const wavelengthLabels =
         textGridRef.current?.querySelectorAll("#wavelength-label");
-      const allSplitLines: Element[] = [];
+      const allSplitLines = [];
 
       if (wavelengthLabels) {
         wavelengthLabels.forEach((label) => {
-          const split = new SplitText(label as HTMLElement, {
+          const split = new SplitText(label, {
             type: "lines",
           });
           gsap.set(split.lines, {
@@ -386,7 +386,7 @@ const Spectrum: React.FC = () => {
       "radial-gradient(circle, #999999 0%, #666666 50%, transparent 100%)",
     ];
 
-    const handleMouseEnter = (index: number) => {
+    const handleMouseEnter = (index) => {
       gradientOverlay.style.background = navGradients[index];
       gradientOverlay.style.opacity = "0.3";
 
@@ -396,26 +396,26 @@ const Spectrum: React.FC = () => {
 
         if (navIndex === index) {
           opacity = 1;
-          (navItem as HTMLElement).classList.add("active");
+          navItem.classList.add("active");
         } else if (distance === 1) {
           opacity = 0.6;
-          (navItem as HTMLElement).classList.remove("active");
+          navItem.classList.remove("active");
         } else if (distance === 2) {
           opacity = 0.3;
-          (navItem as HTMLElement).classList.remove("active");
+          navItem.classList.remove("active");
         } else {
           opacity = 0.1;
-          (navItem as HTMLElement).classList.remove("active");
+          navItem.classList.remove("active");
         }
 
-        (navItem as HTMLElement).style.opacity = opacity.toString();
+        navItem.style.opacity = opacity.toString();
       });
     };
 
     const handleMouseLeave = () => {
       navItems.forEach((navItem) => {
-        (navItem as HTMLElement).style.opacity = "1";
-        (navItem as HTMLElement).classList.remove("active");
+        navItem.style.opacity = "1";
+        navItem.classList.remove("active");
       });
       gradientOverlay.style.opacity = "0";
     };

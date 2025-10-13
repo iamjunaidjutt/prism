@@ -11,24 +11,24 @@ if (typeof window !== "undefined") {
 }
 
 // Debounce utility for performance
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { cancel: () => void } {
-  let timeout: NodeJS.Timeout;
+function debounce(
+  func,
+  wait
+) {
+  let timeout;
   
-  const debounced = (...args: Parameters<T>) => {
+  const debounced = (...args) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
   
   debounced.cancel = () => clearTimeout(timeout);
   
-  return debounced as T & { cancel: () => void };
+  return debounced;
 }
 
 // Create context for Lenis instance
-const LenisContext = createContext<Lenis | null>(null);
+const LenisContext = createContext(null);
 
 export const useLenis = () => {
 	const lenis = useContext(LenisContext);
@@ -37,10 +37,8 @@ export const useLenis = () => {
 
 export default function SmoothScroll({
 	children,
-}: {
-	children: React.ReactNode;
 }) {
-	const lenisRef = useRef<Lenis | null>(null);
+	const lenisRef = useRef(null);
 
 	useEffect(() => {
 		try {
@@ -67,7 +65,7 @@ export default function SmoothScroll({
 			lenis.on("scroll", debouncedScrollUpdate);
 
 			// Optimized ticker function
-			const tickerFunction = (time: number) => {
+			const tickerFunction = (time) => {
 				lenis.raf(time * 1000);
 			};
 
