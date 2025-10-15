@@ -5,27 +5,12 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import styles from "./spectrum.module.scss";
+import { detectDeviceCapability, getAnimationSettings } from "@/utils/device-detection";
+import { debounce } from "@/utils/debounce";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
-}
-
-// Simple debounce utility for resize events
-function debounce(
-  func,
-  wait
-) {
-  let timeout;
-  
-  const debounced = (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-  
-  debounced.cancel = () => clearTimeout(timeout);
-  
-  return debounced;
 }
 
 // Monochrome theme colors - Chrome gray and light champagne
@@ -42,65 +27,6 @@ const MONOCHROME_COLORS = [
   "#f7e7ce", // Light champagne
   "#f7e7ce", // Light champagne
 ];
-
-// Device capability detection
-function detectDeviceCapability() {
-  const isMobile = window.innerWidth < 768;
-  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-  
-  // Check for hardware acceleration and memory
-  const canvas = document.createElement('canvas');
-  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-  const hasWebGL = !!gl;
-  
-  // Check device pixel ratio (higher usually means better GPU)
-  const pixelRatio = window.devicePixelRatio || 1;
-  
-  // Check for reduced motion preference
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
-  // Estimate device capability
-  if (prefersReducedMotion || !hasWebGL) {
-    return 'low';
-  } else if (isMobile || pixelRatio < 1.5) {
-    return 'low';
-  } else if (isTablet || pixelRatio < 2) {
-    return 'medium';
-  } else {
-    return 'high';
-  }
-}
-
-// Get animation settings based on device capability
-function getAnimationSettings(capability) {
-  switch (capability) {
-    case 'low':
-      return { 
-        blurIntensity: 0.3, 
-        staggerDelay: 0.15, 
-        duration: 0.6,
-        enableBlur: false,
-        enableComplexAnimations: false
-      };
-    case 'medium':
-      return { 
-        blurIntensity: 0.6, 
-        staggerDelay: 0.08, 
-        duration: 0.8,
-        enableBlur: true,
-        enableComplexAnimations: true
-      };
-    case 'high':
-    default:
-      return { 
-        blurIntensity: 1.0, 
-        staggerDelay: 0.03, 
-        duration: 1.0,
-        enableBlur: true,
-        enableComplexAnimations: true
-      };
-  }
-}
 
 const Spectrum = () => {
   const [isMounted, setIsMounted] = useState(false);

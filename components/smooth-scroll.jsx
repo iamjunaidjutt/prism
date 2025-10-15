@@ -4,28 +4,13 @@ import { useEffect, useRef, createContext, useContext, useCallback } from "react
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { debounce } from "@/utils/debounce";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
 	gsap.registerPlugin(ScrollTrigger);
 }
 
-// Debounce utility for performance
-function debounce(
-  func,
-  wait
-) {
-  let timeout;
-  
-  const debounced = (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-  
-  debounced.cancel = () => clearTimeout(timeout);
-  
-  return debounced;
-}
 
 // Create context for Lenis instance
 const LenisContext = createContext(null);
@@ -44,13 +29,13 @@ export default function SmoothScroll({
 		try {
 			// Initialize Lenis with optimized settings
 			const lenis = new Lenis({
-				duration: 1.2,
+				duration: 3,
 				easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
 				orientation: "vertical",
 				gestureOrientation: "vertical",
 				smoothWheel: true,
-				wheelMultiplier: 1,
-				touchMultiplier: 2,
+				wheelMultiplier: 1.5,
+				touchMultiplier: 3,
 				infinite: false,
 			});
 

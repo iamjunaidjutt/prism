@@ -5,85 +5,9 @@ import { useGSAP } from "@gsap/react";
 import styles from "./glitch.module.scss";
 import { slideData } from "@/utils/slides-data";
 import Image from "next/image";
+import { detectDeviceCapability, getWebGLSettings } from "@/utils/device-detection";
+import { debounce } from "@/utils/debounce";
 
-// Debounce utility for performance optimization
-function debounce(
-  func,
-  wait
-) {
-  let timeout;
-  
-  const debounced = (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-  
-  debounced.cancel = () => clearTimeout(timeout);
-  
-  return debounced;
-}
-
-// Device capability detection
-function detectDeviceCapability() {
-  const isMobile = window.innerWidth < 768;
-  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-  
-  // Check for hardware acceleration and memory
-  const canvas = document.createElement('canvas');
-  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-  const hasWebGL = !!gl;
-  
-  // Check device pixel ratio (higher usually means better GPU)
-  const pixelRatio = window.devicePixelRatio || 1;
-  
-  // Check for reduced motion preference
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
-  // Estimate device capability
-  if (prefersReducedMotion || !hasWebGL) {
-    return 'low';
-  } else if (isMobile || pixelRatio < 1.5) {
-    return 'low';
-  } else if (isTablet || pixelRatio < 2) {
-    return 'medium';
-  } else {
-    return 'high';
-  }
-}
-
-// Get WebGL settings based on device capability
-function getWebGLSettings(capability) {
-  switch (capability) {
-    case 'low':
-      return { 
-        pixelRatio: 1,
-        antialias: false,
-        maxTextureSize: 1024,
-        shaderComplexity: 'low',
-        effectIntensity: 0.5,
-        textureQuality: 0.5
-      };
-    case 'medium':
-      return { 
-        pixelRatio: Math.min(window.devicePixelRatio, 1.5),
-        antialias: false,
-        maxTextureSize: 2048,
-        shaderComplexity: 'medium',
-        effectIntensity: 0.75,
-        textureQuality: 0.75
-      };
-    case 'high':
-    default:
-      return { 
-        pixelRatio: Math.min(window.devicePixelRatio, 2),
-        antialias: true,
-        maxTextureSize: 4096,
-        shaderComplexity: 'high',
-        effectIntensity: 1.0,
-        textureQuality: 1.0
-      };
-  }
-}
 
 const GlitchSlider = () => {
   const containerRef = useRef(null);

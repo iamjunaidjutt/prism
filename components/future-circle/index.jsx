@@ -6,114 +6,21 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import styles from "./future-circle.module.scss";
 import Image from "next/image";
+import { 
+  detectDeviceCapability, 
+  getParticleCounts, 
+  getAnimationSpeedMultiplier 
+} from "@/utils/device-detection";
+import { debounce } from "@/utils/debounce";
+import { 
+  performanceMonitor, 
+  easingFunctions, 
+  tweenValue 
+} from "@/utils/performance-monitoring";
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
-// Performance monitoring utility
-const performanceMonitor = {
-  startTime: 0,
-  frameCount: 0,
-  lowFpsCount: 0,
-  
-  start: () => {
-    performanceMonitor.startTime = performance.now();
-    performanceMonitor.frameCount = 0;
-    performanceMonitor.lowFpsCount = 0;
-  },
-  
-  frame: (onPerformanceIssue) => {
-    performanceMonitor.frameCount++;
-    const now = performance.now();
-    const elapsed = now - performanceMonitor.startTime;
-    
-    if (elapsed > 1000) { // Every second
-      const fps = Math.round((performanceMonitor.frameCount * 1000) / elapsed);
-      
-      if (fps < 30) {
-        performanceMonitor.lowFpsCount++;
-        console.warn(`Future Circle Animation Low FPS: ${fps}, count: ${performanceMonitor.lowFpsCount}`);
-        
-        // If we've had low FPS for 3 consecutive seconds, trigger performance adjustment
-        if (performanceMonitor.lowFpsCount >= 3 && onPerformanceIssue) {
-          onPerformanceIssue();
-          performanceMonitor.lowFpsCount = 0; // Reset counter
-        }
-      } else {
-        performanceMonitor.lowFpsCount = 0; // Reset counter on good performance
-      }
-      
-      performanceMonitor.startTime = now;
-      performanceMonitor.frameCount = 0;
-    }
-  }
-};
-
-// Debounce utility function
-function debounce(
-  func,
-  wait
-) {
-  let timeout;
-  
-  const debounced = (...args) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-  
-  debounced.cancel = () => clearTimeout(timeout);
-  
-  return debounced;
-}
-
-// Device capability detection
-function detectDeviceCapability() {
-  const isMobile = window.innerWidth < 768;
-  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-  
-  // Check for hardware acceleration and memory
-  const canvas = document.createElement('canvas');
-  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-  const hasWebGL = !!gl;
-  
-  // Check device pixel ratio (higher usually means better GPU)
-  const pixelRatio = window.devicePixelRatio || 1;
-  
-  // Check for reduced motion preference
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
-  // Estimate device capability
-  if (prefersReducedMotion || !hasWebGL) {
-    return 'low';
-  } else if (isMobile || pixelRatio < 1.5) {
-    return 'low';
-  } else if (isTablet || pixelRatio < 2) {
-    return 'medium';
-  } else {
-    return 'high';
-  }
-}
-
-// Get particle counts based on device capability
-function getParticleCounts(capability) {
-  switch (capability) {
-    case 'low':
-      return { particles: 150, lines: 50, discs: 10 };
-    case 'medium':
-      return { particles: 300, lines: 75, discs: 15 };
-    case 'high':
-    default:
-      return { particles: 500, lines: 100, discs: 20 };
-  }
-}
-
-// Easing functions
-const easingFunctions = {
-  linear: (t) => t,
-  easeInExpo: (t) => (t === 0 ? 0 : Math.pow(2, 10 * (t - 1))),
-  easeOutCubic: (t) => 1 - Math.pow(1 - t, 3),
-  easeInCubic: (t) => t * t * t,
-};
 
 const FutureCircle = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -146,20 +53,6 @@ const FutureCircle = () => {
   const startDiscRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
   const endDiscRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
 
-  // Utility function to tween values with easing
-  const tweenValue = useCallback(
-    (
-      start,
-      end,
-      p,
-      ease = "linear",
-    ) => {
-      const delta = end - start;
-      const easeFn = easingFunctions[ease];
-      return start + delta * easeFn(p);
-    },
-    [],
-  );
 
   // WebNominee animation functions with error handling
   const setSize = useCallback(() => {
@@ -392,7 +285,7 @@ const FutureCircle = () => {
   // Animation functions
   const moveDiscs = useCallback(() => {
     // Adjust animation speed based on device capability
-    const speedMultiplier = deviceCapability === 'low' ? 0.5 : deviceCapability === 'medium' ? 0.75 : 1;
+    const speedMultiplier = getAnimationSpeedMultiplier(deviceCapability);
     
     discsRef.current.forEach((disc) => {
       disc.p = (disc.p + 0.001 * speedMultiplier) % 1;
@@ -402,7 +295,7 @@ const FutureCircle = () => {
 
   const moveParticles = useCallback(() => {
     // Adjust animation speed based on device capability
-    const speedMultiplier = deviceCapability === 'low' ? 0.5 : deviceCapability === 'medium' ? 0.75 : 1;
+    const speedMultiplier = getAnimationSpeedMultiplier(deviceCapability);
     
     particlesRef.current.forEach((particle) => {
       if (particle.p < 1) {
@@ -492,7 +385,7 @@ const FutureCircle = () => {
       setIsMobile(window.innerWidth < 768);
       const capability = detectDeviceCapability();
       setDeviceCapability(capability);
-      console.log(`Device capability detected: ${capability}`);
+      console.log(`Future Circle device capability detected: ${capability}`);
     };
 
     checkDeviceCapability();
