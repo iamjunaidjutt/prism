@@ -1,5 +1,10 @@
 .spectrum {
   @apply font-mono text-12px uppercase tracking-0.5px bg-primary-bg overflow-hidden transition-colors duration-300 h-[250vh] flex flex-col relative;
+  
+  /* Spectrum animations are optimized based on device capability:
+     - Low capability: No blur effects, slower stagger (0.15s), shorter duration (0.6s)
+     - Medium capability: Reduced blur intensity (0.6x), medium stagger (0.08s), medium duration (0.8s)  
+     - High capability: Full blur effects, fast stagger (0.03s), full duration (1.0s) */
 
   .header {
 

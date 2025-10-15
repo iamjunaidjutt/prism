@@ -3,33 +3,25 @@
 import React, { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import styles from "./glitch.module.scss";
-import type * as THREE from "three";
 import { slideData } from "@/utils/slides-data";
 import Image from "next/image";
+import { detectDeviceCapability, getWebGLSettings } from "@/utils/device-detection";
+import { debounce } from "@/utils/debounce";
 
-// Debounce utility for performance optimization
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { cancel: () => void } {
-  let timeout: NodeJS.Timeout;
-  
-  const debounced = (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-  
-  debounced.cancel = () => clearTimeout(timeout);
-  
-  return debounced as T & { cancel: () => void };
-}
 
 const GlitchSlider = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef(null);
+  const [deviceCapability, setDeviceCapability] = useState('high');
 
   useGSAP(() => {
     const initSlider = async () => {
       try {
+        // Detect device capability
+        const capability = detectDeviceCapability();
+        setDeviceCapability(capability);
+        const webglSettings = getWebGLSettings(capability);
+        console.log(`Glitch device capability detected: ${capability}`, webglSettings);
+
         // Dynamic imports to avoid SSR issues
         const THREE = await import("three");
         const gsap = (await import("gsap")).default;
@@ -42,7 +34,7 @@ const GlitchSlider = () => {
 
       const slider = containerRef.current.querySelector(
         "[data-image-slider-init]",
-      ) as HTMLElement;
+      );
       if (!slider) return;
 
       // Don't initialize slider immediately - wait for viewport
@@ -118,11 +110,11 @@ const GlitchSlider = () => {
         touchStartPosition: 0,
         isTouchActive: false,
         isActive: false,
-        renderer: null as THREE.WebGLRenderer | null,
-        scene: null as THREE.Scene | null,
-        camera: null as THREE.OrthographicCamera | null,
-        shaderMaterial: null as THREE.ShaderMaterial | null,
-        slideTextures: [] as THREE.Texture[],
+        renderer: null,
+        scene: null,
+        camera: null,
+        shaderMaterial: null,
+        slideTextures: [],
         texturesLoaded: false,
         startTime: Date.now(),
       };
@@ -709,8 +701,8 @@ const GlitchSlider = () => {
 			`;
 
       // Helper functions
-      function getEffectIndex(effectName: string): number {
-        const effectMap: Record<string, number> = {
+      function getEffectIndex(effectName) {
+        const effectMap = {
           datamosh: 0,
           pixelSort: 1,
           digitalStatic: 2,
@@ -721,7 +713,7 @@ const GlitchSlider = () => {
         return effectMap[effectName] || 0;
       }
 
-      function loadImageTexture(src: string): Promise<THREE.Texture> {
+      function loadImageTexture(src) {
         return new Promise((resolve, reject) => {
           try {
             const loader = new THREE.TextureLoader();
@@ -730,13 +722,43 @@ const GlitchSlider = () => {
               src,
               (texture) => {
                 clearTimeout(timeout);
-                texture.minFilter = texture.magFilter = THREE.LinearFilter;
-                texture.userData = {
-                  size: new THREE.Vector2(
-                    texture.image.width,
-                    texture.image.height,
-                  ),
-                };
+                
+                // Apply device-based texture quality settings
+                if (webglSettings.textureQuality < 1.0) {
+                  const maxSize = webglSettings.maxTextureSize;
+                  const originalWidth = texture.image.width;
+                  const originalHeight = texture.image.height;
+                  
+                  // Scale down texture if it's too large for device capability
+                  if (originalWidth > maxSize || originalHeight > maxSize) {
+                    const scale = Math.min(maxSize / originalWidth, maxSize / originalHeight);
+                    texture.userData = {
+                      size: new THREE.Vector2(
+                        originalWidth * scale,
+                        originalHeight * scale,
+                      ),
+                    };
+                  } else {
+                    texture.userData = {
+                      size: new THREE.Vector2(originalWidth, originalHeight),
+                    };
+                  }
+                } else {
+                  texture.userData = {
+                    size: new THREE.Vector2(
+                      texture.image.width,
+                      texture.image.height,
+                    ),
+                  };
+                }
+                
+                // Use appropriate filtering based on device capability
+                if (webglSettings.textureQuality >= 0.75) {
+                  texture.minFilter = texture.magFilter = THREE.LinearFilter;
+                } else {
+                  texture.minFilter = texture.magFilter = THREE.NearestFilter;
+                }
+                
                 resolve(texture);
               },
               undefined,
@@ -758,7 +780,7 @@ const GlitchSlider = () => {
         try {
           const canvas = slider.querySelector(
             "[data-webgl-canvas]",
-          ) as HTMLCanvasElement;
+          );
           if (!canvas) {
             console.warn("WebGL canvas not found");
             return;
@@ -768,11 +790,11 @@ const GlitchSlider = () => {
         state.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
         state.renderer = new THREE.WebGLRenderer({
           canvas: canvas,
-          antialias: false,
+          antialias: webglSettings.antialias,
           alpha: false,
         });
         state.renderer.setSize(window.innerWidth, window.innerHeight);
-        state.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        state.renderer.setPixelRatio(webglSettings.pixelRatio);
 
         // Create shader material
         state.shaderMaterial = new THREE.ShaderMaterial({
@@ -789,7 +811,7 @@ const GlitchSlider = () => {
             uEffectType: {
               value: getEffectIndex(config.currentEffect),
             },
-            uGlobalIntensity: { value: config.globalIntensity },
+            uGlobalIntensity: { value: config.globalIntensity * webglSettings.effectIntensity },
             uSpeedMultiplier: { value: config.speedMultiplier },
             uColorShiftAmount: { value: config.colorShiftAmount },
             uDistortionStrength: {
@@ -917,9 +939,9 @@ const GlitchSlider = () => {
 
       // Transitions
       function createFeaturedImageWrapper(
-        imageIndex: number,
-        transitionDirection: string,
-      ): HTMLElement {
+        imageIndex,
+        transitionDirection,
+      ) {
         const featuredWrapper = document.createElement("div");
         featuredWrapper.className = styles.featuredImageWrapper;
         featuredWrapper.setAttribute("data-featured-wrapper", "");
@@ -937,8 +959,8 @@ const GlitchSlider = () => {
       }
 
       function createTextElements(
-        slideIndex: number,
-        transitionDirection: string,
+        slideIndex,
+        transitionDirection,
       ) {
         const newNumber = document.createElement("span");
         newNumber.textContent = slideData[slideIndex].number;
@@ -994,7 +1016,7 @@ const GlitchSlider = () => {
         };
       }
 
-      function getNextImageIndex(direction: string): number {
+      function getNextImageIndex(direction) {
         if (direction === "down") {
           return state.currentImageIndex === config.totalImages - 1
             ? 0
@@ -1006,7 +1028,7 @@ const GlitchSlider = () => {
         }
       }
 
-      function executeSlideTransition(transitionDirection: string) {
+      function executeSlideTransition(transitionDirection) {
         if (
           state.isTransitioning ||
           !state.scrollingEnabled ||
@@ -1037,7 +1059,7 @@ const GlitchSlider = () => {
           "[data-slide-description]",
         );
         // Get all property line containers (up to 5)
-        const propertyLineContainers: (Element | null)[] = [];
+        const propertyLineContainers = [];
         for (let i = 1; i <= 5; i++) {
           propertyLineContainers.push(
             slider.querySelector(`[data-property-line-${i}]`),
@@ -1186,7 +1208,7 @@ const GlitchSlider = () => {
 
         if (currentFeaturedWrapper?.querySelector("img")) {
           transitionTimeline.to(
-            currentFeaturedWrapper.querySelector("img")!,
+            currentFeaturedWrapper.querySelector("img"),
             {
               y: transitionDirection === "down" ? "50%" : "-50%",
               duration: config.transitionDuration,
@@ -1410,7 +1432,7 @@ const GlitchSlider = () => {
           );
         });
       }
-      function handleScrollInteraction(scrollDirection: string) {
+      function handleScrollInteraction(scrollDirection) {
         const currentTimestamp = Date.now();
         if (state.isTransitioning || !state.scrollingEnabled) return;
         if (
@@ -1424,7 +1446,7 @@ const GlitchSlider = () => {
       }
 
       // Event listeners with error handling
-      let eventListenersCleanup: (() => void) | null = null;
+      let eventListenersCleanup = null;
       
       function initEventListeners() {
         // Clean up existing listeners first
@@ -1434,7 +1456,7 @@ const GlitchSlider = () => {
         
         try {
           // Mouse wheel handler
-          const wheelHandler = (wheelEvent: WheelEvent) => {
+          const wheelHandler = (wheelEvent) => {
             // Only handle scroll if component is active AND scrolling is enabled
             if (!state.isActive || !state.scrollingEnabled) return;
             
@@ -1454,7 +1476,7 @@ const GlitchSlider = () => {
           window.addEventListener("wheel", wheelHandler, { passive: false });
 
           // Touch start handler
-          const touchStartHandler = (touchStartEvent: TouchEvent) => {
+          const touchStartHandler = (touchStartEvent) => {
             // Only handle touch if component is active AND scrolling is enabled
             if (!state.isActive || !state.scrollingEnabled) return;
             
@@ -1463,7 +1485,7 @@ const GlitchSlider = () => {
           };
           
           // Touch move handler
-          const touchMoveHandler = (touchMoveEvent: TouchEvent) => {
+          const touchMoveHandler = (touchMoveEvent) => {
             if (
               !state.isActive ||
               !state.isTouchActive ||
@@ -1503,14 +1525,14 @@ const GlitchSlider = () => {
           window.addEventListener("touchend", touchEndHandler);
 
           // Keyboard handler
-          const keyboardHandler = (e: KeyboardEvent) => {
+          const keyboardHandler = (e) => {
             e.preventDefault();
 
             switch (e.code) {
               case "KeyH":
                 const paneElement = document.querySelector(
                   ".tp-dfwv",
-                ) as HTMLElement;
+                );
                 if (paneElement) {
                   const isHidden = paneElement.style.visibility === "hidden";
                   paneElement.style.visibility = isHidden ? "visible" : "hidden";
@@ -1592,11 +1614,22 @@ const GlitchSlider = () => {
           // Resize handler with debouncing
           const debouncedResize = debounce(() => {
             if (state.renderer && state.shaderMaterial) {
+              // Re-detect device capability on resize
+              const newCapability = detectDeviceCapability();
+              const newWebglSettings = getWebGLSettings(newCapability);
+              
               state.renderer.setSize(window.innerWidth, window.innerHeight);
+              state.renderer.setPixelRatio(newWebglSettings.pixelRatio);
               state.shaderMaterial.uniforms.uResolution.value.set(
                 window.innerWidth,
                 window.innerHeight,
               );
+              
+              // Update intensity if capability changed
+              if (newCapability !== capability) {
+                state.shaderMaterial.uniforms.uGlobalIntensity.value = 
+                  config.globalIntensity * newWebglSettings.effectIntensity;
+              }
             }
           }, 100);
           

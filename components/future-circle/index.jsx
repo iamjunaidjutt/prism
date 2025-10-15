@@ -6,116 +6,53 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import styles from "./future-circle.module.scss";
 import Image from "next/image";
+import { 
+  detectDeviceCapability, 
+  getParticleCounts, 
+  getAnimationSpeedMultiplier 
+} from "@/utils/device-detection";
+import { debounce } from "@/utils/debounce";
+import { 
+  performanceMonitor, 
+  easingFunctions, 
+  tweenValue 
+} from "@/utils/performance-monitoring";
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
-// Performance monitoring utility
-const performanceMonitor = {
-  startTime: 0,
-  frameCount: 0,
-  
-  start: () => {
-    performanceMonitor.startTime = performance.now();
-    performanceMonitor.frameCount = 0;
-  },
-  
-  frame: () => {
-    performanceMonitor.frameCount++;
-    const now = performance.now();
-    const elapsed = now - performanceMonitor.startTime;
-    
-    if (elapsed > 1000) { // Every second
-      const fps = Math.round((performanceMonitor.frameCount * 1000) / elapsed);
-      if (fps < 30) {
-        console.warn(`Future Circle Animation Low FPS: ${fps}, consider reducing animation complexity`);
-      }
-      performanceMonitor.startTime = now;
-      performanceMonitor.frameCount = 0;
-    }
-  }
-};
-
-// Debounce utility function
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { cancel: () => void } {
-  let timeout: NodeJS.Timeout;
-  
-  const debounced = (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-  
-  debounced.cancel = () => clearTimeout(timeout);
-  
-  return debounced as T & { cancel: () => void };
-}
-
-// WebNominee animation interfaces
-interface Disc {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  p: number;
-}
-
-interface Line {
-  p0: { x: number; y: number };
-  p1: { x: number; y: number };
-  l: { x: number; y: number };
-}
-
-interface Particle {
-  lineIndex: number;
-  p: number;
-  v: number;
-  l: number;
-  a: number;
-}
-
-// Easing functions
-const easingFunctions = {
-  linear: (t: number) => t,
-  easeInExpo: (t: number) => (t === 0 ? 0 : Math.pow(2, 10 * (t - 1))),
-  easeOutCubic: (t: number) => 1 - Math.pow(1 - t, 3),
-  easeInCubic: (t: number) => t * t * t,
-};
 
 const FutureCircle = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [deviceCapability, setDeviceCapability] = useState('high'); // 'low', 'medium', 'high'
+  const containerRef = useRef(null);
+
+  // Handle performance issues by reducing particle count
+  const handlePerformanceIssue = useCallback(() => {
+    console.log('Performance issue detected, reducing particle count...');
+    
+    if (deviceCapability === 'high') {
+      setDeviceCapability('medium');
+    } else if (deviceCapability === 'medium') {
+      setDeviceCapability('low');
+    }
+    // If already at 'low', we can't reduce further
+  }, [deviceCapability]);
 
   // WebNominee animation refs
-  const webbyNomineeRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const badgeRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
+  const webbyNomineeRef = useRef(null);
+  const canvasRef = useRef(null);
+  const badgeRef = useRef(null);
+  const animationFrameRef = useRef(null);
 
-  const discsRef = useRef<Disc[]>([]);
-  const linesRef = useRef<Line[]>([]);
-  const particlesRef = useRef<Particle[]>([]);
+  const discsRef = useRef([]);
+  const linesRef = useRef([]);
+  const particlesRef = useRef([]);
   const renderRef = useRef({ width: 0, height: 0, dpi: 1 });
   const startDiscRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
   const endDiscRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
 
-  // Utility function to tween values with easing
-  const tweenValue = useCallback(
-    (
-      start: number,
-      end: number,
-      p: number,
-      ease: keyof typeof easingFunctions = "linear",
-    ) => {
-      const delta = end - start;
-      const easeFn = easingFunctions[ease];
-      return start + delta * easeFn(p);
-    },
-    [],
-  );
 
   // WebNominee animation functions with error handling
   const setSize = useCallback(() => {
@@ -179,7 +116,7 @@ const FutureCircle = () => {
 
   // Tween disc properties
   const tweenDisc = useCallback(
-    (disc: Disc) => {
+    (disc) => {
       disc.x = tweenValue(startDiscRef.current.x, endDiscRef.current.x, disc.p);
       disc.y = tweenValue(
         startDiscRef.current.y,
@@ -206,7 +143,8 @@ const FutureCircle = () => {
 
   // Initialize discs
   const setDiscs = useCallback(() => {
-    const totalDiscs = 20;
+    const counts = getParticleCounts(deviceCapability);
+    const totalDiscs = counts.discs;
     discsRef.current = [];
 
     for (let i = 0; i < totalDiscs; i++) {
@@ -214,14 +152,15 @@ const FutureCircle = () => {
       const disc = tweenDisc({ x: 0, y: 0, w: 0, h: 0, p });
       discsRef.current.push(disc);
     }
-  }, [tweenDisc]);
+  }, [tweenDisc, deviceCapability]);
 
   // Set lines
   const setLines = useCallback(() => {
     const { width, height } = renderRef.current;
     linesRef.current = [];
 
-    const totalLines = 100;
+    const counts = getParticleCounts(deviceCapability);
+    const totalLines = counts.lines;
     const linesAngle = (Math.PI * 2) / totalLines;
 
     for (let i = 0; i < totalLines; i++) {
@@ -245,12 +184,13 @@ const FutureCircle = () => {
 
       linesRef.current.push({ p0, p1, l });
     }
-  }, []);
+  }, [deviceCapability]);
 
   // Initialize particles
   const setParticles = useCallback(() => {
     particlesRef.current = [];
-    const totalParticles = 500;
+    const counts = getParticleCounts(deviceCapability);
+    const totalParticles = counts.particles;
 
     for (let i = 0; i < totalParticles; i++) {
       const lineIndex = Math.round(
@@ -262,9 +202,9 @@ const FutureCircle = () => {
 
       particlesRef.current.push({ lineIndex, p: Math.random(), v, l, a });
     }
-  }, []);
+  }, [deviceCapability]);
   // Draw functions
-  const drawDiscs = useCallback((ctx: CanvasRenderingContext2D) => {
+  const drawDiscs = useCallback((ctx) => {
     try {
       ctx.strokeStyle = "#444";
       ctx.lineWidth = 2;
@@ -296,7 +236,7 @@ const FutureCircle = () => {
     }
   }, []);
 
-  const drawLines = useCallback((ctx: CanvasRenderingContext2D) => {
+  const drawLines = useCallback((ctx) => {
     try {
       ctx.beginPath();
       linesRef.current.forEach(({ p0, p1 }) => {
@@ -312,7 +252,7 @@ const FutureCircle = () => {
     }
   }, []);
 
-  const drawParticles = useCallback((ctx: CanvasRenderingContext2D) => {
+  const drawParticles = useCallback((ctx) => {
     try {
       particlesRef.current.forEach((particle) => {
         const line = linesRef.current[particle.lineIndex];
@@ -344,21 +284,27 @@ const FutureCircle = () => {
 
   // Animation functions
   const moveDiscs = useCallback(() => {
+    // Adjust animation speed based on device capability
+    const speedMultiplier = getAnimationSpeedMultiplier(deviceCapability);
+    
     discsRef.current.forEach((disc) => {
-      disc.p = (disc.p + 0.001) % 1;
+      disc.p = (disc.p + 0.001 * speedMultiplier) % 1;
       tweenDisc(disc);
     });
-  }, [tweenDisc]);
+  }, [tweenDisc, deviceCapability]);
 
   const moveParticles = useCallback(() => {
+    // Adjust animation speed based on device capability
+    const speedMultiplier = getAnimationSpeedMultiplier(deviceCapability);
+    
     particlesRef.current.forEach((particle) => {
       if (particle.p < 1) {
-        particle.p += particle.v;
+        particle.p += particle.v * speedMultiplier;
       } else {
         particle.p = 0;
       }
     });
-  }, []);
+  }, [deviceCapability]);
 
   // Main animation loop with performance monitoring and error handling
   const tick = useCallback(() => {
@@ -402,6 +348,9 @@ const FutureCircle = () => {
         console.warn(`Canvas animation performance issue: ${frameTime.toFixed(2)}ms per frame`);
       }
 
+      // Enhanced performance monitoring with automatic adjustment
+      performanceMonitor.frame(handlePerformanceIssue);
+
       animationFrameRef.current = requestAnimationFrame(tick);
     } catch (error) {
       console.error("Canvas animation error:", error);
@@ -410,7 +359,7 @@ const FutureCircle = () => {
         animationFrameRef.current = null;
       }
     }
-  }, [moveDiscs, moveParticles, setLines, drawDiscs, drawLines, drawParticles]);
+  }, [moveDiscs, moveParticles, setLines, drawDiscs, drawLines, drawParticles, handlePerformanceIssue]);
 
   // Resize handler with debouncing
   const handleResize = useCallback(() => {
@@ -432,14 +381,17 @@ const FutureCircle = () => {
   }, []);
 
   useEffect(() => {
-    const checkMobile = () => {
+    const checkDeviceCapability = () => {
       setIsMobile(window.innerWidth < 768);
+      const capability = detectDeviceCapability();
+      setDeviceCapability(capability);
+      console.log(`Future Circle device capability detected: ${capability}`);
     };
 
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
+    checkDeviceCapability();
+    window.addEventListener("resize", checkDeviceCapability);
 
-    return () => window.removeEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkDeviceCapability);
   }, []);
 
   useGSAP(
@@ -724,6 +676,7 @@ const FutureCircle = () => {
       dependencies: [
         isMounted,
         isMobile,
+        deviceCapability,
         debouncedResize,
         tick,
         setSize,

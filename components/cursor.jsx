@@ -5,25 +5,25 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
 // Debounce utility for performance
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { cancel: () => void } {
-  let timeout: NodeJS.Timeout;
+function debounce(
+  func,
+  wait
+) {
+  let timeout;
   
-  const debounced = (...args: Parameters<T>) => {
+  const debounced = (...args) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
   
   debounced.cancel = () => clearTimeout(timeout);
   
-  return debounced as T & { cancel: () => void };
+  return debounced;
 }
 
-const Cursor: React.FC = () => {
+const Cursor = () => {
   const [showCursor, setShowCursor] = useState(false);
-  const cursorRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef(null);
 
   // Optimized resize handler
   const checkCursorVisibility = useCallback(() => {
@@ -53,7 +53,7 @@ const Cursor: React.FC = () => {
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
 
-    const moveCursor = (e: MouseEvent) => {
+    const moveCursor = (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
     };

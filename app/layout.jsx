@@ -1,4 +1,3 @@
-import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.scss";
 
@@ -22,7 +21,7 @@ const geistMono = Geist_Mono({
   preload: false, // Only load when needed
 });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: {
     default: "PRÏSMAEON - 穿越化",
     template: "%s | PRÏSMAEON"
@@ -67,7 +66,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
+export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -80,9 +79,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}) {
   // Initialize performance monitoring
   if (typeof window !== "undefined") {
     initPerformanceMonitoring();

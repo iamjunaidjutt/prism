@@ -1,24 +1,16 @@
 // Performance monitoring utilities for production
 
-interface PerformanceMetrics {
-  loadTime: number;
-  firstContentfulPaint: number;
-  largestContentfulPaint: number;
-  cumulativeLayoutShift: number;
-  firstInputDelay: number;
-}
-
 class PerformanceMonitor {
-  private metrics: Partial<PerformanceMetrics> = {};
-  private observer: PerformanceObserver | null = null;
-
   constructor() {
+    this.metrics = {};
+    this.observer = null;
+    
     if (typeof window !== "undefined" && "PerformanceObserver" in window) {
       this.initObservers();
     }
   }
 
-  private initObservers() {
+  initObservers() {
     try {
       // Observe Core Web Vitals
       this.observer = new PerformanceObserver((list) => {
@@ -34,44 +26,44 @@ class PerformanceMonitor {
     }
   }
 
-  private handlePerformanceEntry(entry: PerformanceEntry) {
+  handlePerformanceEntry(entry) {
     switch (entry.entryType) {
       case "navigation":
-        const navEntry = entry as PerformanceNavigationTiming;
+        const navEntry = entry;
         this.metrics.loadTime = navEntry.loadEventEnd - navEntry.loadEventStart;
         break;
 
       case "paint":
-        const paintEntry = entry as PerformancePaintTiming;
+        const paintEntry = entry;
         if (paintEntry.name === "first-contentful-paint") {
           this.metrics.firstContentfulPaint = paintEntry.startTime;
         }
         break;
 
       case "largest-contentful-paint":
-        const lcpEntry = entry as any;
+        const lcpEntry = entry;
         this.metrics.largestContentfulPaint = lcpEntry.startTime;
         break;
 
       case "layout-shift":
-        const clsEntry = entry as any;
+        const clsEntry = entry;
         if (!clsEntry.hadRecentInput) {
           this.metrics.cumulativeLayoutShift = (this.metrics.cumulativeLayoutShift || 0) + clsEntry.value;
         }
         break;
 
       case "first-input":
-        const fidEntry = entry as any;
+        const fidEntry = entry;
         this.metrics.firstInputDelay = fidEntry.processingStart - fidEntry.startTime;
         break;
     }
   }
 
-  public getMetrics(): Partial<PerformanceMetrics> {
+  getMetrics() {
     return { ...this.metrics };
   }
 
-  public logMetrics() {
+  logMetrics() {
     const metrics = this.getMetrics();
     
     if (process.env.NODE_ENV === "development") {
@@ -90,10 +82,10 @@ class PerformanceMonitor {
     }
   }
 
-  private sendToAnalytics(metrics: Partial<PerformanceMetrics>) {
+  sendToAnalytics(metrics) {
     // Example: Send to Google Analytics or other analytics service
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag("event", "performance_metrics", {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "performance_metrics", {
         load_time: metrics.loadTime,
         first_contentful_paint: metrics.firstContentfulPaint,
         largest_contentful_paint: metrics.largestContentfulPaint,
@@ -103,7 +95,7 @@ class PerformanceMonitor {
     }
   }
 
-  public destroy() {
+  destroy() {
     if (this.observer) {
       this.observer.disconnect();
       this.observer = null;
@@ -112,7 +104,7 @@ class PerformanceMonitor {
 }
 
 // Singleton instance
-let performanceMonitor: PerformanceMonitor | null = null;
+let performanceMonitor = null;
 
 export const initPerformanceMonitoring = () => {
   if (typeof window !== "undefined" && !performanceMonitor) {
@@ -164,7 +156,7 @@ export const PERFORMANCE_THRESHOLDS = {
 
 export const checkPerformanceWarnings = () => {
   const vitals = getWebVitals();
-  const warnings: string[] = [];
+  const warnings = [];
 
   if (vitals.FCP && vitals.FCP > PERFORMANCE_THRESHOLDS.FCP) {
     warnings.push(`First Contentful Paint is slow: ${vitals.FCP.toFixed(2)}ms`);

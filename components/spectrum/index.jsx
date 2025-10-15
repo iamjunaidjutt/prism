@@ -5,27 +5,12 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import styles from "./spectrum.module.scss";
+import { detectDeviceCapability, getAnimationSettings } from "@/utils/device-detection";
+import { debounce } from "@/utils/debounce";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
-}
-
-// Simple debounce utility for resize events
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { cancel: () => void } {
-  let timeout: NodeJS.Timeout;
-  
-  const debounced = (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-  
-  debounced.cancel = () => clearTimeout(timeout);
-  
-  return debounced as T & { cancel: () => void };
 }
 
 // Monochrome theme colors - Chrome gray and light champagne
@@ -43,22 +28,34 @@ const MONOCHROME_COLORS = [
   "#f7e7ce", // Light champagne
 ];
 
-const Spectrum: React.FC = () => {
+const Spectrum = () => {
   const [isMounted, setIsMounted] = useState(false);
+  const [deviceCapability, setDeviceCapability] = useState('high');
 
   // Refs for DOM elements
-  const heroTitleRef = useRef<HTMLHeadingElement>(null);
-  const heroNavRef = useRef<HTMLDivElement>(null);
-  const heroTextRef = useRef<HTMLDivElement>(null);
-  const scrollHintRef = useRef<HTMLDivElement>(null);
-  const svgContainerRef = useRef<HTMLDivElement>(null);
-  const textGridRef = useRef<HTMLDivElement>(null);
-  const mainTitleRef = useRef<HTMLDivElement>(null);
-  const gradientOverlayRef = useRef<HTMLDivElement>(null);
-  const svgGroupRef = useRef<SVGGElement>(null);
+  const heroTitleRef = useRef(null);
+  const heroNavRef = useRef(null);
+  const heroTextRef = useRef(null);
+  const scrollHintRef = useRef(null);
+  const svgContainerRef = useRef(null);
+  const textGridRef = useRef(null);
+  const mainTitleRef = useRef(null);
+  const gradientOverlayRef = useRef(null);
+  const svgGroupRef = useRef(null);
 
   useEffect(() => {
     setIsMounted(true);
+    
+    const checkDeviceCapability = () => {
+      const capability = detectDeviceCapability();
+      setDeviceCapability(capability);
+      console.log(`Spectrum device capability detected: ${capability}`);
+    };
+
+    checkDeviceCapability();
+    window.addEventListener("resize", checkDeviceCapability);
+
+    return () => window.removeEventListener("resize", checkDeviceCapability);
   }, []);
 
   // Initialize animations after fonts are loaded
@@ -72,6 +69,7 @@ const Spectrum: React.FC = () => {
 
         const isMobileView = window.innerWidth < 768;
         const isTabletView = window.innerWidth >= 768 && window.innerWidth < 1024;
+        const animationSettings = getAnimationSettings(deviceCapability);
 
 
       // Hero Timeline - Initial animations
@@ -86,7 +84,8 @@ const Spectrum: React.FC = () => {
 
         const elements = isMobileView ? titleSplit.words : titleSplit.chars;
 
-        gsap.set(elements, { opacity: 0, filter: "blur(8px)", x: -20 });
+        const initialBlur = animationSettings.enableBlur ? `${4 * animationSettings.blurIntensity}px` : "0px";
+        gsap.set(elements, { opacity: 0, filter: `blur(${initialBlur})`, x: -10 });
 
         heroTl.to(
           elements,
@@ -94,8 +93,8 @@ const Spectrum: React.FC = () => {
             opacity: 1,
             filter: "blur(0px)",
             x: 0,
-            duration: 0.8,
-            stagger: isMobileView ? 0.1 : 0.03,
+            duration: animationSettings.duration,
+            stagger: animationSettings.staggerDelay,
             ease: "power2.out",
           },
           0,
@@ -109,13 +108,14 @@ const Spectrum: React.FC = () => {
 
       if (navItems) {
         navItems.forEach((item) => {
-          const split = new SplitText(item as HTMLElement, {
+          const split = new SplitText(item, {
             type: "lines",
           });
+          const navBlur = animationSettings.enableBlur ? `${3 * animationSettings.blurIntensity}px` : "0px";
           gsap.set(split.lines, {
             opacity: 0,
-            y: 30,
-            filter: "blur(8px)",
+            y: 20,
+            filter: `blur(${navBlur})`,
           });
 
           heroTl.to(
@@ -124,8 +124,8 @@ const Spectrum: React.FC = () => {
               opacity: 1,
               y: 0,
               filter: "blur(0px)",
-              duration: 0.8,
-              stagger: 0.08,
+              duration: animationSettings.duration,
+              stagger: animationSettings.staggerDelay,
               ease: "power2.out",
             },
             0.4,
@@ -139,10 +139,11 @@ const Spectrum: React.FC = () => {
       );
 
       if (textElements) {
+        const textBlur = animationSettings.enableBlur ? `${2 * animationSettings.blurIntensity}px` : "0px";
         gsap.set(textElements, {
           opacity: 0,
-          y: 50,
-          filter: "blur(4px)",
+          y: 30,
+          filter: `blur(${textBlur})`,
         });
 
         heroTl.to(
@@ -151,39 +152,34 @@ const Spectrum: React.FC = () => {
             opacity: 1,
             y: 0,
             filter: "blur(0px)",
-            duration: 1.0,
-            stagger: 0.2,
+            duration: animationSettings.duration * 1.2,
+            stagger: animationSettings.staggerDelay * 2,
             ease: "power2.out",
           },
           0.5,
         );
       }
 
-      // Animate scroll hint with continuous blur
+      // Animate scroll hint with simplified animation (no continuous loops)
       if (scrollHintRef.current) {
         const scrollSplit = new SplitText(scrollHintRef.current, {
           type: "chars",
         });
+        
+        const scrollBlur = animationSettings.enableBlur ? `${2 * animationSettings.blurIntensity}px` : "0px";
         gsap.set(scrollSplit.chars, {
           opacity: 0,
-          filter: "blur(3px)",
+          filter: `blur(${scrollBlur})`,
         });
 
+        // Simple fade in animation - no continuous loops
         gsap.to(scrollSplit.chars, {
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.6,
-          stagger: { each: 0.08, repeat: -1, yoyo: true },
-          ease: "sine.inOut",
-          delay: 1,
-        });
-
-        gsap.to(scrollSplit.chars, {
-          filter: "blur(1px)",
           duration: 0.8,
-          stagger: { each: 0.08, repeat: -1, yoyo: true },
-          ease: "sine.inOut",
-          delay: 1.04,
+          stagger: 0.05,
+          ease: "power2.out",
+          delay: 1,
         });
       }
 
@@ -269,18 +265,19 @@ const Spectrum: React.FC = () => {
       // Prepare wavelength labels and main title
       const wavelengthLabels =
         textGridRef.current?.querySelectorAll("#wavelength-label");
-      const allSplitLines: Element[] = [];
+      const allSplitLines = [];
 
       if (wavelengthLabels) {
         wavelengthLabels.forEach((label) => {
-          const split = new SplitText(label as HTMLElement, {
+          const split = new SplitText(label, {
             type: "lines",
           });
-          gsap.set(split.lines, {
-            opacity: 0,
-            y: 30,
-            filter: "blur(8px)",
-          });
+        const wavelengthBlur = animationSettings.enableBlur ? `${3 * animationSettings.blurIntensity}px` : "0px";
+        gsap.set(split.lines, {
+          opacity: 0,
+          y: 20,
+          filter: `blur(${wavelengthBlur})`,
+        });
           allSplitLines.push(...split.lines);
         });
       }
@@ -289,10 +286,11 @@ const Spectrum: React.FC = () => {
         const mainTitleSplit = new SplitText(mainTitleRef.current, {
           type: "lines",
         });
+        const mainTitleBlur = animationSettings.enableBlur ? `${3 * animationSettings.blurIntensity}px` : "0px";
         gsap.set(mainTitleSplit.lines, {
           opacity: 0,
-          y: 30,
-          filter: "blur(8px)",
+          y: 20,
+          filter: `blur(${mainTitleBlur})`,
         });
         allSplitLines.push(...mainTitleSplit.lines);
       }
@@ -305,8 +303,8 @@ const Spectrum: React.FC = () => {
         .to(
           "[data-spectrum-component] #svg-container",
           {
-            transform: "scaleY(0.05) translateY(-30px)",
-            duration: 0.3,
+            transform: "scaleY(0.1) translateY(-15px)",
+            duration: 0.2,
             ease: "power2.out",
           },
           0,
@@ -315,10 +313,10 @@ const Spectrum: React.FC = () => {
           "[data-spectrum-component] #svg-container",
           {
             transform: "scaleY(1) translateY(0px)",
-            duration: 1.2,
+            duration: 0.8,
             ease: "power2.out",
           },
-          0.3,
+          0.2,
         )
         .to(
           "[data-spectrum-component] #nav-bottom-left, [data-spectrum-component] #nav-bottom-right, [data-spectrum-component] #nav-bottom-center",
@@ -332,20 +330,20 @@ const Spectrum: React.FC = () => {
         .to(
           allSplitLines,
           {
-            duration: 0.8,
+            duration: animationSettings.duration,
             y: 0,
             opacity: 1,
             filter: "blur(0px)",
-            stagger: 0.08,
+            stagger: animationSettings.staggerDelay,
             ease: "power2.out",
           },
           0.9,
         )
-        .to(".level-5", { y: "-25vh", duration: 0.8, ease: "power2.out" }, 0.9)
-        .to(".level-4", { y: "-20vh", duration: 0.8, ease: "power2.out" }, 0.9)
-        .to(".level-3", { y: "-15vh", duration: 0.8, ease: "power2.out" }, 0.9)
-        .to(".level-2", { y: "-10vh", duration: 0.8, ease: "power2.out" }, 0.9)
-        .to(".level-1", { y: "-5vh", duration: 0.8, ease: "power2.out" }, 0.9);
+        .to(".level-5", { y: "-15vh", duration: 0.6, ease: "power2.out" }, 0.7)
+        .to(".level-4", { y: "-12vh", duration: 0.6, ease: "power2.out" }, 0.7)
+        .to(".level-3", { y: "-9vh", duration: 0.6, ease: "power2.out" }, 0.7)
+        .to(".level-2", { y: "-6vh", duration: 0.6, ease: "power2.out" }, 0.7)
+        .to(".level-1", { y: "-3vh", duration: 0.6, ease: "power2.out" }, 0.7);
       } catch (error) {
         console.error("Spectrum animation initialization failed:", error);
       }
@@ -362,7 +360,7 @@ const Spectrum: React.FC = () => {
       debouncedResize.cancel();
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, [isMounted]);
+  }, [isMounted, deviceCapability]);
 
   // Hero nav hover effects
   useEffect(() => {
@@ -386,9 +384,9 @@ const Spectrum: React.FC = () => {
       "radial-gradient(circle, #999999 0%, #666666 50%, transparent 100%)",
     ];
 
-    const handleMouseEnter = (index: number) => {
+    const handleMouseEnter = (index) => {
       gradientOverlay.style.background = navGradients[index];
-      gradientOverlay.style.opacity = "0.3";
+      gradientOverlay.style.opacity = "0.2"; // Reduced opacity
 
       navItems.forEach((navItem, navIndex) => {
         const distance = Math.abs(index - navIndex);
@@ -396,26 +394,26 @@ const Spectrum: React.FC = () => {
 
         if (navIndex === index) {
           opacity = 1;
-          (navItem as HTMLElement).classList.add("active");
+          navItem.classList.add("active");
         } else if (distance === 1) {
-          opacity = 0.6;
-          (navItem as HTMLElement).classList.remove("active");
+          opacity = 0.7; // Reduced opacity change
+          navItem.classList.remove("active");
         } else if (distance === 2) {
-          opacity = 0.3;
-          (navItem as HTMLElement).classList.remove("active");
+          opacity = 0.4; // Reduced opacity change
+          navItem.classList.remove("active");
         } else {
-          opacity = 0.1;
-          (navItem as HTMLElement).classList.remove("active");
+          opacity = 0.2; // Reduced opacity change
+          navItem.classList.remove("active");
         }
 
-        (navItem as HTMLElement).style.opacity = opacity.toString();
+        navItem.style.opacity = opacity.toString();
       });
     };
 
     const handleMouseLeave = () => {
       navItems.forEach((navItem) => {
-        (navItem as HTMLElement).style.opacity = "1";
-        (navItem as HTMLElement).classList.remove("active");
+        navItem.style.opacity = "1";
+        navItem.classList.remove("active");
       });
       gradientOverlay.style.opacity = "0";
     };

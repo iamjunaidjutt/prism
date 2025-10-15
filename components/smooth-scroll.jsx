@@ -4,31 +4,16 @@ import { useEffect, useRef, createContext, useContext, useCallback } from "react
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { debounce } from "@/utils/debounce";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
 	gsap.registerPlugin(ScrollTrigger);
 }
 
-// Debounce utility for performance
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { cancel: () => void } {
-  let timeout: NodeJS.Timeout;
-  
-  const debounced = (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-  
-  debounced.cancel = () => clearTimeout(timeout);
-  
-  return debounced as T & { cancel: () => void };
-}
 
 // Create context for Lenis instance
-const LenisContext = createContext<Lenis | null>(null);
+const LenisContext = createContext(null);
 
 export const useLenis = () => {
 	const lenis = useContext(LenisContext);
@@ -37,22 +22,20 @@ export const useLenis = () => {
 
 export default function SmoothScroll({
 	children,
-}: {
-	children: React.ReactNode;
 }) {
-	const lenisRef = useRef<Lenis | null>(null);
+	const lenisRef = useRef(null);
 
 	useEffect(() => {
 		try {
 			// Initialize Lenis with optimized settings
 			const lenis = new Lenis({
-				duration: 1.2,
+				duration: 3,
 				easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
 				orientation: "vertical",
 				gestureOrientation: "vertical",
 				smoothWheel: true,
-				wheelMultiplier: 1,
-				touchMultiplier: 2,
+				wheelMultiplier: 1.5,
+				touchMultiplier: 3,
 				infinite: false,
 			});
 
@@ -67,7 +50,7 @@ export default function SmoothScroll({
 			lenis.on("scroll", debouncedScrollUpdate);
 
 			// Optimized ticker function
-			const tickerFunction = (time: number) => {
+			const tickerFunction = (time) => {
 				lenis.raf(time * 1000);
 			};
 
