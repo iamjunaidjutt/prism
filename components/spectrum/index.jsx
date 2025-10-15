@@ -84,8 +84,8 @@ const Spectrum = () => {
 
         const elements = isMobileView ? titleSplit.words : titleSplit.chars;
 
-        const initialBlur = animationSettings.enableBlur ? `${8 * animationSettings.blurIntensity}px` : "0px";
-        gsap.set(elements, { opacity: 0, filter: `blur(${initialBlur})`, x: -20 });
+        const initialBlur = animationSettings.enableBlur ? `${4 * animationSettings.blurIntensity}px` : "0px";
+        gsap.set(elements, { opacity: 0, filter: `blur(${initialBlur})`, x: -10 });
 
         heroTl.to(
           elements,
@@ -111,10 +111,10 @@ const Spectrum = () => {
           const split = new SplitText(item, {
             type: "lines",
           });
-          const navBlur = animationSettings.enableBlur ? `${8 * animationSettings.blurIntensity}px` : "0px";
+          const navBlur = animationSettings.enableBlur ? `${3 * animationSettings.blurIntensity}px` : "0px";
           gsap.set(split.lines, {
             opacity: 0,
-            y: 30,
+            y: 20,
             filter: `blur(${navBlur})`,
           });
 
@@ -139,10 +139,10 @@ const Spectrum = () => {
       );
 
       if (textElements) {
-        const textBlur = animationSettings.enableBlur ? `${4 * animationSettings.blurIntensity}px` : "0px";
+        const textBlur = animationSettings.enableBlur ? `${2 * animationSettings.blurIntensity}px` : "0px";
         gsap.set(textElements, {
           opacity: 0,
-          y: 50,
+          y: 30,
           filter: `blur(${textBlur})`,
         });
 
@@ -160,46 +160,27 @@ const Spectrum = () => {
         );
       }
 
-      // Animate scroll hint with continuous blur (simplified for low-end devices)
+      // Animate scroll hint with simplified animation (no continuous loops)
       if (scrollHintRef.current) {
         const scrollSplit = new SplitText(scrollHintRef.current, {
           type: "chars",
         });
         
-        const scrollBlur = animationSettings.enableBlur ? `${3 * animationSettings.blurIntensity}px` : "0px";
+        const scrollBlur = animationSettings.enableBlur ? `${2 * animationSettings.blurIntensity}px` : "0px";
         gsap.set(scrollSplit.chars, {
           opacity: 0,
           filter: `blur(${scrollBlur})`,
         });
 
-        if (animationSettings.enableComplexAnimations) {
-          gsap.to(scrollSplit.chars, {
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 0.6,
-            stagger: { each: 0.08, repeat: -1, yoyo: true },
-            ease: "sine.inOut",
-            delay: 1,
-          });
-
-          gsap.to(scrollSplit.chars, {
-            filter: "blur(1px)",
-            duration: 0.8,
-            stagger: { each: 0.08, repeat: -1, yoyo: true },
-            ease: "sine.inOut",
-            delay: 1.04,
-          });
-        } else {
-          // Simple fade in for low-end devices
-          gsap.to(scrollSplit.chars, {
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 0.8,
-            stagger: 0.1,
-            ease: "power2.out",
-            delay: 1,
-          });
-        }
+        // Simple fade in animation - no continuous loops
+        gsap.to(scrollSplit.chars, {
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 0.8,
+          stagger: 0.05,
+          ease: "power2.out",
+          delay: 1,
+        });
       }
 
       // Scroll-triggered animations
@@ -291,10 +272,10 @@ const Spectrum = () => {
           const split = new SplitText(label, {
             type: "lines",
           });
-        const wavelengthBlur = animationSettings.enableBlur ? `${8 * animationSettings.blurIntensity}px` : "0px";
+        const wavelengthBlur = animationSettings.enableBlur ? `${3 * animationSettings.blurIntensity}px` : "0px";
         gsap.set(split.lines, {
           opacity: 0,
-          y: 30,
+          y: 20,
           filter: `blur(${wavelengthBlur})`,
         });
           allSplitLines.push(...split.lines);
@@ -305,10 +286,10 @@ const Spectrum = () => {
         const mainTitleSplit = new SplitText(mainTitleRef.current, {
           type: "lines",
         });
-        const mainTitleBlur = animationSettings.enableBlur ? `${8 * animationSettings.blurIntensity}px` : "0px";
+        const mainTitleBlur = animationSettings.enableBlur ? `${3 * animationSettings.blurIntensity}px` : "0px";
         gsap.set(mainTitleSplit.lines, {
           opacity: 0,
-          y: 30,
+          y: 20,
           filter: `blur(${mainTitleBlur})`,
         });
         allSplitLines.push(...mainTitleSplit.lines);
@@ -322,8 +303,8 @@ const Spectrum = () => {
         .to(
           "[data-spectrum-component] #svg-container",
           {
-            transform: "scaleY(0.05) translateY(-30px)",
-            duration: 0.3,
+            transform: "scaleY(0.1) translateY(-15px)",
+            duration: 0.2,
             ease: "power2.out",
           },
           0,
@@ -332,10 +313,10 @@ const Spectrum = () => {
           "[data-spectrum-component] #svg-container",
           {
             transform: "scaleY(1) translateY(0px)",
-            duration: 1.2,
+            duration: 0.8,
             ease: "power2.out",
           },
-          0.3,
+          0.2,
         )
         .to(
           "[data-spectrum-component] #nav-bottom-left, [data-spectrum-component] #nav-bottom-right, [data-spectrum-component] #nav-bottom-center",
@@ -358,11 +339,11 @@ const Spectrum = () => {
           },
           0.9,
         )
-        .to(".level-5", { y: "-25vh", duration: 0.8, ease: "power2.out" }, 0.9)
-        .to(".level-4", { y: "-20vh", duration: 0.8, ease: "power2.out" }, 0.9)
-        .to(".level-3", { y: "-15vh", duration: 0.8, ease: "power2.out" }, 0.9)
-        .to(".level-2", { y: "-10vh", duration: 0.8, ease: "power2.out" }, 0.9)
-        .to(".level-1", { y: "-5vh", duration: 0.8, ease: "power2.out" }, 0.9);
+        .to(".level-5", { y: "-15vh", duration: 0.6, ease: "power2.out" }, 0.7)
+        .to(".level-4", { y: "-12vh", duration: 0.6, ease: "power2.out" }, 0.7)
+        .to(".level-3", { y: "-9vh", duration: 0.6, ease: "power2.out" }, 0.7)
+        .to(".level-2", { y: "-6vh", duration: 0.6, ease: "power2.out" }, 0.7)
+        .to(".level-1", { y: "-3vh", duration: 0.6, ease: "power2.out" }, 0.7);
       } catch (error) {
         console.error("Spectrum animation initialization failed:", error);
       }
@@ -405,7 +386,7 @@ const Spectrum = () => {
 
     const handleMouseEnter = (index) => {
       gradientOverlay.style.background = navGradients[index];
-      gradientOverlay.style.opacity = "0.3";
+      gradientOverlay.style.opacity = "0.2"; // Reduced opacity
 
       navItems.forEach((navItem, navIndex) => {
         const distance = Math.abs(index - navIndex);
@@ -415,13 +396,13 @@ const Spectrum = () => {
           opacity = 1;
           navItem.classList.add("active");
         } else if (distance === 1) {
-          opacity = 0.6;
+          opacity = 0.7; // Reduced opacity change
           navItem.classList.remove("active");
         } else if (distance === 2) {
-          opacity = 0.3;
+          opacity = 0.4; // Reduced opacity change
           navItem.classList.remove("active");
         } else {
-          opacity = 0.1;
+          opacity = 0.2; // Reduced opacity change
           navItem.classList.remove("active");
         }
 

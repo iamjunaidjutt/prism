@@ -43,26 +43,26 @@ export function getAnimationSettings(capability) {
   switch (capability) {
     case 'low':
       return { 
-        blurIntensity: 0.3, 
-        staggerDelay: 0.15, 
-        duration: 0.6,
+        blurIntensity: 0.2, 
+        staggerDelay: 0.08, 
+        duration: 0.5,
         enableBlur: false,
         enableComplexAnimations: false
       };
     case 'medium':
       return { 
-        blurIntensity: 0.6, 
-        staggerDelay: 0.08, 
-        duration: 0.8,
+        blurIntensity: 0.4, 
+        staggerDelay: 0.05, 
+        duration: 0.6,
         enableBlur: true,
         enableComplexAnimations: true
       };
     case 'high':
     default:
       return { 
-        blurIntensity: 1.0, 
+        blurIntensity: 0.6, 
         staggerDelay: 0.03, 
-        duration: 1.0,
+        duration: 0.7,
         enableBlur: true,
         enableComplexAnimations: true
       };
