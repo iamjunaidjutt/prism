@@ -23,12 +23,81 @@ function debounce(
   return debounced;
 }
 
+// Device capability detection
+function detectDeviceCapability() {
+  const isMobile = window.innerWidth < 768;
+  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+  
+  // Check for hardware acceleration and memory
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  const hasWebGL = !!gl;
+  
+  // Check device pixel ratio (higher usually means better GPU)
+  const pixelRatio = window.devicePixelRatio || 1;
+  
+  // Check for reduced motion preference
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  // Estimate device capability
+  if (prefersReducedMotion || !hasWebGL) {
+    return 'low';
+  } else if (isMobile || pixelRatio < 1.5) {
+    return 'low';
+  } else if (isTablet || pixelRatio < 2) {
+    return 'medium';
+  } else {
+    return 'high';
+  }
+}
+
+// Get WebGL settings based on device capability
+function getWebGLSettings(capability) {
+  switch (capability) {
+    case 'low':
+      return { 
+        pixelRatio: 1,
+        antialias: false,
+        maxTextureSize: 1024,
+        shaderComplexity: 'low',
+        effectIntensity: 0.5,
+        textureQuality: 0.5
+      };
+    case 'medium':
+      return { 
+        pixelRatio: Math.min(window.devicePixelRatio, 1.5),
+        antialias: false,
+        maxTextureSize: 2048,
+        shaderComplexity: 'medium',
+        effectIntensity: 0.75,
+        textureQuality: 0.75
+      };
+    case 'high':
+    default:
+      return { 
+        pixelRatio: Math.min(window.devicePixelRatio, 2),
+        antialias: true,
+        maxTextureSize: 4096,
+        shaderComplexity: 'high',
+        effectIntensity: 1.0,
+        textureQuality: 1.0
+      };
+  }
+}
+
 const GlitchSlider = () => {
   const containerRef = useRef(null);
+  const [deviceCapability, setDeviceCapability] = useState('high');
 
   useGSAP(() => {
     const initSlider = async () => {
       try {
+        // Detect device capability
+        const capability = detectDeviceCapability();
+        setDeviceCapability(capability);
+        const webglSettings = getWebGLSettings(capability);
+        console.log(`Glitch device capability detected: ${capability}`, webglSettings);
+
         // Dynamic imports to avoid SSR issues
         const THREE = await import("three");
         const gsap = (await import("gsap")).default;
@@ -729,13 +798,43 @@ const GlitchSlider = () => {
               src,
               (texture) => {
                 clearTimeout(timeout);
-                texture.minFilter = texture.magFilter = THREE.LinearFilter;
-                texture.userData = {
-                  size: new THREE.Vector2(
-                    texture.image.width,
-                    texture.image.height,
-                  ),
-                };
+                
+                // Apply device-based texture quality settings
+                if (webglSettings.textureQuality < 1.0) {
+                  const maxSize = webglSettings.maxTextureSize;
+                  const originalWidth = texture.image.width;
+                  const originalHeight = texture.image.height;
+                  
+                  // Scale down texture if it's too large for device capability
+                  if (originalWidth > maxSize || originalHeight > maxSize) {
+                    const scale = Math.min(maxSize / originalWidth, maxSize / originalHeight);
+                    texture.userData = {
+                      size: new THREE.Vector2(
+                        originalWidth * scale,
+                        originalHeight * scale,
+                      ),
+                    };
+                  } else {
+                    texture.userData = {
+                      size: new THREE.Vector2(originalWidth, originalHeight),
+                    };
+                  }
+                } else {
+                  texture.userData = {
+                    size: new THREE.Vector2(
+                      texture.image.width,
+                      texture.image.height,
+                    ),
+                  };
+                }
+                
+                // Use appropriate filtering based on device capability
+                if (webglSettings.textureQuality >= 0.75) {
+                  texture.minFilter = texture.magFilter = THREE.LinearFilter;
+                } else {
+                  texture.minFilter = texture.magFilter = THREE.NearestFilter;
+                }
+                
                 resolve(texture);
               },
               undefined,
@@ -767,11 +866,11 @@ const GlitchSlider = () => {
         state.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
         state.renderer = new THREE.WebGLRenderer({
           canvas: canvas,
-          antialias: false,
+          antialias: webglSettings.antialias,
           alpha: false,
         });
         state.renderer.setSize(window.innerWidth, window.innerHeight);
-        state.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        state.renderer.setPixelRatio(webglSettings.pixelRatio);
 
         // Create shader material
         state.shaderMaterial = new THREE.ShaderMaterial({
@@ -788,7 +887,7 @@ const GlitchSlider = () => {
             uEffectType: {
               value: getEffectIndex(config.currentEffect),
             },
-            uGlobalIntensity: { value: config.globalIntensity },
+            uGlobalIntensity: { value: config.globalIntensity * webglSettings.effectIntensity },
             uSpeedMultiplier: { value: config.speedMultiplier },
             uColorShiftAmount: { value: config.colorShiftAmount },
             uDistortionStrength: {
@@ -1591,11 +1690,22 @@ const GlitchSlider = () => {
           // Resize handler with debouncing
           const debouncedResize = debounce(() => {
             if (state.renderer && state.shaderMaterial) {
+              // Re-detect device capability on resize
+              const newCapability = detectDeviceCapability();
+              const newWebglSettings = getWebGLSettings(newCapability);
+              
               state.renderer.setSize(window.innerWidth, window.innerHeight);
+              state.renderer.setPixelRatio(newWebglSettings.pixelRatio);
               state.shaderMaterial.uniforms.uResolution.value.set(
                 window.innerWidth,
                 window.innerHeight,
               );
+              
+              // Update intensity if capability changed
+              if (newCapability !== capability) {
+                state.shaderMaterial.uniforms.uGlobalIntensity.value = 
+                  config.globalIntensity * newWebglSettings.effectIntensity;
+              }
             }
           }, 100);
           

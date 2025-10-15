@@ -75,6 +75,10 @@
 
     .canvas {
       @apply absolute top-0 left-0 block w-full h-full pointer-events-none;
+      /* Canvas animation is optimized based on device capability:
+         - Low capability: 150 particles, 50 lines, 10 discs, 50% animation speed
+         - Medium capability: 300 particles, 75 lines, 15 discs, 75% animation speed  
+         - High capability: 500 particles, 100 lines, 20 discs, 100% animation speed */
     }
   }
 

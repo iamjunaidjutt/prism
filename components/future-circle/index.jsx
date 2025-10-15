@@ -14,22 +14,35 @@ gsap.registerPlugin(ScrollTrigger);
 const performanceMonitor = {
   startTime: 0,
   frameCount: 0,
+  lowFpsCount: 0,
   
   start: () => {
     performanceMonitor.startTime = performance.now();
     performanceMonitor.frameCount = 0;
+    performanceMonitor.lowFpsCount = 0;
   },
   
-  frame: () => {
+  frame: (onPerformanceIssue) => {
     performanceMonitor.frameCount++;
     const now = performance.now();
     const elapsed = now - performanceMonitor.startTime;
     
     if (elapsed > 1000) { // Every second
       const fps = Math.round((performanceMonitor.frameCount * 1000) / elapsed);
+      
       if (fps < 30) {
-        console.warn(`Future Circle Animation Low FPS: ${fps}, consider reducing animation complexity`);
+        performanceMonitor.lowFpsCount++;
+        console.warn(`Future Circle Animation Low FPS: ${fps}, count: ${performanceMonitor.lowFpsCount}`);
+        
+        // If we've had low FPS for 3 consecutive seconds, trigger performance adjustment
+        if (performanceMonitor.lowFpsCount >= 3 && onPerformanceIssue) {
+          onPerformanceIssue();
+          performanceMonitor.lowFpsCount = 0; // Reset counter
+        }
+      } else {
+        performanceMonitor.lowFpsCount = 0; // Reset counter on good performance
       }
+      
       performanceMonitor.startTime = now;
       performanceMonitor.frameCount = 0;
     }
@@ -53,6 +66,47 @@ function debounce(
   return debounced;
 }
 
+// Device capability detection
+function detectDeviceCapability() {
+  const isMobile = window.innerWidth < 768;
+  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+  
+  // Check for hardware acceleration and memory
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  const hasWebGL = !!gl;
+  
+  // Check device pixel ratio (higher usually means better GPU)
+  const pixelRatio = window.devicePixelRatio || 1;
+  
+  // Check for reduced motion preference
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  // Estimate device capability
+  if (prefersReducedMotion || !hasWebGL) {
+    return 'low';
+  } else if (isMobile || pixelRatio < 1.5) {
+    return 'low';
+  } else if (isTablet || pixelRatio < 2) {
+    return 'medium';
+  } else {
+    return 'high';
+  }
+}
+
+// Get particle counts based on device capability
+function getParticleCounts(capability) {
+  switch (capability) {
+    case 'low':
+      return { particles: 150, lines: 50, discs: 10 };
+    case 'medium':
+      return { particles: 300, lines: 75, discs: 15 };
+    case 'high':
+    default:
+      return { particles: 500, lines: 100, discs: 20 };
+  }
+}
+
 // Easing functions
 const easingFunctions = {
   linear: (t) => t,
@@ -64,7 +118,20 @@ const easingFunctions = {
 const FutureCircle = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [deviceCapability, setDeviceCapability] = useState('high'); // 'low', 'medium', 'high'
   const containerRef = useRef(null);
+
+  // Handle performance issues by reducing particle count
+  const handlePerformanceIssue = useCallback(() => {
+    console.log('Performance issue detected, reducing particle count...');
+    
+    if (deviceCapability === 'high') {
+      setDeviceCapability('medium');
+    } else if (deviceCapability === 'medium') {
+      setDeviceCapability('low');
+    }
+    // If already at 'low', we can't reduce further
+  }, [deviceCapability]);
 
   // WebNominee animation refs
   const webbyNomineeRef = useRef(null);
@@ -183,7 +250,8 @@ const FutureCircle = () => {
 
   // Initialize discs
   const setDiscs = useCallback(() => {
-    const totalDiscs = 20;
+    const counts = getParticleCounts(deviceCapability);
+    const totalDiscs = counts.discs;
     discsRef.current = [];
 
     for (let i = 0; i < totalDiscs; i++) {
@@ -191,14 +259,15 @@ const FutureCircle = () => {
       const disc = tweenDisc({ x: 0, y: 0, w: 0, h: 0, p });
       discsRef.current.push(disc);
     }
-  }, [tweenDisc]);
+  }, [tweenDisc, deviceCapability]);
 
   // Set lines
   const setLines = useCallback(() => {
     const { width, height } = renderRef.current;
     linesRef.current = [];
 
-    const totalLines = 100;
+    const counts = getParticleCounts(deviceCapability);
+    const totalLines = counts.lines;
     const linesAngle = (Math.PI * 2) / totalLines;
 
     for (let i = 0; i < totalLines; i++) {
@@ -222,12 +291,13 @@ const FutureCircle = () => {
 
       linesRef.current.push({ p0, p1, l });
     }
-  }, []);
+  }, [deviceCapability]);
 
   // Initialize particles
   const setParticles = useCallback(() => {
     particlesRef.current = [];
-    const totalParticles = 500;
+    const counts = getParticleCounts(deviceCapability);
+    const totalParticles = counts.particles;
 
     for (let i = 0; i < totalParticles; i++) {
       const lineIndex = Math.round(
@@ -239,7 +309,7 @@ const FutureCircle = () => {
 
       particlesRef.current.push({ lineIndex, p: Math.random(), v, l, a });
     }
-  }, []);
+  }, [deviceCapability]);
   // Draw functions
   const drawDiscs = useCallback((ctx) => {
     try {
@@ -321,21 +391,27 @@ const FutureCircle = () => {
 
   // Animation functions
   const moveDiscs = useCallback(() => {
+    // Adjust animation speed based on device capability
+    const speedMultiplier = deviceCapability === 'low' ? 0.5 : deviceCapability === 'medium' ? 0.75 : 1;
+    
     discsRef.current.forEach((disc) => {
-      disc.p = (disc.p + 0.001) % 1;
+      disc.p = (disc.p + 0.001 * speedMultiplier) % 1;
       tweenDisc(disc);
     });
-  }, [tweenDisc]);
+  }, [tweenDisc, deviceCapability]);
 
   const moveParticles = useCallback(() => {
+    // Adjust animation speed based on device capability
+    const speedMultiplier = deviceCapability === 'low' ? 0.5 : deviceCapability === 'medium' ? 0.75 : 1;
+    
     particlesRef.current.forEach((particle) => {
       if (particle.p < 1) {
-        particle.p += particle.v;
+        particle.p += particle.v * speedMultiplier;
       } else {
         particle.p = 0;
       }
     });
-  }, []);
+  }, [deviceCapability]);
 
   // Main animation loop with performance monitoring and error handling
   const tick = useCallback(() => {
@@ -379,6 +455,9 @@ const FutureCircle = () => {
         console.warn(`Canvas animation performance issue: ${frameTime.toFixed(2)}ms per frame`);
       }
 
+      // Enhanced performance monitoring with automatic adjustment
+      performanceMonitor.frame(handlePerformanceIssue);
+
       animationFrameRef.current = requestAnimationFrame(tick);
     } catch (error) {
       console.error("Canvas animation error:", error);
@@ -387,7 +466,7 @@ const FutureCircle = () => {
         animationFrameRef.current = null;
       }
     }
-  }, [moveDiscs, moveParticles, setLines, drawDiscs, drawLines, drawParticles]);
+  }, [moveDiscs, moveParticles, setLines, drawDiscs, drawLines, drawParticles, handlePerformanceIssue]);
 
   // Resize handler with debouncing
   const handleResize = useCallback(() => {
@@ -409,14 +488,17 @@ const FutureCircle = () => {
   }, []);
 
   useEffect(() => {
-    const checkMobile = () => {
+    const checkDeviceCapability = () => {
       setIsMobile(window.innerWidth < 768);
+      const capability = detectDeviceCapability();
+      setDeviceCapability(capability);
+      console.log(`Device capability detected: ${capability}`);
     };
 
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
+    checkDeviceCapability();
+    window.addEventListener("resize", checkDeviceCapability);
 
-    return () => window.removeEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkDeviceCapability);
   }, []);
 
   useGSAP(
@@ -701,6 +783,7 @@ const FutureCircle = () => {
       dependencies: [
         isMounted,
         isMobile,
+        deviceCapability,
         debouncedResize,
         tick,
         setSize,

@@ -43,8 +43,68 @@ const MONOCHROME_COLORS = [
   "#f7e7ce", // Light champagne
 ];
 
+// Device capability detection
+function detectDeviceCapability() {
+  const isMobile = window.innerWidth < 768;
+  const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+  
+  // Check for hardware acceleration and memory
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  const hasWebGL = !!gl;
+  
+  // Check device pixel ratio (higher usually means better GPU)
+  const pixelRatio = window.devicePixelRatio || 1;
+  
+  // Check for reduced motion preference
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  // Estimate device capability
+  if (prefersReducedMotion || !hasWebGL) {
+    return 'low';
+  } else if (isMobile || pixelRatio < 1.5) {
+    return 'low';
+  } else if (isTablet || pixelRatio < 2) {
+    return 'medium';
+  } else {
+    return 'high';
+  }
+}
+
+// Get animation settings based on device capability
+function getAnimationSettings(capability) {
+  switch (capability) {
+    case 'low':
+      return { 
+        blurIntensity: 0.3, 
+        staggerDelay: 0.15, 
+        duration: 0.6,
+        enableBlur: false,
+        enableComplexAnimations: false
+      };
+    case 'medium':
+      return { 
+        blurIntensity: 0.6, 
+        staggerDelay: 0.08, 
+        duration: 0.8,
+        enableBlur: true,
+        enableComplexAnimations: true
+      };
+    case 'high':
+    default:
+      return { 
+        blurIntensity: 1.0, 
+        staggerDelay: 0.03, 
+        duration: 1.0,
+        enableBlur: true,
+        enableComplexAnimations: true
+      };
+  }
+}
+
 const Spectrum = () => {
   const [isMounted, setIsMounted] = useState(false);
+  const [deviceCapability, setDeviceCapability] = useState('high');
 
   // Refs for DOM elements
   const heroTitleRef = useRef(null);
@@ -59,6 +119,17 @@ const Spectrum = () => {
 
   useEffect(() => {
     setIsMounted(true);
+    
+    const checkDeviceCapability = () => {
+      const capability = detectDeviceCapability();
+      setDeviceCapability(capability);
+      console.log(`Spectrum device capability detected: ${capability}`);
+    };
+
+    checkDeviceCapability();
+    window.addEventListener("resize", checkDeviceCapability);
+
+    return () => window.removeEventListener("resize", checkDeviceCapability);
   }, []);
 
   // Initialize animations after fonts are loaded
@@ -72,6 +143,7 @@ const Spectrum = () => {
 
         const isMobileView = window.innerWidth < 768;
         const isTabletView = window.innerWidth >= 768 && window.innerWidth < 1024;
+        const animationSettings = getAnimationSettings(deviceCapability);
 
 
       // Hero Timeline - Initial animations
@@ -86,7 +158,8 @@ const Spectrum = () => {
 
         const elements = isMobileView ? titleSplit.words : titleSplit.chars;
 
-        gsap.set(elements, { opacity: 0, filter: "blur(8px)", x: -20 });
+        const initialBlur = animationSettings.enableBlur ? `${8 * animationSettings.blurIntensity}px` : "0px";
+        gsap.set(elements, { opacity: 0, filter: `blur(${initialBlur})`, x: -20 });
 
         heroTl.to(
           elements,
@@ -94,8 +167,8 @@ const Spectrum = () => {
             opacity: 1,
             filter: "blur(0px)",
             x: 0,
-            duration: 0.8,
-            stagger: isMobileView ? 0.1 : 0.03,
+            duration: animationSettings.duration,
+            stagger: animationSettings.staggerDelay,
             ease: "power2.out",
           },
           0,
@@ -112,10 +185,11 @@ const Spectrum = () => {
           const split = new SplitText(item, {
             type: "lines",
           });
+          const navBlur = animationSettings.enableBlur ? `${8 * animationSettings.blurIntensity}px` : "0px";
           gsap.set(split.lines, {
             opacity: 0,
             y: 30,
-            filter: "blur(8px)",
+            filter: `blur(${navBlur})`,
           });
 
           heroTl.to(
@@ -124,8 +198,8 @@ const Spectrum = () => {
               opacity: 1,
               y: 0,
               filter: "blur(0px)",
-              duration: 0.8,
-              stagger: 0.08,
+              duration: animationSettings.duration,
+              stagger: animationSettings.staggerDelay,
               ease: "power2.out",
             },
             0.4,
@@ -139,10 +213,11 @@ const Spectrum = () => {
       );
 
       if (textElements) {
+        const textBlur = animationSettings.enableBlur ? `${4 * animationSettings.blurIntensity}px` : "0px";
         gsap.set(textElements, {
           opacity: 0,
           y: 50,
-          filter: "blur(4px)",
+          filter: `blur(${textBlur})`,
         });
 
         heroTl.to(
@@ -151,40 +226,54 @@ const Spectrum = () => {
             opacity: 1,
             y: 0,
             filter: "blur(0px)",
-            duration: 1.0,
-            stagger: 0.2,
+            duration: animationSettings.duration * 1.2,
+            stagger: animationSettings.staggerDelay * 2,
             ease: "power2.out",
           },
           0.5,
         );
       }
 
-      // Animate scroll hint with continuous blur
+      // Animate scroll hint with continuous blur (simplified for low-end devices)
       if (scrollHintRef.current) {
         const scrollSplit = new SplitText(scrollHintRef.current, {
           type: "chars",
         });
+        
+        const scrollBlur = animationSettings.enableBlur ? `${3 * animationSettings.blurIntensity}px` : "0px";
         gsap.set(scrollSplit.chars, {
           opacity: 0,
-          filter: "blur(3px)",
+          filter: `blur(${scrollBlur})`,
         });
 
-        gsap.to(scrollSplit.chars, {
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 0.6,
-          stagger: { each: 0.08, repeat: -1, yoyo: true },
-          ease: "sine.inOut",
-          delay: 1,
-        });
+        if (animationSettings.enableComplexAnimations) {
+          gsap.to(scrollSplit.chars, {
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.6,
+            stagger: { each: 0.08, repeat: -1, yoyo: true },
+            ease: "sine.inOut",
+            delay: 1,
+          });
 
-        gsap.to(scrollSplit.chars, {
-          filter: "blur(1px)",
-          duration: 0.8,
-          stagger: { each: 0.08, repeat: -1, yoyo: true },
-          ease: "sine.inOut",
-          delay: 1.04,
-        });
+          gsap.to(scrollSplit.chars, {
+            filter: "blur(1px)",
+            duration: 0.8,
+            stagger: { each: 0.08, repeat: -1, yoyo: true },
+            ease: "sine.inOut",
+            delay: 1.04,
+          });
+        } else {
+          // Simple fade in for low-end devices
+          gsap.to(scrollSplit.chars, {
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out",
+            delay: 1,
+          });
+        }
       }
 
       // Scroll-triggered animations
@@ -276,11 +365,12 @@ const Spectrum = () => {
           const split = new SplitText(label, {
             type: "lines",
           });
-          gsap.set(split.lines, {
-            opacity: 0,
-            y: 30,
-            filter: "blur(8px)",
-          });
+        const wavelengthBlur = animationSettings.enableBlur ? `${8 * animationSettings.blurIntensity}px` : "0px";
+        gsap.set(split.lines, {
+          opacity: 0,
+          y: 30,
+          filter: `blur(${wavelengthBlur})`,
+        });
           allSplitLines.push(...split.lines);
         });
       }
@@ -289,10 +379,11 @@ const Spectrum = () => {
         const mainTitleSplit = new SplitText(mainTitleRef.current, {
           type: "lines",
         });
+        const mainTitleBlur = animationSettings.enableBlur ? `${8 * animationSettings.blurIntensity}px` : "0px";
         gsap.set(mainTitleSplit.lines, {
           opacity: 0,
           y: 30,
-          filter: "blur(8px)",
+          filter: `blur(${mainTitleBlur})`,
         });
         allSplitLines.push(...mainTitleSplit.lines);
       }
@@ -332,11 +423,11 @@ const Spectrum = () => {
         .to(
           allSplitLines,
           {
-            duration: 0.8,
+            duration: animationSettings.duration,
             y: 0,
             opacity: 1,
             filter: "blur(0px)",
-            stagger: 0.08,
+            stagger: animationSettings.staggerDelay,
             ease: "power2.out",
           },
           0.9,
@@ -362,7 +453,7 @@ const Spectrum = () => {
       debouncedResize.cancel();
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, [isMounted]);
+  }, [isMounted, deviceCapability]);
 
   // Hero nav hover effects
   useEffect(() => {

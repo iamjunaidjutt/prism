@@ -1,5 +1,10 @@
 .glitchContainer {
   @apply w-full relative overflow-hidden h-[100vh] z-20;
+  
+  /* Glitch WebGL animations are optimized based on device capability:
+     - Low capability: Pixel ratio 1, no antialias, 1024px max texture, 50% effect intensity, nearest filtering
+     - Medium capability: Pixel ratio 1.5, no antialias, 2048px max texture, 75% effect intensity, linear filtering
+     - High capability: Pixel ratio 2, antialias enabled, 4096px max texture, 100% effect intensity, linear filtering */
 
   .imageSlider {
     @apply relative w-screen h-screen overflow-hidden opacity-0 pointer-events-none transition-opacity duration-[1500ms];
@@ -112,7 +117,7 @@
     }
 
     .bottomCenterText {
-      @apply fixed left-1/2 bottom-4 3xl:bottom-8 -translate-x-1/2 pointer-events-none z-2 text-primary-text font-sans text-[10px] minTab:text-[12px] 2xl:text-[14px] 3xl:text-xl font-medium tracking-wide-2 opacity-0 font-semibold;
+      @apply fixed left-1/2 bottom-4 3xl:bottom-8 -translate-x-1/2 pointer-events-none z-2 text-primary-text font-sans text-[10px] minTab:text-[12px] 2xl:text-[14px] 3xl:text-xl font-semibold tracking-wide-2 opacity-0;
       -webkit-text-stroke: 0.1px #000;
       text-stroke: 0.1px #000;
     }
