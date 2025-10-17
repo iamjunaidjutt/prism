@@ -26,8 +26,8 @@ if (typeof window !== "undefined") {
 // Monochrome theme colors - Chrome gray and light champagne
 const MONOCHROME_COLORS = [
   // "#1A1A1A", // Dark chrome gray
-  // "#404040", // Chrome gray
-  "#666666", // Medium gray
+  "#404040", // Chrome gray
+  // "#666666", // Medium gray
   // "#b0b0b0", // Light gray
   "#f7e7ce", // Light champagne
   "#f7e7ce", // Light champagne
@@ -52,6 +52,7 @@ const Spectrum = () => {
   const mainTitleRef = useRef(null);
   const gradientOverlayRef = useRef(null);
   const svgGroupRef = useRef(null);
+  const logoRef = useRef(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -220,6 +221,13 @@ const Spectrum = () => {
         ease: "power2.out",
       }, 0);
 
+      // Fade out logo when Glitch section comes into view
+      fadeOutTl.to(logoRef.current, {
+        opacity: 0,
+        duration: 1,
+        ease: "power2.out",
+      }, 0);
+
 
 
       // Control Spectrum header/nav visibility
@@ -348,6 +356,15 @@ const Spectrum = () => {
             ease: "power2.out",
           },
           0.9,
+        )
+        .to(
+          logoRef.current,
+          {
+            opacity: 1,
+            duration: 1,
+            ease: "power2.out",
+          },
+          0.9 + animationSettings.duration + (8 * animationSettings.staggerDelay) + 0.3, // After wavelength labels complete + small delay
         )
         .to(".level-5", { y: "-15vh", duration: 0.6, ease: "power2.out" }, 0.7)
         .to(".level-4", { y: "-12vh", duration: 0.6, ease: "power2.out" }, 0.7)
@@ -683,6 +700,12 @@ const Spectrum = () => {
                 </clipPath>
               </defs>
             </svg>
+            <img 
+              ref={logoRef}
+              src="/9D.webp" 
+              alt="9D Logo"
+              className={styles.centerLogo}
+            />
           </div>
           <div id="text-grid" ref={textGridRef} className={styles.textGrid}>
             {[

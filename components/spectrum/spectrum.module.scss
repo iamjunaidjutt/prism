@@ -200,6 +200,10 @@
     @apply overflow-visible;
   }
 
+  .centerLogo {
+    @apply absolute top-[55%] left-1/2 -translate-x-1/2 opacity-0 z-2 max-w-[180px] w-[12%] h-auto pointer-events-none;
+  }
+
   .heroTitle :global(.char),
   .heroTitle div,
   .heroNavItem div,
