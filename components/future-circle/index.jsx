@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * Future Circle Component
+ * 
+ * Performance Features:
+ * - Automatic device capability detection
+ * - Frame rate limiting based on device
+ * - Dynamic particle count adjustment
+ * - Real-time performance monitoring
+ */
+
 import React, { useRef, useCallback, useState, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -13,10 +23,10 @@ import {
 } from "@/utils/device-detection";
 import { debounce } from "@/utils/debounce";
 import { 
-  performanceMonitor, 
+  animationPerformanceMonitor, 
   easingFunctions, 
   tweenValue 
-} from "@/utils/performance-monitoring";
+} from "@/utils/performance";
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -349,7 +359,7 @@ const FutureCircle = () => {
       }
 
       // Enhanced performance monitoring with automatic adjustment
-      performanceMonitor.frame(handlePerformanceIssue);
+      animationPerformanceMonitor.frame(handlePerformanceIssue);
 
       animationFrameRef.current = requestAnimationFrame(tick);
     } catch (error) {

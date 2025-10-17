@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * Spectrum Component
+ * 
+ * Performance Features:
+ * - Device-optimized animation settings
+ * - Reduced blur effects for better performance
+ * - Simplified animations for low-end devices
+ * - Optimized stagger delays and durations
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";

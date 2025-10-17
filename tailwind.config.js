@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   content: [
     "./app/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
@@ -47,8 +47,25 @@ module.exports = {
 
       // Font Families
       fontFamily: {
-        mono: ["var(--font-mono)", "monospace"],
-        sans: ["var(--font-sans)", "sans-serif"],
+        mono: [
+          "var(--font-geist-mono)",
+          "SF Mono",
+          "Monaco",
+          "Inconsolata",
+          "Roboto Mono",
+          "monospace"
+        ],
+        sans: [
+          "var(--font-geist-sans)",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif"
+        ],
         "supply-mono": ["PPSupplyMono", "monospace"],
         "neue-montreal": ["PP Neue Montreal", "sans-serif"],
       },

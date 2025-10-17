@@ -1,3 +1,4 @@
+import React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.scss";
 
@@ -12,6 +13,8 @@ const geistSans = Geist({
   subsets: ["latin"],
   display: "swap",
   preload: true,
+  fallback: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+  adjustFontFallback: true,
 });
 
 const geistMono = Geist_Mono({
@@ -19,6 +22,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
   preload: false, // Only load when needed
+  fallback: ["SF Mono", "Monaco", "Inconsolata", "Roboto Mono", "monospace"],
+  adjustFontFallback: true,
 });
 
 export const metadata = {

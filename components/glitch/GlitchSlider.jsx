@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * Glitch Slider Component
+ * 
+ * Performance Features:
+ * - Device-based WebGL optimization
+ * - Adaptive texture quality and pixel ratio
+ * - Frame rate limiting for smooth performance
+ * - Memory-efficient texture management
+ */
+
 import React, { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import styles from "./glitch.module.scss";

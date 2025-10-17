@@ -4,6 +4,11 @@ class PerformanceMonitor {
   constructor() {
     this.metrics = {};
     this.observer = null;
+    this.animationMonitor = {
+      startTime: 0,
+      frameCount: 0,
+      lowFpsCount: 0,
+    };
     
     if (typeof window !== "undefined" && "PerformanceObserver" in window) {
       this.initObservers();
@@ -56,6 +61,39 @@ class PerformanceMonitor {
         const fidEntry = entry;
         this.metrics.firstInputDelay = fidEntry.processingStart - fidEntry.startTime;
         break;
+    }
+  }
+
+  // Animation performance monitoring
+  startAnimationMonitoring() {
+    this.animationMonitor.startTime = performance.now();
+    this.animationMonitor.frameCount = 0;
+    this.animationMonitor.lowFpsCount = 0;
+  }
+
+  recordAnimationFrame(onPerformanceIssue) {
+    this.animationMonitor.frameCount++;
+    const now = performance.now();
+    const elapsed = now - this.animationMonitor.startTime;
+    
+    if (elapsed > 1000) { // Every second
+      const fps = Math.round((this.animationMonitor.frameCount * 1000) / elapsed);
+      
+      if (fps < 30) {
+        this.animationMonitor.lowFpsCount++;
+        console.warn(`Animation Low FPS: ${fps}, count: ${this.animationMonitor.lowFpsCount}`);
+        
+        // If we've had low FPS for 3 consecutive seconds, trigger performance adjustment
+        if (this.animationMonitor.lowFpsCount >= 3 && onPerformanceIssue) {
+          onPerformanceIssue();
+          this.animationMonitor.lowFpsCount = 0; // Reset counter
+        }
+      } else {
+        this.animationMonitor.lowFpsCount = 0; // Reset counter on good performance
+      }
+      
+      this.animationMonitor.startTime = now;
+      this.animationMonitor.frameCount = 0;
     }
   }
 
@@ -131,6 +169,43 @@ export const destroyPerformanceMonitoring = () => {
     performanceMonitor = null;
   }
 };
+
+// Animation performance utilities
+export const animationPerformanceMonitor = {
+  start: () => performanceMonitor?.startAnimationMonitoring(),
+  frame: (callback) => performanceMonitor?.recordAnimationFrame(callback)
+};
+
+// Easing functions for animations
+export const easingFunctions = {
+  linear: (t) => t,
+  easeInExpo: (t) => (t === 0 ? 0 : Math.pow(2, 10 * (t - 1))),
+  easeOutCubic: (t) => 1 - Math.pow(1 - t, 3),
+  easeInCubic: (t) => t * t * t,
+};
+
+// Utility function to tween values with easing
+export function tweenValue(start, end, progress, ease = "linear") {
+  const delta = end - start;
+  const easeFn = easingFunctions[ease];
+  return start + delta * easeFn(progress);
+}
+
+// Measures frame time and logs warnings for slow frames
+export function measureFrameTime(frameFunction) {
+  return (...args) => {
+    const startTime = performance.now();
+    const result = frameFunction(...args);
+    const endTime = performance.now();
+    const frameTime = endTime - startTime;
+    
+    if (frameTime > 16) {
+      console.warn(`Frame performance issue: ${frameTime.toFixed(2)}ms per frame`);
+    }
+    
+    return result;
+  };
+}
 
 // Web Vitals helper functions
 export const getWebVitals = () => {
