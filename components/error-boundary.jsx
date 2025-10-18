@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
+import React, { Component } from "react";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -15,7 +15,6 @@ class ErrorBoundary extends Component {
   componentDidCatch(error, errorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
     
-    // In production, you might want to log this to an error reporting service
     if (process.env.NODE_ENV === "production") {
       // Example: log to error reporting service
       // errorReportingService.captureException(error, { extra: errorInfo });
