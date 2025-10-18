@@ -702,7 +702,7 @@ const Spectrum = () => {
             </svg>
             <img 
               ref={logoRef}
-              src="/9d-dark.webp" 
+              src="/9d-dark-2.webp" 
               alt="9D Logo"
               className={styles.centerLogo}
             />
